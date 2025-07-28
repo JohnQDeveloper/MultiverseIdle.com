@@ -1,4 +1,6 @@
-FROM dunglas/frankenphp
+FROM dunglas/frankenphp:latest
+
+ENV SERVER_NAME=:80
 
 LABEL maintainer="JohnQDeveloper <public@JohnQDeveloper.com>"
 
@@ -9,4 +11,5 @@ RUN install-php-extensions \
 	zip \
 	opcache
 
-COPY . /app
+COPY "configs/Caddyfile" "/etc/frankenphp/Caddyfile"
+COPY "configs/php.ini-development" "/usr/local/etc/php/php.ini"
