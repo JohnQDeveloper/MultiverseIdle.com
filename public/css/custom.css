@@ -1,0 +1,8 @@
+table.main td {
+  font-size: 1em;
+  width: 12em;
+}
+
+table.main td+td {
+  width: auto;
+}

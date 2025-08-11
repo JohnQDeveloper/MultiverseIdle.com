@@ -8,7 +8,7 @@
     }
 }
 
-localhost:80 {
+:80 {
 	# Enable compression (optional)
 	encode zstd br gzip
 

@@ -1,0 +1,14 @@
+<a href="#"># Active</a>
+<a href="#">Rules</a>
+<a href="#">Staff</a>
+<a href="#">GitHub</a>
+<a href="#">News</a>
+<a href="#">Patch Notes</a>
+<a href="#">Discord</a>
+<a href="#">Privacy Policy</a>
+<a href="#">Terms of Service</a>
+<a href="#">Report Bugs</a>
+<a href="#">Suggestions</a>
+<a href="#">Rankings</a>
+<a href="#">Game Log</a>
+<a href="#">Manual</a>

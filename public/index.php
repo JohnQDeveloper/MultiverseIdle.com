@@ -13,7 +13,7 @@
 
 
     if (!in_array(ltrim($unsafe_uri.".php","/"), $pages)) {
-        die("Invalid page.");
+        require_once("../pages/index.php");
     }
     else {
         require_once("../pages/" . ltrim($unsafe_uri, "/") . ".php");
