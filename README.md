@@ -1,3 +1,12 @@
+# CSS Library
+
+https://picocss.com/docs
+
+# Composer Packages
+
+https://github.com/delight-im/PHP-Auth?tab=readme-ov-file
+
+
 # Why open source?
 
 Games are more about community than most people give them credit in combination with the fact this is not my full time job but a side hustle for underlying engineering projects that are more serious financially. (i.e. Multidatacenter failover testing, testing deployment processes, etc)

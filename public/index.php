@@ -1,4 +1,23 @@
 <?php
 
-    echo "Hello World! This is the MultiverseIdle.com server.\n";
-    echo "This is a placeholder for the main entry point of the application.\n";
+
+    require_once('../config.php');
+    require_once('../templates/header.php');
+
+    // Sanitize user input
+    $unsafe_uri = strtok($_SERVER["REQUEST_URI"], '?');;
+    $unsafe_qs = $_SERVER['QUERY_STRING'];
+
+    # find valid pages
+    $pages = scandir("../pages");
+
+
+    if (!in_array(ltrim($unsafe_uri.".php","/"), $pages)) {
+        die("Invalid page.");
+    }
+    else {
+        require_once("../pages/" . ltrim($unsafe_uri, "/") . ".php");
+    }
+
+
+    require_once('../templates/footer.php');

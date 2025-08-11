@@ -12,7 +12,11 @@ localhost:80 {
 	# Enable compression (optional)
 	encode zstd br gzip
 
-	# Rewrite
+	# Stop on css/js
+	rewrite /css/* /public/{uri}
+	rewrite /js/* /public/{uri}
+
+	# Rewrite everything else
 	rewrite * /public/index.php
 
 	# Execute PHP files in the current directory and serve assets
