@@ -1,3 +1,9 @@
+# Mobile vs. Desktop View
+
+I'm cheating here and just having the phone players scroll a fixed width viewport. It is not ideal but for a hobby/side project I can choose between using a large CSS/JS library to build out stuff (pages are slower to load on mobile) or do something simple like pico/fixed viewports. The inbetween is a bit too time consuming for this project.
+
+You just can't really beat having pages that are 25% the file size of a normal website.
+
 # CSS Library
 
 https://picocss.com/docs
@@ -9,7 +15,7 @@ https://github.com/delight-im/PHP-Auth?tab=readme-ov-file
 
 # Why open source?
 
-Games are more about community than most people give them credit in combination with the fact this is not my full time job but a side hustle for underlying engineering projects that are more serious financially. (i.e. Multidatacenter failover testing, testing deployment processes, etc)
+Games are more about community than most people give them credit in combination with the fact this is not my full time job but a hobby/side project.
 
 As such, there really is not a reason to avoid it being open source as it is more "an example of this type of project" as a practical learning exercise.
 
