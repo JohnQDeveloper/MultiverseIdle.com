@@ -21,6 +21,14 @@
             $_SESSION['constitution'] = 10;
             $_SESSION['strength'] = 10;
             $_SESSION['intelligence'] = 10;
+
+            # SKILLS
+            $_SESSION['healing'] = 10;
+            $_SESSION['runemastery'] = 10;
+            $_SESSION['forging'] = 10;
+            $_SESSION['mining'] = 10;
+            $_SESSION['puzzles'] = 10;
+            $_SESSION['traps'] = 10;
         }
 
     }

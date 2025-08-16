@@ -33,7 +33,7 @@ if(isset($success_message)) {
 <div>
     <h2>Gym</h2>
     <p>
-    Stats are critical to character growth
+    Stats are critical to character growth.
     as they determine your success rate in delves and combat. Even the quality of your crafting attempts are governed by such things.
     A player with higher total stats will usually beat a weaker player in a fight but gear and skill selection also play a role.
     </p>

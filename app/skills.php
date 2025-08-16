@@ -1,11 +1,10 @@
 <?php
 
-class Stats {
-    static function calculateStatGains($base, $amount) {
+class Skills {
+    static function calculateSkillGains($base, $amount) {
 
-        $gains = 0;
         while($amount > 0) {
-            $global_sum = Stats::statsSum() + $gains;
+            $global_sum = Skills::skillsSum() + $gains;
             $local_sum = $base + $gains;
 
             $local_stat_gains = 300/ceil(($local_sum-1)^1.3)*10;
@@ -27,8 +26,8 @@ class Stats {
         return $gains;
     }
 
-    static function statsSum() {
-        return $_SESSION['strength'] + $_SESSION['agility'] + $_SESSION['dexterity'] + $_SESSION['constitution']
-            + $_SESSION['intelligence'];
+    static function skillsSum() {
+        return $_SESSION['healing'] + $_SESSION['runemastery'] + $_SESSION['forging'] + $_SESSION['mining']
+            + $_SESSION['puzzles'] + $_SESSION['traps'];
     }
 }

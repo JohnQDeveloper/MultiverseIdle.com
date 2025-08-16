@@ -1,5 +1,5 @@
 <?php
-    if($_POST['amount'] > $_SESSION['energy']) {
+    if($_POST['amount'] > $_SESSION['energy'] && isset($_POST['stat']))  {
         $failure_message = true;
     }
     else if(in_array($_POST['stat'], ['strength', 'agility', 'dexterity', 'constitution', 'intelligence'])) {

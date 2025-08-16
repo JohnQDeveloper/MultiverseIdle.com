@@ -1,4 +1,6 @@
 <h3>Status</h3>
+$<?php echo $_SESSION['money'] ?>
+<BR />
 <a href="#" data-tooltip="Recovers 15 on the hour" data-placement="right">Energy:</a>
 <?php echo $_SESSION['energy'] . "/" . $_SESSION['max_energy']; ?><br />
 <a href="#" data-tooltip="Recovers 15 on the hour" data-placement="right">Nerve:</a>
@@ -10,11 +12,14 @@
 <br />
 <h3>Locations</h3>
 <a href="#">🔒 Auctions</a><br />
+<a href="/play-now/character-sheet">Char Sheet</a><br />
 <a href="#">🔒 Craft</a><br />
 <a href="/play-now/delve">Delves</a><br />
 <a href="#">🔒 Guilds</a><br />
 <a href="/play-now/gym">Gym</a><br />
 <a href="/play-now/inventory">Inventory</a><br />
-<a href="#">🔒 Jobs</a><br />
+<a href="/play-now/jobs">Jobs</a><br />
+<a href="#">🔒 Pets</a><br />
 <a href="#">🔒 Turf Wars</a><br />
+<a href="/play-now/logs">Logs</a><br />
 <a href="/logout">Log Out</a><br />

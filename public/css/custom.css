@@ -1,7 +1,6 @@
 body {
-  overflow-y:scroll;
-  overflow-x:scroll;
-  width: 1200px;
+  overflow:auto;
+  width: 1400px;
 }
 
 table.main {
@@ -9,14 +8,20 @@ table.main {
   left: 1em;
   right: 1em;
   bottom: 1em;
-  position:fixed;
+  /*position:fixed;*/
 }
 
 table.main td {
   font-size: 1em;
-  width: 12em;  ;
+  /*width: 12em;  ;*/
 }
 
 table.main td+td {
   width: auto;
+}
+
+table th {
+  font-size: 1.2em;
+  font-weight: bold;
+  text-align: left;
 }
