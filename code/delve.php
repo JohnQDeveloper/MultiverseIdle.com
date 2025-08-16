@@ -38,6 +38,7 @@
             $_SESSION['nerve'] = 0;
         }
 
+        $start_life = $_SESSION['life'];
         $result = Delves::Perform($_POST['delve'], $risk_factor = $_POST['risk']);
 
         if($_POST['delve'] != 'hunt') {
@@ -67,12 +68,30 @@
                 $success_message = "<b>Failure:</b> You could not complete the delve!";
                 $success_message .= "<p>Target Number: " . $result['target'] . "</p>";
                 $success_message .= "<p>Rolled: " . $result['rolled'] . "</p>";
+
                 $_SESSION['life'] = 0;
                 $_SESSION['nerve'] = 0;
             }
         }
         else {
-            $success_message = "<b>Hunt:</b> You went on a hunt! See Logs for full combat details!";
+            $success_message = "<b>Hunt:</b> You succeeded on a hunt! See Logs for full combat details!";
+            $success_message .= "<p>Life Lost: " . ($start_life - $_SESSION['life']) . "</p>";
+
+            foreach($result['loot'] as $loot_type => $amt) {
+                if($loot_type == 'money') {
+                    $success_message .= "<p>You found " . $amt . " gold!</p>";
+                } else if($loot_type == 'mithral') {
+                    $success_message .= "<p>You found " . $amt . " mithral!</p>";
+                } else if($loot_type == 'minor runes') {
+                    $success_message .= "<p>You found " . $amt . " minor runes!</p>";
+                } else if($loot_type == 'major runes') {
+                    $success_message .= "<p>You found " . $amt . " major runes!</p>";
+                } else if($loot_type == 'stat books') {
+                    $success_message .= "<p>You found " . $amt . " stat books!</p>";
+                } else if($loot_type == 'potion ingredients') {
+                    $success_message .= "<p>You found " . $amt . " potion ingredients!</p>";
+                }
+            }
 
         }
     }

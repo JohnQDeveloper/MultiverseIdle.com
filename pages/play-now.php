@@ -14,6 +14,7 @@
             $_SESSION['life'] = 120;
             $_SESSION['max_life'] = 120;
             $_SESSION['toxicity'] = 0;
+            $_SESSION['money'] = 0;
 
             # STATS
             $_SESSION['agility'] = 10;
@@ -44,12 +45,15 @@
         </td>
     </tr>
     <tr>
-        <td class='left'>
+        <td class='left-nav'>
             <?php require_once('../templates/play-now/left-game-nav.php'); ?>
         </td>
         <td class='center'>
             <?php
-            if($unsafe_second_page != "" && in_array(ltrim(strtolower($unsafe_second_page).".php","/"), $pages)) {
+            if($_SESSION['energy'] == 0 && $_SESSION['nerve'] == 0) {
+                require_once('../templates/play-now/register.php');
+            }
+            else if($unsafe_second_page != "" && in_array(ltrim(strtolower($unsafe_second_page).".php","/"), $pages)) {
                 require_once('../pages/' . $unsafe_second_page . '.php');
             }
             else {

@@ -25,3 +25,7 @@ table th {
   font-weight: bold;
   text-align: left;
 }
+
+.left-nav {
+  vertical-align: top;
+}

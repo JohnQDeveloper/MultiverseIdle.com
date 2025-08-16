@@ -32,4 +32,6 @@ Nothing is saved unless you register.
     <li>Please register only once. While we allow cross trading in Perpetual, we do not allow multiple accounts.</li>
     <li>If caught, all accounts are banned and you have to start over. We don't ban permanently as I'm testing automated moderation tools.</li>
 
+    <li><b>Once you run out of energy and nerve, you will be asked to register in a way that saves your current session.</b></li>
+
 </ul>

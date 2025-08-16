@@ -16,7 +16,7 @@
                     if($r >= $target_number) {
                         $x = rand(1,100);
                         $loot_type = 'money';
-                        $amt = rand($target_number/3, $target_number);
+                        $amt = ceil(rand($target_number/3, $target_number));
                         if($x <= 40) {
                             $type = 'money';
                             $_SESSION['money'] += $amt;
@@ -55,7 +55,7 @@
                     if($r >= $target_number) {
                         $x = rand(1,100);
                         $loot_type = 'money';
-                        $amt = rand($target_number/3, $target_number);
+                        $amt = ceil(rand($target_number/3, $target_number));
                         if($x <= 10 && round($target_number / 100) > 0) {
                             $loot_type = 'stat books';
                             $_SESSION['stat books'] += round($target_number / 100);
@@ -85,7 +85,7 @@
                     if($r >= $target_number) {
                         $x = rand(1,100);
                         $loot_type = 'money';
-                        $amt = rand($target_number/3, $target_number);
+                        $amt = ceil(rand($target_number/3, $target_number));
                         if($x <= 10 && round($target_number / 100) > 0) {
                             $loot_type = 'stat books';
                             $_SESSION['stat books'] += round($target_number / 100);
@@ -109,10 +109,61 @@
                 }
                 # Monster Hunter!
                 else if($type == 'hunt') {
+                    if(Combat::RunPvE(($effective_level) * ($risk_factor))) {
+                        $loot = [];
+                        $i = 0;
+                        while($i < 2)
+                        {
+                            $i++;
+                            $x = rand(1,100);
+                            $amt = ceil(rand(($effective_level) * ($risk_factor)/3, ($effective_level) * ($risk_factor)));
+                            if($x <= 25) {
+                                $loot_type = 'money';
+                                $_SESSION['money'] += $amt;
+                            }
+                            else if($x <= 45) {
+                                $loot_type = 'mithral';
+                                $_SESSION['mithral'] += $amt;
+                            }
+                            else if($x <= 65) {
+                                $loot_type = 'potion ingredients';
+                                $amt = rand(1, 10);
+                                $_SESSION['potion ingredients'] += round($target_number / 100) + 1;
+                            }
+                            else if($x <= 85 && round($target_number / 100) > 0) {
+                                $loot_type = 'stat books';
+                                $amt = rand(1, 10);
+                                $_SESSION['stat books'] += round($target_number / 100);
+                            }
+                            else if($x <= 95 && round($target_number / 100) > 0 ) {
+                                $loot_type = 'minor runes';
+                                $amt = rand(1, 5);
+                                $_SESSION['minor runes'] += round(10 * $risk_factor);
+                            }
+                            else if (round(2 * $risk_factor) > 0) {
+                                $loot_type = 'major runes';
+                                $_SESSION['major runes'] += round(2 * $risk_factor);
+                            }
+                            else {
+                                $loot_type = 'money';
+                                $_SESSION['money'] += $amt;
+                            }
 
+                            if(!isset($loot[$loot_type])) {
+                                $loot[$loot_type] = 0;
+                            }
+
+                            $loot[$loot_type] += $amt;
+                        }
+
+                        return ["success" => true, "loot" => $loot];
+                    }
+                    else {
+                        return ["success" => false];
+                    }
                 }
             }
 
-            return ["success" => false, "target" => 0, "rolled" => 0];
+            return ["success" => false];
         }
     }
