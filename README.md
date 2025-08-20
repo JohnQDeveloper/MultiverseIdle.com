@@ -1,3 +1,22 @@
+# Points of Contact
+
+Codeberg is for humans to open bug reports, discuss changes, etc.
+
+IF you want real human responses contact us at:
+
+**Codeberg**
+https://codeberg.org/johnQdeveloper/www.MultiverseIdle.com
+
+OR
+
+**Discord**
+https://discord.gg/umagBhVg
+
+
+# Github
+
+Github is for automated reviews of pull request / code / tooling / development work. Basically, the tooling here is just not beatable by open source right now. That said, it has no value to end users.
+
 # Mobile vs. Desktop View
 
 I'm cheating here and just having the phone players scroll a fixed width viewport. It is not ideal but for a hobby/side project I can choose between using a large CSS/JS library to build out stuff (pages are slower to load on mobile) or do something simple like pico/fixed viewports. The inbetween is a bit too time consuming for this project.
