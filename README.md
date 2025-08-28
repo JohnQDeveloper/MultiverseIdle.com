@@ -12,6 +12,7 @@ OR
 **Discord**
 https://discord.gg/umagBhVg
 
+_Github is ONLY for testing automated tooling like CodeRabbit that has better support over there._
 
 # Github
 
