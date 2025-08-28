@@ -18,6 +18,9 @@
         $player_session = $p->BuildFromArray($player);
         #print_r($player_session);die();
 
+        echo "Healing characters\n";
+        $player_session['life'] = $player_session['max_life']; # full heal
+
         $player_session['nerve'] += 15;
         $player_session['energy'] += 15;
         echo "Energy @ ".$player_session['energy']." / ".$player_session['max_energy']."\n";
