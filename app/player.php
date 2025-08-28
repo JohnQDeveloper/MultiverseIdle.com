@@ -72,7 +72,7 @@
                         $return[$key] = $value;
                     }
                 }
-                unset($temp['user_id']);
+                unset($return['user_id']);
 
                 $return['energy'] = $player['energy'];
                 $return['max_energy'] = $player['max_energy'];

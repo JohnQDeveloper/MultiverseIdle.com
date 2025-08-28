@@ -66,7 +66,6 @@
                 }
             }
 
-            return false;
         }
 
         public static function CalcSkillTrigger($src_intelligence, $target_intelligence) {

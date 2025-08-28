@@ -4,8 +4,8 @@
         public static function Perform($type, $risk_factor = 1) {
             if(in_array($type, ['mining', 'puzzles', 'traps', 'hunt'])) {
 
-                $effective_level = Stats::statsSum() + Skills::skillsSum();
-                $risk_factor = $risk_factor / 100;
+                $effective_level = Stats::statsSum($_SESSION) + Skills::skillsSum($_SESSION);
+                $risk_factor = max(0, $risk_factor) / 100;
 
                 # Mining Delve
                 if($type == 'mining') {
