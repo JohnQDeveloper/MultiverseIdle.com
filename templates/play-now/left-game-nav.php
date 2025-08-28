@@ -1,4 +1,4 @@
-<?php if(!$guest_mode) { ?>
+<?php if(!$guest_mode) { # @phpstan-ignore variable.undefined  ?>
 <h3>Status</h3>
 $<?php echo $_SESSION['money'] ?>
 <BR />

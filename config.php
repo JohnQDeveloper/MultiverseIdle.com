@@ -3,6 +3,12 @@
     define('DEBUG', true);
     define('URL', 'http://localhost:3456/');
 
+    $redis = new Redis();
+    $redis->connect(getenv('REDIS_HOST'), getenv('REDIS_PORT'));
+
+    # Set DAU Constant
+    define('DAU', $redis->get('DAU'));
+
     error_reporting(E_ALL ^ E_DEPRECATED ^ E_WARNING); # otherwise barf on sessions due to headers already being sent
 
     spl_autoload_register(function ($class_name) {
