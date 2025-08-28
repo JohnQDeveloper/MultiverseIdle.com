@@ -6,11 +6,11 @@
         $stat = '';
         $skill = '';
 
-        if($guest_mode)
-            $_SESSION['money'] += 100;
-        else {
-            $_SESSION['money'] += Jobs::Salary($_POST['job']);
-        }
+        #if($guest_mode)
+        #    $_SESSION['money'] += 100;
+        #else {
+        #    $_SESSION['money'] += Jobs::Salary($_POST['job']);
+        #}
 
         $_SESSION['last_job'] = $_POST['job'];
 
