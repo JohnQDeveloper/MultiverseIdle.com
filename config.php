@@ -6,16 +6,6 @@
     $redis = new Redis();
     $redis->connect(getenv('REDIS_HOST'), getenv('REDIS_PORT'));
 
-    # Set DAU Constant
-    $DAU = $redis->get('DAU');
-    if($DAU === false || $DAU < 1) {
-        // Fix cache miss
-        $r = $DAL->r("SELECT COUNT(*) as C FROM perpetual_characters WHERE last_save > NOW() - INTERVAL 1 DAY");
-        $DAU = $r[0]['C'];
-        $redis->set('DAU', $DAU);
-    }
-    define('DAU', $DAU);
-
     error_reporting(E_ALL ^ E_DEPRECATED ^ E_WARNING); # otherwise barf on sessions due to headers already being sent
 
     spl_autoload_register(function ($class_name) {
@@ -36,3 +26,13 @@
         $_SESSION['email'] = $_SESSION['auth_email'];
         $_SESSION['username'] = $_SESSION['auth_username'];
     }
+
+    # Set DAU Constant
+    $DAU = $redis->get('DAU');
+    if($DAU === false || $DAU < 1) {
+        // Fix cache miss
+        $r = $DAL->r("SELECT COUNT(*) as C FROM perpetual_characters WHERE last_save > NOW() - INTERVAL 1 DAY");
+        $DAU = $r[0]['C'];
+        $redis->set('DAU', $DAU);
+    }
+    define('DAU', $DAU);
