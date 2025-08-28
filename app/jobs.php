@@ -2,7 +2,7 @@
 
     class Jobs {
         static function Salary() {
-
+            return DAU; // 1 DAU = $1 as the job baseline
         }
 
         static function PerformJob($job, $stat_array) {

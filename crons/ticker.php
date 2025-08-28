@@ -5,6 +5,7 @@
 
     # Get daily active users
     $DAU = $r[0]['C'];
+    $redis->set('DAU', $DAU);
 
     $players_to_update = $DAL->r("SELECT * FROM perpetual_characters WHERE
     (last_save > NOW() - INTERVAL 1 DAY)
@@ -54,8 +55,6 @@
 
             $jobs_performed--;
         }
-
-
 
         $p->SaveCharacter($player_session, $players_to_update[$k]['user_id']);
         echo "\n\n";

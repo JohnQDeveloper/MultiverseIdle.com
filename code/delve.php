@@ -19,15 +19,15 @@
         }
 
         if($_POST['delve'] == 'traps') {
-            $stat_gains = Stats::calculateStatGains($_SESSION[$stat], 2);
+            $stat_gains = Stats::calculateStatGains($_SESSION[$stat], 2, $_SESSION);
             $_SESSION[$stat] = $stat_gains;
-            $skill_gains = Stats::calculateStatGains($_SESSION[$skill], 2);
+            $skill_gains = Stats::calculateStatGains($_SESSION[$skill], 2, $_SESSION);
             $_SESSION[$skill] = $skill_gains;
         }
         else if($_POST['delve'] != 'hunt') {
-            $stat_gains = Stats::calculateStatGains($_SESSION[$stat], 2);
+            $stat_gains = Stats::calculateStatGains($_SESSION[$stat], 2, $_SESSION);
             $_SESSION[$stat] = $stat_gains;
-            $skill_gains = Skills::calculateSkillGains($_SESSION[$skill], 2);
+            $skill_gains = Skills::calculateSkillGains($_SESSION[$skill], 2, $_SESSION);
             $_SESSION[$skill] = $skill_gains;
         }
 

@@ -1,7 +1,7 @@
 <?php
 
     try {
-        $auth->confirmEmail($_GET['selector'], $_GET['token']);
+        $auth->confirmEmail($_GET['selector'], $_GET['token']); // @phpstan-ignore variable.undefined
 
         echo 'Email address has been verified';
         echo '<BR /><a href="'.URL.'">You May Now Login</a>';

@@ -1,4 +1,4 @@
-<?php if(!$guest_mode) { ?>
+<?php $guest_mode = $guest_mode ?? false; if(!$guest_mode) { ?>
 <h3>Status</h3>
 $<?php echo $_SESSION['money'] ?>
 <BR />
