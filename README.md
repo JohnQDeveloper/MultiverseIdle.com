@@ -44,15 +44,7 @@ That said, I do NOT recommend you base your projects around similar design conce
 
 # Why not Laravel/Symfony/etc
 
-40% of my career is cleaning up legacy projects written without a framework and at most a handful of composer libraries. Staying in pratice in this regard is useful.
-
-There is also the practical problems with frameworks in modern PHP:
-
-1) Overeliance on ORMs that quietly break only in production via performance issues that are opaque requiring hours to fix.
-
-2) Upgrades are major projects between major versions of frameworks. I just don't really have time for this.
-
-3) Similarly to ORMs, "magic" heavy frameworks like Laravel have a tendency towards opaque bug messages that aren't exactly what is broken. Sure, it might only happen a few times a year on a project like this, but that is development time I can't get back.
+I like the simplicity of doing things this way. It might be slower and with less magic but there is also less frustration since problems are easy to reason through.
 
 # Why mixing functions and classes and requires instead of MVC?
 
