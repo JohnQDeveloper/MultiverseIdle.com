@@ -1,9 +1,11 @@
 <?php
 if(isset($_POST['email']) && isset($_POST['password'])) {
     try {
-        $auth->login($_POST['email'], $_POST['password']);
+        $auth->login($_POST['email'], $_POST['password'], (60 * 60 * 24 * 30)); # 30 day cookie
 
-        echo 'User is logged in';
+        #print_r($_SESSION);
+        header('Location: '.URL."");
+        die();
     }
     catch (\Delight\Auth\InvalidEmailException $e) {
         die('Wrong email address');

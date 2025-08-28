@@ -28,4 +28,10 @@ table th {
 
 .left-nav {
   vertical-align: top;
+  width: 16em;
+}
+
+.left-spacing {
+  margin-top: 1em;
+  margin-left: 1em;
 }

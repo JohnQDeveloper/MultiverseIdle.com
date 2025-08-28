@@ -1,38 +1,17 @@
 <?php
-if(isset($_POST['username']) && isset($_POST['email']) && isset($_POST['password'])) {
-    try {
-
-        if($_POST['password'] != $_POST['confirm_password']) {
-            die('Passwords do not match');
-        }
-
-        if (\preg_match('/[\x00-\x1f\x7f\/:@\\\\]/', $_POST['username']) === 0) {
-            $userId = $auth->register($_POST['email'], $_POST['password'], $_POST['username'], function ($selector, $token) {
-                echo 'Send this link: ' .
-                'https://example.com/confirm?selector=' . \urlencode($selector) . '&token=' . \urlencode($token);
-            });
-            echo 'We have signed up a new user with the ID ' . $userId;
-        }
-        else {
-            die('Invalid username');
-        }
-    }
-    catch (\Delight\Auth\InvalidEmailException $e) {
-        die('Invalid email address');
-    }
-    catch (\Delight\Auth\InvalidPasswordException $e) {
-        die('Invalid password');
-    }
-    catch (\Delight\Auth\UserAlreadyExistsException $e) {
-        die('User already exists');
-    }
-    catch (\Delight\Auth\TooManyRequestsException $e) {
-        die('Too many requests');
-    }
-    catch (Exception $e) {
-        if(DEBUG)
-            die("Exception: " . $e->getMessage());
-    }
+if($_POST != [] && isset($fail_message) && $fail_message !== "") {
+    echo '
+    <dialog open id="messageModal">
+        <article>
+            <header>
+            <button aria-label="Close" rel="prev" id="closeMessageModal"></button>
+            <p>
+                <strong>Registration Error!</strong>
+            </p>
+            </header>
+            ' . $fail_message . '
+        </article>
+    </dialog>';
 }
 ?>
 

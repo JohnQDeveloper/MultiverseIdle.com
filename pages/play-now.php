@@ -1,38 +1,11 @@
 <?php
     $guest_mode = true;
-    if(isset($_SESSION['player_id'])) {
+    $Player = new Player($DAL);
+    if(isset($_SESSION['auth_user_id'])) {
         $guest_mode = false;
     }
-    else {
-        if(!isset($_SESSION['energy'])) {
 
-            # STATUS BAR
-            $_SESSION['energy'] = 120;
-            $_SESSION['max_energy'] = 120;
-            $_SESSION['nerve'] = 120;
-            $_SESSION['max_nerve'] = 120;
-            $_SESSION['life'] = 120;
-            $_SESSION['max_life'] = 120;
-            $_SESSION['toxicity'] = 0;
-            $_SESSION['money'] = 0;
-
-            # STATS
-            $_SESSION['agility'] = 10;
-            $_SESSION['dexterity'] = 10;
-            $_SESSION['constitution'] = 10;
-            $_SESSION['strength'] = 10;
-            $_SESSION['intelligence'] = 10;
-
-            # SKILLS
-            $_SESSION['healing'] = 10;
-            $_SESSION['runemastery'] = 10;
-            $_SESSION['forging'] = 10;
-            $_SESSION['mining'] = 10;
-            $_SESSION['puzzles'] = 10;
-            $_SESSION['traps'] = 10;
-        }
-
-    }
+    $Player->LoadCharacter($guest_mode);
 
     if($unsafe_second_page != "" && in_array(ltrim(strtolower($unsafe_second_page).".php","/"), $pages)) {
         require_once('../code/' . $unsafe_second_page . '.php');
@@ -50,7 +23,7 @@
         </td>
         <td class='center'>
             <?php
-            if($_SESSION['energy'] == 0 && $_SESSION['nerve'] == 0) {
+            if($_SESSION['energy'] == 0 && $_SESSION['nerve'] == 0 && $guest_mode) {
                 require_once('../templates/play-now/register.php');
             }
             else if($unsafe_second_page != "" && in_array(ltrim(strtolower($unsafe_second_page).".php","/"), $pages)) {
@@ -63,3 +36,5 @@
         </td>
     </tr>
 </table>
+<?php
+    $Player->SaveCharacter();

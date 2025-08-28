@@ -13,12 +13,21 @@
 
     # find valid pages
     $pages = scandir("../pages");
+    #print_r($_SESSION);die();
 
     if (in_array(ltrim(strtolower($unsafe_main_page).".php","/"), $pages)) {
+        if(file_exists("../code/" . ltrim($unsafe_main_page, "/") . ".php")) {
+            require_once("../code/" . ltrim($unsafe_main_page, "/") . ".php");
+        }
         require_once("../pages/" . ltrim($unsafe_main_page, "/") . ".php");
     }
     else {
-        require_once("../pages/index.php");
+        if(!isset($_SESSION['auth_logged_in']) && $_SESSION['auth_logged_in'] !== 1) {
+            require_once("../pages/index.php");
+        }
+        else {
+            require_once("../pages/play-now.php");
+        }
     }
 
 

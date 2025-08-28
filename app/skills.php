@@ -1,14 +1,18 @@
 <?php
 
 class Skills {
-    static function calculateSkillGains($base, $amount) {
+    static function calculateSkillGains($base, $amount, $player_data) {
+
+        if($player_data === null) {
+            $player_data = $_SESSION;
+        }
 
         while($amount > 0) {
-            $global_sum = Skills::skillsSum() + $gains;
+            $global_sum = Skills::skillsSum($player_data) + $gains;
             $local_sum = $base + $gains;
 
-            $local_stat_gains = 300/ceil(($local_sum-1)^1.3)*10;
-            $global_stat_gains = 300/ceil(($global_sum-1)^1.3)*10;
+            $local_stat_gains = max(300/ceil(($local_sum-1)^1.3)*10, 0);
+            $global_stat_gains = max(300/ceil(($global_sum-1)^1.3)*10, 0);
 
             $total_gains = ($local_stat_gains + $global_stat_gains)/100;
 
@@ -26,8 +30,8 @@ class Skills {
         return $gains;
     }
 
-    static function skillsSum() {
-        return $_SESSION['healing'] + $_SESSION['runemastery'] + $_SESSION['forging'] + $_SESSION['mining']
-            + $_SESSION['puzzles'] + $_SESSION['traps'];
+    static function skillsSum($player_data) {
+        return $player_data['healing'] + $player_data['runemastery'] + $player_data['forging'] + $player_data['mining']
+            + $player_data['puzzles'] + $player_data['traps'];
     }
 }

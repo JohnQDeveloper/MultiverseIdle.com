@@ -9,7 +9,7 @@
         if($guest_mode)
             $_SESSION['money'] += 100;
         else {
-            // tbd; need demand calculations
+            $_SESSION['money'] += Jobs::Salary($_POST['job']);
         }
 
         $_SESSION['last_job'] = $_POST['job'];
@@ -23,36 +23,12 @@
             $resource_type = 'nerve';
         }
 
-        if($_POST['job'] == 'alchemist') {
-            $stat = 'dexterity';
-            $skill = 'agility';
-        } else if($_POST['job'] == 'runeforger') {
-            $stat = 'intelligence';
-            $skill = 'runemastery';
-        } else if($_POST['job'] == 'armorer') {
-            $stat = 'strength';
-            $skill = 'forging';
-        } else if($_POST['job'] == 'healer') {
-            $stat = 'intelligence';
-            $skill = 'healing';
+        $gains = Jobs::PerformJob($_POST['job'], $_SESSION);
+
+        $success_message = "";
+        foreach($gains as $stat => $gain) {
+            $_SESSION[$stat] += $gain;
+            $success_message .= "<p>You increased your " . $stat . " by " . $gain . " consuming 5 $resource_type.</p>\n";
         }
 
-        $gains = Stats::calculateStatGains($_SESSION[$stat], 2);
-        $_SESSION[$stat] += $gains;
-        $_SESSION['energy'] -= intval($_POST['amount']);
-
-        if($_POST['job'] == 'alchemist') {
-            $gains = Stats::calculateStatGains($_SESSION[$skill], 2);
-            $_SESSION[$skill] += $gains;
-        } else {
-            $gains = Skills::calculateSkillGains($_SESSION[$skill], 2);
-            $_SESSION[$skill] += $gains;
-        }
-
-        $gains = Stats::calculateStatGains($_SESSION[$stat], 2);
-        $_SESSION[$stat] += $gains;
-        $_SESSION['energy'] -= intval($_POST['amount']);
-
-        $success_message = "<p>You increased your " . $stat . " by " . $gains . " consuming 5 $resource_type.</p>\n";
-        $success_message .= "<p>You increased your " . $skill . " by " . $gains . " consuming 5 $resource_type.</p>\n";
     }

@@ -1,4 +1,4 @@
-<div class="grid">
+<div class="grid left-spacing">
     <div>
         <h1>Welcome to Multiverse Idle - 2026 Alpha Edition</h1>
         Multiverse Idle is a game where you can explore different realms, collect resources, and build your character.
@@ -10,6 +10,9 @@
         are only available in Perpetual mode.
         <br /><br />
         The game will be wiped on release of Beta and Early Access. So please keep that in mind.
+        <BR />
+        <a href="/register"><button>Register</button></a>
+
     </div>
     <div>
         <h2>Tutorial (Register at the end)</h2>
