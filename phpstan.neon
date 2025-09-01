@@ -12,3 +12,5 @@ parameters:
         - identifier: variable.undefined
         - identifier: if.alwaysTrue
         - identifier: requireOnce.fileNotFound
+        - identifier: constant.notFound
+        - identifier: greater.alwaysTrue

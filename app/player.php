@@ -47,14 +47,16 @@
 
            # echo "ENERGY:".$energy."<BR />";
            # echo "MONEY:".$money."<BR />";
+           # echo "LIFE:".$life."<BR />";
 
             $json_save = json_encode($temp);
 
             $this->DAL->w("INSERT INTO perpetual_characters SET user_id=:user_id, json_save=:json_save, energy=:energy,
-            max_energy=:max_energy, nerve=:nerve, max_nerve=:max_nerve, life=:life, max_life=:max_life, toxicity=:toxicity, money=:money
+            max_energy=:max_energy, nerve=:nerve, max_nerve=:max_nerve, life=:life, max_life=:max_life, toxicity=:toxicity, money=:money,
+            last_job=:last_job, last_save=NOW()
             ON DUPLICATE KEY UPDATE json_save=:json_save, energy=:energy,
             max_energy=:max_energy, nerve=:nerve, max_nerve=:max_nerve,
-            life=:life, max_life=:max_life, toxicity=:toxicity, money=:money, last_job=:last_job",
+            life=:life, max_life=:max_life, toxicity=:toxicity, money=:money, last_job=:last_job, last_save=NOW()",
             [':user_id' => isset($_SESSION['auth_user_id']) ? $_SESSION['auth_user_id'] : $uid
             , ':json_save' => $json_save, ':energy' => $energy,
             ':max_energy' => $max_energy, ':nerve' => $nerve, ':max_nerve' => $max_nerve,

@@ -94,7 +94,7 @@ if(isset($success_message)) {
         is more a question of working with rare metals and forcing them into shape.
         Demand is determined by crafting of quality items.
     </p>
-    <p>1 Quality Affix = $5 of Demand.</p>
+    <p>1 Mithral = $1 of Demand.</p>
     </div>
 
     <div>
@@ -106,7 +106,7 @@ if(isset($success_message)) {
     <p>Consumables are always in demand and producing these valuable potions will provide dividends.
     The results are a mixture of dexterity in preparing the ingredients and skill at the craft.
     It should be noted that you train two stats with this one but no skills.</p>
-    <p>Each consumable that is consumed is $1 of Demand.</p>
+    <p>Each consumable that is produced is $1 of Demand.</p>
     </div>
 
 </div>

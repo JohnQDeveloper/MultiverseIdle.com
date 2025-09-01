@@ -22,9 +22,14 @@
                 $_SESSION['combat_log'] .= "Monster Dex: $monster_dexterity<br>";
                 $_SESSION['combat_log'] .= "Monster Agi: $monster_agility<br>";
                 $_SESSION['combat_log'] .= "Monster Str: $monster_strength<br>";
+                $_SESSION['combat_log'] .= "Monster Con: $monster_constitution<br>";
+                $_SESSION['combat_log'] .= "Monster Int: $monster_intelligence<br>";
+
                 $_SESSION['combat_log'] .= "Player Dex: ".$_SESSION['dexterity']."<br>";
                 $_SESSION['combat_log'] .= "Player Agi: ".$_SESSION['agility']."<br>";
                 $_SESSION['combat_log'] .= "Player Str: ".$_SESSION['strength']."<br>";
+                $_SESSION['combat_log'] .= "Player Con: ".$_SESSION['constitution']."<br>";
+                $_SESSION['combat_log'] .= "Player Int: ".$_SESSION['intelligence']."<br>";
 
                 $_SESSION['combat_log'] .= "<br /><hr /><br /><p><b>Combat Round $x:</b></p>";
                 $_SESSION['combat_log'] .= "<p>Your skill proc chance is ".
