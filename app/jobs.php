@@ -2,7 +2,24 @@
 
     class Jobs {
         static function Salary($job) {
-            return DAU; // 1 DAU = $1 as the job baseline
+
+            $baseline = DAU / constant(strtoupper($job)); // 1 DAU = $1 as the job baseline
+
+            $consumption = 0;
+            if($job == 'healer') {
+                $consumption = HEALING_DONE / constant(strtoupper($job));
+            }
+            else if ($job == 'armorer') {
+                $consumption = MITHRAL_USED / constant(strtoupper($job));
+            }
+            else if ($job == 'runeforger') {
+                $consumption = RUNES_FORGED / constant(strtoupper($job));
+            }
+            else if ($job == 'alchemist') {
+                $consumption = POTIONS_BREWED / constant(strtoupper($job));
+            }
+
+            return $baseline + $consumption; // amount to pay.
         }
 
         static function PerformJob($job, $stat_array) {

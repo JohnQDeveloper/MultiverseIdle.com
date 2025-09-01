@@ -15,3 +15,12 @@ CREATE TABLE
     `last_job` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
     PRIMARY KEY (`user_id`)
   ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci
+
+CREATE TABLE
+  `economy_stats` (
+    `id` int unsigned NOT NULL AUTO_INCREMENT,
+    `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `type` varchar(255) DEFAULT NULL,
+    `amt` bigint DEFAULT '0',
+    PRIMARY KEY (`id`)
+  ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci
