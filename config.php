@@ -4,7 +4,7 @@
     define('URL', 'http://localhost:3456/');
 
     $redis = new Redis();
-    $redis->connect(getenv('REDIS_HOST'), getenv('REDIS_PORT'));
+    $redis->connect(getenv('REDIS_HOST'), intval(getenv('REDIS_PORT')));
 
     error_reporting(E_ALL ^ E_DEPRECATED ^ E_WARNING); # otherwise barf on sessions due to headers already being sent
 
