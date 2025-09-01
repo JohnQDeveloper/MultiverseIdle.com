@@ -27,7 +27,7 @@
         $EconomicValue = $redis->get($EconomicConstant);
         if($EconomicValue === false || $EconomicValue < 1) {
             // Fix cache miss
-            $r = $DAL->r("SELECT COUNT(*) as C FROM economy_stats WHERE type=? AND created_at > NOW() - INTERVAL 1 DAY",
+            $r = $DAL->r("SELECT SUM(amt) as C FROM economy_stats WHERE type=? AND created_at > NOW() - INTERVAL 1 DAY",
             [$EconomicConstant]);
             $EconomicValue = $r[0]['C'];
             $redis->set($EconomicConstant, $EconomicValue);

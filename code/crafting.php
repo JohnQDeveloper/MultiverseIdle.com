@@ -13,7 +13,7 @@
         else {
 
             // the crafting loop
-            while($attempts > 0 && $mithral > 0 && ($_SESSION['mithral'] - $mithral > 0)) {
+            while($attempts > 0 && $mithral > 0 && ($_SESSION['mithral'] - $mithral >= 0)) {
                 $_SESSION['inventory'][] = Crafting::createItem($gear_slot, $mithral);
                 $_SESSION['mithral'] -= $mithral;
                 $attempts--;
