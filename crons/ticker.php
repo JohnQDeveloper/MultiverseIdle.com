@@ -38,8 +38,10 @@
 
         # Updating healing done economic constant
         echo "Healing characters\n";
-        $healed = $player_session['max_life'] - $player_session['life'];
-        $DAL->w("UPDATE economy_stats SET amt = amt + ? WHERE type = 'healing_done' ORDER BY id DESC LIMIT 1", [$healed]);
+        $healed = max(0, $player_session['max_life'] - $player_session['life']);
+        if($healed > 0) {
+            $DAL->w("UPDATE economy_stats SET amt = amt + ? WHERE type = 'healing_done' ORDER BY id DESC LIMIT 1", [$healed]);
+        }
 
         $player_session['life'] = $player_session['max_life']; # full heal
 
