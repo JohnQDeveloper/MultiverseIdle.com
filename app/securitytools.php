@@ -7,7 +7,7 @@
 
         static function VerifyCSRFToken($form = 'default') {
             $signature = hash_hmac('sha256', $form, $_SESSION['csrf-token']);
-            return hash_equals($signature, $_POST['csrf-request-id']);
+            return isset($_POST['csrf-request-id']) && hash_equals($signature, $_POST['csrf-request-id']);
         }
 
     }
