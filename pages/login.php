@@ -1,5 +1,14 @@
 <?php
 if(isset($_POST['email']) && isset($_POST['password'])) {
+
+    if(SecurityTools::VerifyCSRFToken('login')) {
+      #die("Passed");
+      // DO nothing
+    }
+    else {
+      die("CSRF Token Verification Failed");
+    }
+
     try {
         $auth->login($_POST['email'], $_POST['password'], (60 * 60 * 24 * 30)); # 30 day cookie
 
@@ -36,6 +45,7 @@ if(isset($_POST['email']) && isset($_POST['password'])) {
       Password
       <input type="password" name="password" placeholder="Password" autocomplete="new-password" />
     </label>
+    <?php SecurityTools::AddFormCSRFToken('login'); ?>
   </fieldset>
 
   <input type="submit" value="Login" />

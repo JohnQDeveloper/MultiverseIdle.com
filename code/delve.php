@@ -4,6 +4,12 @@
     }
     else if(in_array($_POST['delve'], ['mining', 'puzzles', 'traps', 'hunt'])) {
 
+        if(SecurityTools::VerifyCSRFToken('delve')) {
+            // CSRF token is valid, process the request
+        } else {
+            die("Invalid CSRF token");
+        }
+
         $_SESSION['nerve'] -= 5;
 
         if($_POST['delve'] == 'mining') {

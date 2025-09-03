@@ -32,6 +32,7 @@
         echo '</select>';
         ?>
 
+        <?php SecurityTools::AddFormCSRFToken('craft'); ?>
         <button type="submit">Craft!</button>
     </form>
     </div>

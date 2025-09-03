@@ -40,50 +40,50 @@ if(isset($success_message)) {
     </p>
 </div>
 
-<div class="grid">
     <div>
+    <h3>Mining - Strength/Mining</h3>
+    <p>Mining yields valuable Mithral, Runes, and Money. </p>
+    <p>But beware the cave in...</p>
     <form action="/play-now/delve" method="POST">
         <input type="hidden" name="delve" value="mining">
         <input type="number" name="risk" min="1" max="100" value="5" placeholder="% Risk Tolerance">
         <button type="submit">Dig for riches</button>
+        <?php SecurityTools::AddFormCSRFToken('delve'); ?>
     </form>
-    <h3>Mining - Strength/Mining</h3>
-    <p>Mining yields valuable Mithral, Runes, and Money. </p>
-    <p>But beware the cave in...</p>
     </div>
 
     <div>
+    <h3>Deadly Puzzles - Intelligence/Puzzles</h3>
+    <p>Behind every puzzle is a stat book, potion, or cash.</p>
+    <p>But beware a wrong answer...</p>
     <form action="/play-now/delve" method="POST">
         <input type="hidden" name="delve" value="puzzles">
         <input type="number" name="risk" min="1" max="100" value="5" placeholder="% Risk Tolerance">
         <button type="submit">Solve puzzles</button>
+        <?php SecurityTools::AddFormCSRFToken('delve'); ?>
     </form>
-    <h3>Deadly Puzzles - Intelligence/Puzzles</h3>
-    <p>Behind every puzzle is a stat book, potion, or cash.</p>
-    <p>But beware a wrong answer...</p>
     </div>
 
     <div>
+    <h3>Disarm Traps - Dexterity/Agility</h3>
+    <p>Behind every trap is a stat book, potion, or cash.</p>
+    <p>But beware the trigger wire...</p>
     <form action="/play-now/delve" method="POST">
         <input type="hidden" name="delve" value="traps">
         <input type="number" name="risk" min="1" max="100" value="5" placeholder="% Risk Tolerance">
         <button type="submit">Disarm traps</button>
+        <?php SecurityTools::AddFormCSRFToken('delve'); ?>
     </form>
-    <h3>Disarm Traps - Dexterity/Agility</h3>
-    <p>Behind every trap is a stat book, potion, or cash.</p>
-    <p>But beware the trigger wire...</p>
     </div>
 
     <div>
+    <h3>Monster Hunting - Combat (PvE)</h3>
+    <p>200% of normal yields of all loot drops.</p>
+    <p>Monsters scale with battle power so this is never 100% safe...</p>
     <form action="/play-now/delve" method="POST">
         <input type="hidden" name="delve" value="hunt">
         <input type="number" name="risk" min="1" max="100" value="5" placeholder="% Risk Tolerance">
         <button type="submit">Hunt monsters!</button>
+        <?php SecurityTools::AddFormCSRFToken('delve'); ?>
     </form>
-    <h3>Monster Hunting - Combat (PvE)</h3>
-    <p>200% of normal yields of all loot drops.</p>
-    <p>Monsters scale with battle power so this is never 100% safe...</p>
     </div>
-
-
-</div>

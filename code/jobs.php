@@ -3,6 +3,14 @@
         $failure_message = true;
     }
     else if(in_array($_POST['job'], ['healer', 'runeforger', 'armorer', 'alchemist'])) {
+
+        if(SecurityTools::VerifyCSRFToken('job')) {
+          // DO nothing
+        }
+        else {
+          die("CSRF Token Verification Failed");
+        }
+
         $stat = '';
         $skill = '';
 

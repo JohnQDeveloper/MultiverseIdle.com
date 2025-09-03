@@ -27,7 +27,9 @@
         $_SESSION['username'] = $_SESSION['auth_username'];
     }
 
-
+    if (empty($_SESSION['csrf-token'])) {
+        $_SESSION['csrf-token'] = bin2hex(random_bytes(32));
+    }
 
     # Require data files
     require_once('data/economy.constants.php');

@@ -5,6 +5,12 @@
         $attempts = (int) $_POST['attempts'];
         $gear_slot = $_POST['gear-slot'];
 
+        if(SecurityTools::VerifyCSRFToken('craft')) {
+            // CSRF token is valid, process the request
+        } else {
+            die("Invalid CSRF token");
+        }
+
         if($mithral < 5 || $attempts < 1 || !in_array($gear_slot, GEAR_SLOTS)) {
             echo "Invalid crafting parameters.";
             exit;

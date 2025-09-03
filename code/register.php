@@ -4,6 +4,14 @@ use PHPMailer\PHPMailer\Exception;
 
 $fail_message = "";
 if(isset($_POST['username']) && isset($_POST['email']) && isset($_POST['password'])) {
+
+    if(SecurityTools::VerifyCSRFToken('register')) {
+      // DO nothing
+    }
+    else {
+      die("CSRF Token Verification Failed");
+    }
+
     try {
 
         if($_POST['password'] != $_POST['confirm_password']) {
