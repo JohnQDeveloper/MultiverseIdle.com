@@ -45,12 +45,13 @@ if(isset($success_message)) {
     </p>
 </div>
 
-<div class="grid">
+
     <div><h3><?php echo $_SESSION['agility']; ?> Agility</h3>
     <form action="/play-now/gym" method="POST">
         <input type="hidden" name="stat" value="agility">
         <input type="number" name="amount" min="1" placeholder="Amount">
         <button type="submit">Train</button>
+        <?php SecurityTools::AddFormCSRFToken('gym'); ?>
     </form>
     </div>
     <div><h3><?php echo $_SESSION['dexterity']; ?> Dexterity</h3>
@@ -58,6 +59,7 @@ if(isset($success_message)) {
         <input type="hidden" name="stat" value="dexterity">
         <input type="number" name="amount" min="1" placeholder="Amount">
         <button type="submit">Train</button>
+        <?php SecurityTools::AddFormCSRFToken('gym'); ?>
     </form>
     </div>
     <div><h3><?php echo $_SESSION['constitution']; ?> Constitution</h3>
@@ -65,6 +67,7 @@ if(isset($success_message)) {
         <input type="hidden" name="stat" value="constitution">
         <input type="number" name="amount" min="1" placeholder="Amount">
         <button type="submit">Train</button>
+        <?php SecurityTools::AddFormCSRFToken('gym'); ?>
     </form>
     </div>
     <div><h3><?php echo $_SESSION['strength']; ?> Strength</h3>
@@ -72,6 +75,7 @@ if(isset($success_message)) {
         <input type="hidden" name="stat" value="strength">
         <input type="number" name="amount" min="1" placeholder="Amount">
         <button type="submit">Train</button>
+        <?php SecurityTools::AddFormCSRFToken('gym'); ?>
     </form>
     </div>
     <div><h3><?php echo $_SESSION['intelligence']; ?> Intelligence</h3>
@@ -79,6 +83,6 @@ if(isset($success_message)) {
         <input type="hidden" name="stat" value="intelligence">
         <input type="number" name="amount" min="1" placeholder="Amount">
         <button type="submit">Train</button>
+        <?php SecurityTools::AddFormCSRFToken('gym'); ?>
     </form>
     </div>
-</div>

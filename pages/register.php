@@ -33,6 +33,7 @@ if($_POST != [] && isset($fail_message) && $fail_message !== "") {
       Confirm Password
       <input type="password" name="confirm_password" placeholder="Confirm Password" autocomplete="new-password" />
     </label>
+    <?php SecurityTools::AddFormCSRFToken('register'); ?>
   </fieldset>
 
   <input type="submit" value="Register" />

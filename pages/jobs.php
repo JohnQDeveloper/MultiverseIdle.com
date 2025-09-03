@@ -60,53 +60,56 @@ if(isset($success_message)) {
     </p>
 </div>
 
-<div class="grid">
     <div>
-    <form action="/play-now/jobs" method="POST">
-        <input type="hidden" name="job" value="healer">
-        <button type="submit">Work as a Healer</button>
-    </form>
     <h3>Healer - Intelligence/Healing</h3>
     <p>Healers train Healing, improving Healing Effectiveness, while also training Intelligence.
         Demand is determined by overall healing. </p>
     <p>1 Life = $1 of Demand.</p>
+    <form action="/play-now/jobs" method="POST">
+        <input type="hidden" name="job" value="healer">
+        <button type="submit">Work as a Healer</button>
+        <?php SecurityTools::AddFormCSRFToken('job'); ?>
+    </form>
     </div>
 
     <div>
-    <form action="/play-now/jobs" method="POST">
-        <input type="hidden" name="job" value="runeforger">
-        <button type="submit">Work as a Runeforger</button>
-    </form>
     <h3>Runeforger - Intelligence/Runemastery</h3>
     <p>Runeforgers train Runemastery, improving Rune Effectiveness, while also training Intelligence that doubles down
         on economic activity.
         Demand is determined by overall crafting. </p>
     <p>1 Minor Rune = $1 of Demand. 1 Major Rune = $5 of Demand.</p>
+    <form action="/play-now/jobs" method="POST">
+        <input type="hidden" name="job" value="runeforger">
+        <button type="submit">Work as a Runeforger</button>
+        <?php SecurityTools::AddFormCSRFToken('job'); ?>
+    </form>
     </div>
 
     <div>
-    <form action="/play-now/jobs" method="POST">
-        <input type="hidden" name="job" value="armorer">
-        <button type="submit">Work as a Armorer</button>
-    </form>
     <h3>Armorer - Strength/Forging</h3>
     <p>Armorers also train crafting but focus on building valuable base items. The results are based on strength as it
         is more a question of working with rare metals and forcing them into shape.
         Demand is determined by crafting of quality items.
     </p>
     <p>1 Mithral = $1 of Demand.</p>
+    <form action="/play-now/jobs" method="POST">
+        <input type="hidden" name="job" value="armorer">
+        <button type="submit">Work as a Armorer</button>
+        <?php SecurityTools::AddFormCSRFToken('job'); ?>
+    </form>
     </div>
 
     <div>
-    <form action="/play-now/jobs" method="POST">
-        <input type="hidden" name="job" value="alchemist">
-        <button type="submit">Work as a Alchemist</button>
-    </form>
     <h3>Alchemist - Agility/Dexterity</h3>
     <p>Consumables are always in demand and producing these valuable potions will provide dividends.
     The results are a mixture of dexterity in preparing the ingredients and skill at the craft.
     It should be noted that you train two stats with this one but no skills.</p>
     <p>Each consumable that is produced is $1 of Demand.</p>
-    </div>
 
-</div>
+    <form action="/play-now/jobs" method="POST">
+        <input type="hidden" name="job" value="alchemist">
+        <button type="submit">Work as a Alchemist</button>
+        <?php SecurityTools::AddFormCSRFToken('job'); ?>
+    </form>
+
+    </div>
