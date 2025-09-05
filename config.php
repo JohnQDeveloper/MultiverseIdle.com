@@ -3,6 +3,12 @@
     define('DEBUG', true);
     define('URL', 'http://localhost:3456/');
 
+    # Harden Sessions
+    ini_set('session.cookie_httponly', 1);
+    #ini_set('session.cookie_secure', 1); # once its HTTPS
+    ini_set('session.cookie_samesite', 'Strict');
+
+    # Connect to Redis
     $redis = new Redis();
     $redis->connect(getenv('REDIS_HOST'), intval(getenv('REDIS_PORT')));
 

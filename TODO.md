@@ -4,3 +4,6 @@
 - Build out Pets
 - Build out Guilds
 - Build out Turf Wars
+
+# After that
+- Work on stretch goals

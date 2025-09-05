@@ -11,12 +11,11 @@ class Stats {
         $gains = 0;
         while($amount > 0) {
 
-            $global_sum = Stats::statsSum($player_data) + $gains;
-            $local_sum = $base + $gains;
+            $global_sum = max(Stats::statsSum($player_data) + $gains, 2);
+            $local_sum = max($base + $gains, 2);
             #echo "GLOBAL: $global_sum LOCAL: $local_sum \n";
-
-            $local_stat_gains = max(300/ceil(($local_sum-1)^1.3)*10, 0);
-            $global_stat_gains = max(300/ceil(($global_sum-1)^1.3)*10, 0);
+            $local_stat_gains = 300/pow($local_sum,1.3)*10;
+            $global_stat_gains = 300/pow($global_sum,1.3)*10;
             #echo "GLOBAL_GAIN: $global_stat_gains LOCAL_GAIN: $local_stat_gains\n";
             $total_gains = ($local_stat_gains + $global_stat_gains)/100;
             #echo "TOTAL_GAINS: $total_gains\n";

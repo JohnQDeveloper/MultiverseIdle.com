@@ -24,6 +24,11 @@ class Crafting {
             $return['modifiers'][] = [$modifiers[$stat2] => rand(1, 4)];
         }
 
+        $return['name'] = GEAR_NAMING['descriptors'][array_rand(GEAR_NAMING['descriptors'])] .
+                        " " . GEAR_NAMING['materials'][array_rand(GEAR_NAMING['materials'])] .
+                        " " . ucfirst($gear_slot) .
+                        " " . GEAR_NAMING['adjectives'][array_rand(GEAR_NAMING['adjectives'])];
+
         return $return;
     }
 }
