@@ -1,0 +1,56 @@
+a.header-nav {
+    font-size: 1em;    
+    align-items: center;
+    margin-right: 1em;
+}
+
+
+/* PROGRESS BARS */
+.progress {
+  height: 1.5em;
+  width: 100%;
+  background-color: #c9c9c9;
+  position: relative;
+  color: black;
+  font-weight: bold;
+}
+.progress:before {
+  content: attr(data-label);
+  font-size: 0.8em;
+  position: absolute;
+  text-align: center;
+  top: 5px;
+  left: 0;
+  right: 0;
+}
+.progress .value {
+  background-color: #7cc4ff;
+  display: inline-block;
+  height: 100%;
+}
+
+/* FLEXBOX GRID LAYOUT */
+.wrapper {
+  display: flex;
+  flex-flow: row wrap;
+}
+
+/* We tell all items to be 100% width, via flex-basis */
+.wrapper > * {
+  flex: 1 100%;
+}
+
+@media all and (min-width: 100px) {
+  /* We tell both sidebars to share a row */
+  .aside { flex: 1 1 10em; margin-right: 1em; }
+}
+
+@media all and (min-width: 100px) {
+  /* We invert order of first sidebar and main
+   * And tell the main element to take twice as much width as the other two sidebars 
+   */
+  .main { flex: 15 0px; }
+  .aside-1 { order: 1; }
+  .main    { order: 2; }  
+  .footer  { order: 4; }
+}

@@ -1,0 +1,57 @@
+body {
+    font-size: medium;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;    
+}
+
+div.navbar {
+    background-color: #333;
+    padding: 10px;
+    display: flex;    
+    width: 100%;
+}
+
+a.skewed {
+    transform: skew(-8deg);
+    /*border-right: 1px solid #FFF;*/
+    margin-top: 0px;
+    padding-top: 0px;
+}    
+    
+a.navbar-link {
+    display: inline-block;
+    padding: 10px 15px;    
+    text-decoration: none;
+    font-weight: bold;
+    background-color: #333;    
+    font-size: 0.8em;    
+    margin-top: 0px;
+    padding-top: 0px;
+}
+
+a.navbar-link div.icon {
+    align-items: center;
+    display: inline-flex;
+    justify-content: center;
+    height: 1.5em;
+    width: 1.5em;
+}
+
+a.brand-logo div {
+    height: 2em;    
+}
+
+a.brand-logo div.subtitle {    
+    color: #AAA;    
+}
+
+.feather {
+    width: 24px;
+    height: 24px;
+    stroke: #FFF;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;  
+}
