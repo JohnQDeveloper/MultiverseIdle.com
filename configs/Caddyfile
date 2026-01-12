@@ -1,0 +1,24 @@
+{
+    frankenphp {
+
+        php_ini {
+            memory_limit 256M
+            max_execution_time 15
+        }
+    }
+}
+
+localhost {
+	# Enable compression (optional)
+	encode zstd br gzip
+
+	# Stop on css/js
+	rewrite /css/* /public/{uri}
+	rewrite /js/* /public/{uri}
+
+	# Rewrite everything else
+	rewrite * /public/index.php
+
+	# Execute PHP files in the current directory and serve assets
+	php_server
+}

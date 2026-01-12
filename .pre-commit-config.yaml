@@ -1,0 +1,48 @@
+# .pre-commit-config.yaml
+repos:
+
+-   repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+    -   id: detect-secrets
+        args: ['--baseline', '.secrets.baseline']
+        exclude: package.lock.json
+
+-   repo: https://github.com/gitleaks/gitleaks
+    rev: v8.23.1
+    hooks:
+    -   id: gitleaks
+        language_version: 1.23.6
+
+-   repo: https://github.com/rhysd/actionlint
+    rev: v1.7.7
+    hooks:
+      - id: actionlint
+        name: Lint GitHub Actions workflow files
+        description: Runs actionlint to lint GitHub Actions workflow files
+        language: golang
+        types: ["yaml"]
+        files: ^\.github/workflows/
+        entry: actionlint
+        minimum_pre_commit_version: 3.0.0
+
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0  # Use the ref you want to point at
+    hooks:
+    -   id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+    -   id: end-of-file-fixer
+    -   id: check-yaml
+    -   id: check-added-large-files
+    -   id: check-executables-have-shebangs
+    -   id: check-merge-conflict
+    -   id: check-shebang-scripts-are-executable
+    -   id: check-illegal-windows-names
+    -   id: check-json
+    -   id: check-toml
+    -   id: check-symlinks
+    -   id: check-xml
+    -   id: destroyed-symlinks
+    -   id: detect-private-key
+    -   id: forbid-new-submodules
+    #-   id: no-commit-to-branch
