@@ -8,6 +8,7 @@
 
                     <label for="password">Password:</label>
                     <input type="password" id="password" name="password" required>
+                    <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
 
                     <button type="submit">Login</button>
                 </form>
