@@ -21,4 +21,13 @@
             $output .= '</select>';
             return $output;
         }
+
+        public static function SkillGemSelectBox($name) {
+            $output = '<select name="' . htmlspecialchars($name) . '" class="skillgem-box">';
+            foreach (SKILL_GEMS as $skillgem => $details) {
+                $output .= '<option value="' . htmlspecialchars($skillgem) . '">' . htmlspecialchars($skillgem) . '</option>';
+            }
+            $output .= '</select>';
+            return $output;
+        }
     }

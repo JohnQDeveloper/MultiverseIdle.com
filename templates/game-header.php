@@ -20,7 +20,7 @@
               </li>
               <li><a href="#">Craft</a></li>
               <li><a href="#">Market</a></li>
-              <li><a href="#">Party</a></li>
+              <li><a href="/party">Party</a></li>
               <li><a href="/workers">Workers</a></li>
               <li><a href="/logout">Logout</a></li>
               <li> ::: </li>
