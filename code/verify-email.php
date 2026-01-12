@@ -1,0 +1,19 @@
+<?php
+    try {
+        $email = $auth->confirmEmailAndSignIn($_GET['selector'], $_GET['token']);
+
+        echo $email[1] . ' has been verified';
+        echo '<a href="/">Click here to continue!</a>';
+    }
+    catch (\Delight\Auth\InvalidSelectorTokenPairException $e) {
+        die('Invalid token');
+    }
+    catch (\Delight\Auth\TokenExpiredException $e) {
+        die('Token expired');
+    }
+    catch (\Delight\Auth\UserAlreadyExistsException $e) {
+        die('Email address already exists');
+    }
+    catch (\Delight\Auth\TooManyRequestsException $e) {
+        die('Too many requests');
+    }

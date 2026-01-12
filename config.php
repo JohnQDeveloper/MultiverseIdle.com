@@ -2,6 +2,7 @@
     # turn on debug printing
     define('DEBUG', true);
     define('URL', 'https://localhost/');
+    define('BASE_URL', 'https://localhost');
 
     # Harden Sessions
     ini_set('session.cookie_httponly', 1);
@@ -15,7 +16,7 @@
     error_reporting(E_ALL ^ E_DEPRECATED ^ E_WARNING); # otherwise barf on sessions due to headers already being sent
 
     spl_autoload_register(function ($class_name) {
-        include_once( __DIR__ . "/app/" . strtolower($class_name) . '.php');
+        include_once( __DIR__ . "/classes/" . strtolower($class_name) . '.php');
     });
 
     # require composer
@@ -36,5 +37,8 @@
     if (empty($_SESSION['csrf-token'])) {
         $_SESSION['csrf-token'] = bin2hex(random_bytes(32));
     }
+
+    # RESEND
+    define('RESEND_API_KEY', getenv('RESEND_API_KEY'));
 
     # Require data files
