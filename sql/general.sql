@@ -15,6 +15,7 @@ CREATE TABLE
     `worker_json` json DEFAULT NULL,
     `rift_queued` bigint unsigned DEFAULT NULL,
     `world_boss_queued` int DEFAULT NULL,
+    `user_id` int DEFAULT NULL,
     PRIMARY KEY (`id`)
   ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci
 

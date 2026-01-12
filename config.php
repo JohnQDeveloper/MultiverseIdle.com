@@ -1,9 +1,10 @@
 <?php
     # turn on debug printing
-    define('DEBUG', true);
-    define('ENVIRONMENT', 'Dev'); # Dev / QA / Prod
-    define('URL', 'https://localhost/');
-    define('BASE_URL', 'https://localhost');
+    define('DEBUG', getenv('DEBUG') === 'true');
+    define('ENVIRONMENT', getenv('ENVIRONMENT')); # Dev / QA / Prod
+    define('URL', 'https://'.getenv('HOSTNAME').'/');
+    define('BASE_URL', 'https://'.getenv('HOSTNAME'));
+    define('NUMBER_OF_TICKS_PER_RUN', 18); // for crons
 
     # Harden Sessions
     ini_set('session.cookie_httponly', 1);
@@ -13,6 +14,14 @@
     # Connect to Redis
     $redis = new Redis();
     $redis->connect(getenv('REDIS_HOST'), intval(getenv('REDIS_PORT')));
+
+    if(DEBUG) {
+        ini_set('display_errors', 1);
+        ini_set('display_startup_errors', 1);
+    } else {
+        ini_set('display_errors', 0);
+        ini_set('display_startup_errors', 0);
+    }
 
     error_reporting(E_ALL ^ E_DEPRECATED ^ E_WARNING); # otherwise barf on sessions due to headers already being sent
 

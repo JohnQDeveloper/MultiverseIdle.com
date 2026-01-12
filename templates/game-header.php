@@ -38,16 +38,16 @@
     <div class="wrapper">
     <div class="resources">
         <div class="row">
-            Level: 365 <BR />
-            Arena: 365 <BR />
+            Level: <?php echo htmlspecialchars($Character->Data['level']); ?> <BR />
+            Arena: <?php echo htmlspecialchars($Character->Data['arena_floor']); ?> <BR />
         </div>
         <div class="row">
-            Gold: 365 <BR />
-            Iron: 365 <BR />
+            Gold: <?php echo htmlspecialchars($Character->Data['gold']); ?> <BR />
+            Iron: <?php echo htmlspecialchars($Character->Data['iron']); ?>  <BR />
         </div>
         <div class="row">
-            Herb: 365 <BR />
-            Gems: 365 <BR />
+            Herb: <?php echo htmlspecialchars($Character->Data['herbs']); ?> <BR />
+            Gems: <?php echo htmlspecialchars($Character->Data['gems']); ?> <BR />
         </div>
         <div class="row">
             Rift: Queued <BR />
