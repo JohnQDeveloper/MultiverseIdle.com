@@ -42,12 +42,12 @@
             Arena: <?php echo htmlspecialchars($Character->Data['arena_floor']); ?> <BR />
         </div>
         <div class="row">
-            Gold: <?php echo htmlspecialchars($Character->Data['gold']); ?> <BR />
-            Iron: <?php echo htmlspecialchars($Character->Data['iron']); ?> <BR />
+            Gold: <?php echo round($Character->Data['gold']); ?> <BR />
+            Iron: <?php echo round($Character->Data['iron']); ?> <BR />
         </div>
         <div class="row">
-            Herb: <?php echo htmlspecialchars($Character->Data['herbs']); ?> <BR />
-            Gems: <?php echo htmlspecialchars($Character->Data['gems']); ?> <BR />
+            Herb: <?php echo round($Character->Data['herbs']); ?> <BR />
+            Gems: <?php echo round($Character->Data['gems']); ?> <BR />
         </div>
         <div class="row">
             Rift: Queued <BR />

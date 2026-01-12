@@ -12,7 +12,7 @@
      * @return int|float The calculated cost for the next upgrade/hire
      */
     function calculate_worker_cost($base_cost, $multiplier, $current_level) {
-        return $base_cost * pow($multiplier, $current_level);
+        return round($base_cost * pow($multiplier, $current_level));
     }
 
     $current_workers = $Character->Data['worker_json']['workers'];
@@ -24,8 +24,8 @@
     ? $Character->Data['worker_json']['intelligence_upgrade_percent'] : 0;
 
     $new_worker_cost = calculate_worker_cost(10000, 10, $current_workers);
-    $next_intelligence_upgrade_cost = calculate_worker_cost(2000, 2, $current_intelligence);
-    $next_speed_upgrade_cost = calculate_worker_cost(2000, 2, $current_speed);
+    $next_intelligence_upgrade_cost = calculate_worker_cost(2000, 1.4, $current_intelligence);
+    $next_speed_upgrade_cost = calculate_worker_cost(2000, 1.4, $current_speed);
 
     #print_r($_POST);
 
@@ -104,5 +104,5 @@
     ? $Character->Data['worker_json']['intelligence_upgrade_percent'] : 0;
 
     $new_worker_cost = calculate_worker_cost(10000, 10, $current_workers);
-    $next_intelligence_upgrade_cost = calculate_worker_cost(2000, 2, $current_intelligence);
-    $next_speed_upgrade_cost = calculate_worker_cost(2000, 2, $current_speed);
+    $next_intelligence_upgrade_cost = calculate_worker_cost(2000, 1.4, $current_intelligence);
+    $next_speed_upgrade_cost = calculate_worker_cost(2000, 1.4, $current_speed);
