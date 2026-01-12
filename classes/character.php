@@ -48,13 +48,19 @@ class Character {
         $worker_json = json_encode([
             "resource" => "gold",
             "workers" => 1,
-            "intelligence_upgrades" => 1,
-            "speed_upgrades" => 1,
+            "intelligence_upgrade_percent" => 0,
+            "speed_upgrade_percent" => 0,
             "skills" => [
                 "gold" => 1,
                 "iron" => 1,
                 "herbs" => 1,
                 "gems" => 1
+            ],
+            "skill_xp" => [
+                "gold" => 0,
+                "iron" => 0,
+                "herbs" => 0,
+                "gems" => 0
             ]
         ]);
 

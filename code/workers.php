@@ -30,6 +30,19 @@
     }
 
     #print_r($_POST);
+    
+    # CHANGE RESOURCE
+    if(isset($_POST['change_resource']) && isset($_POST['resource'])) {
+        $valid_resources = array_map('strtolower', RESOURCES);
+        $selected_resource = strtolower($_POST['resource']);
+        
+        if(in_array($selected_resource, $valid_resources)) {
+            $Character->Data['worker_json']['resource'] = $selected_resource;
+            $alert_success = 'Workers are now gathering ' . htmlspecialchars($selected_resource) . '!';
+        } else {
+            $alert_danger = 'Invalid resource selected.';
+        }
+    }
 
     # INCREASE INTELLIGENCE
     if(isset($_POST['upgrade_intelligence'])) {
@@ -46,6 +59,9 @@
             $Character->Data['gold'] -= $next_intelligence_upgrade_cost;
             $Character->Data['worker_json']['intelligence_upgrade_percent'] += 1;
             $total_cost += $next_intelligence_upgrade_cost;
+            
+            # Recalculate next cost
+            $next_intelligence_upgrade_cost = $next_intelligence_upgrade_cost * 2;
 
             $alert_success = 'You have upgraded worker intelligence by ' . $increased_intelligence . '% for ' .
             human_num($total_cost) . ' gold!';
@@ -72,6 +88,9 @@
             $Character->Data['gold'] -= $next_speed_upgrade_cost;
             $Character->Data['worker_json']['speed_upgrade_percent'] += 1;
             $total_cost += $next_speed_upgrade_cost;
+            
+            # Recalculate next cost
+            $next_speed_upgrade_cost = $next_speed_upgrade_cost * 2;
 
             $alert_success = 'You have upgraded worker speed by ' . $increased_speed . '% for ' .
             human_num($total_cost) . ' gold!';

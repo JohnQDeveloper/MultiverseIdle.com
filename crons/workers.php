@@ -40,8 +40,8 @@
             $resource = $worker_config['resource'];
             $skill_level = $worker_config['skills'][$resource];
             $num_workers = $worker_config['workers'];
-            $speed_upgrades = $worker_config['speed_upgrades'];
-            $intelligence_upgrades = $worker_config['intelligence_upgrades'];
+            $speed_upgrades = isset($worker_config['speed_upgrade_percent']) ? $worker_config['speed_upgrade_percent'] : 0;
+            $intelligence_upgrades = isset($worker_config['intelligence_upgrade_percent']) ? $worker_config['intelligence_upgrade_percent'] : 0;
 
             $harvests = 10; // 10 harvests per 10 minute tick basically
             $harvests = round($harvests * (1 + ($speed_upgrades * 0.01)) * (1 + ($skill_level * 0.05)) * $num_workers);
@@ -49,6 +49,18 @@
             echo "Gained ".$harvests." skill xp\n";
 
             # Worker XP Calculation
+            if(!isset($Character->Data['worker_json']['skill_xp'])) {
+                $Character->Data['worker_json']['skill_xp'] = [
+                    "gold" => 0,
+                    "iron" => 0,
+                    "herbs" => 0,
+                    "gems" => 0
+                ];
+            }
+            if(!isset($Character->Data['worker_json']['skill_xp'][$worker_config['resource']])) {
+                $Character->Data['worker_json']['skill_xp'][$worker_config['resource']] = 0;
+            }
+            
             $Character->Data['worker_json']['skill_xp'][$worker_config['resource']] += $harvests;
             $xp = $Character->Data['worker_json']['skill_xp'][$worker_config['resource']];
             $xp_needed = 100 * (pow($skill_level,2));
