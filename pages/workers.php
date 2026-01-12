@@ -53,6 +53,7 @@
         <input type="submit" role="button" name="hire_workers"
         value="Hire +1 Worker for <?php echo human_num($new_worker_cost); ?> gold"><br /><br />
 
+        <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
         </form>
 
     </article>
