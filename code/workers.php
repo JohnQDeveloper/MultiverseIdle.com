@@ -9,13 +9,7 @@
      * @return int The calculated cost
      */
     function calculate_worker_cost($base_cost, $multiplier, $current_level) {
-        $cost = $base_cost;
-        $x = 1;
-        while($x < $current_level + 1) {
-            $cost = $cost * $multiplier;
-            $x++;
-        }
-        return $cost;
+        return $base_cost * pow($multiplier, $current_level);
     }
 
     $current_workers = $Character->Data['worker_json']['workers'];
