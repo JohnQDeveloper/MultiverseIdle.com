@@ -44,10 +44,6 @@
         $_SESSION['username'] = $_SESSION['auth_username'];
     }
 
-    if (empty($_SESSION['csrf-token'])) {
-        $_SESSION['csrf-token'] = bin2hex(random_bytes(32));
-    }
-
     # RESEND
     define('RESEND_API_KEY', getenv('RESEND_API_KEY'));
 
@@ -57,3 +53,13 @@
     # Require data files
     require_once(__DIR__ . '/data/resources.php');
     require_once(__DIR__ . '/data/skillgems.php');
+
+    # Minimal CSRF Protection
+    if (empty($_SESSION['csrf-token'])) {
+        $_SESSION['csrf-token'] = bin2hex(random_bytes(32));
+    }
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf-token']) {
+            die('CSRF token validation failed');
+        }
+    }
