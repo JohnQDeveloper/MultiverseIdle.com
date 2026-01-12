@@ -106,4 +106,3 @@
     $new_worker_cost = calculate_worker_cost(10000, 10, $current_workers);
     $next_intelligence_upgrade_cost = calculate_worker_cost(2000, 2, $current_intelligence);
     $next_speed_upgrade_cost = calculate_worker_cost(2000, 2, $current_speed);
-
