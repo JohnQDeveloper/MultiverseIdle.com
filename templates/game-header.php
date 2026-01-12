@@ -13,21 +13,21 @@
               <li class="dropdown">
                 <a href="#">Actions</a>
                 <ul class="dropdown-content">
-                  <li><a href="#">2v2 Arena</a></li>
-                  <li><a href="#">Rift Delves</a></li>
-                  <li><a href="#">World Boss</a></li>
+                  <li><a href="/arena">2v2 Arena</a></li>
+                  <li><a href="/rift-delves">Rift Delves</a></li>
+                  <li><a href="/world-boss">World Boss</a></li>
                 </ul>
               </li>
-              <li><a href="#">Craft</a></li>
-              <li><a href="#">Market</a></li>
+              <li><a href="/craft">Craft</a></li>
+              <li><a href="/market">Market</a></li>
               <li><a href="/party">Party</a></li>
               <li><a href="/workers">Workers</a></li>
               <li><a href="/logout">Logout</a></li>
               <li> ::: </li>
               <li><a href="https://discord.gg/KrD7hGuDyb">Discord</a></li>
-              <li><a href="#">Feedback</a></li>
-              <li><a href="#">Game Log</a></li>
-              <li><a href="#">Settings</a></li>
+              <li><a href="https://github.com/JohnQDeveloper/MultiverseIdle.com/issues">Feedback</a></li>
+              <li><a href="/log">Game Log</a></li>
+              <li><a href="/settings">Settings</a></li>
             </ul>
           </nav>
 
