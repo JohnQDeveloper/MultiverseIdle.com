@@ -2,8 +2,9 @@
     try {
         $email = $auth->confirmEmailAndSignIn($_GET['selector'], $_GET['token']);
 
-        echo $email[1] . ' has been verified';
-        echo '<a href="/">Click here to continue!</a>';
+        #echo $email[1] . ' has been verified';
+        #echo '<a href="/">Click here to continue!</a>';
+        Header('Location: /');
     }
     catch (\Delight\Auth\InvalidSelectorTokenPairException $e) {
         die('Invalid token');

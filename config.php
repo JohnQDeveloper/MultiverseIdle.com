@@ -1,6 +1,7 @@
 <?php
     # turn on debug printing
     define('DEBUG', true);
+    define('ENVIRONMENT', 'Dev'); # Dev / QA / Prod
     define('URL', 'https://localhost/');
     define('BASE_URL', 'https://localhost');
 
