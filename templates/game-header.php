@@ -24,7 +24,7 @@
               <li><a href="/workers">Workers</a></li>
               <li><a href="/logout">Logout</a></li>
               <li> ::: </li>
-              <li><a href="#">Discord</a></li>
+              <li><a href="https://discord.gg/KrD7hGuDyb">Discord</a></li>
               <li><a href="#">Feedback</a></li>
               <li><a href="#">Game Log</a></li>
               <li><a href="#">Settings</a></li>
