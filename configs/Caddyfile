@@ -23,3 +23,51 @@ localhost {
 	# Execute PHP files in the current directory and serve assets
 	php_server
 }
+
+dev.multiverseidle.com {
+	# Enable compression (optional)
+	encode zstd br gzip
+
+	# Stop on css/js/img
+	rewrite /css/* /public/{uri}
+	rewrite /js/* /public/{uri}
+	rewrite /img/* /public/{uri}
+
+	# Rewrite everything else
+	rewrite * /public/index.php
+
+	# Execute PHP files in the current directory and serve assets
+	php_server
+}
+
+qa,multiverseidle.com {
+	# Enable compression (optional)
+	encode zstd br gzip
+
+	# Stop on css/js/img
+	rewrite /css/* /public/{uri}
+	rewrite /js/* /public/{uri}
+	rewrite /img/* /public/{uri}
+
+	# Rewrite everything else
+	rewrite * /public/index.php
+
+	# Execute PHP files in the current directory and serve assets
+	php_server
+}
+
+prod.multiverseidle.com {
+	# Enable compression (optional)
+	encode zstd br gzip
+
+	# Stop on css/js/img
+	rewrite /css/* /public/{uri}
+	rewrite /js/* /public/{uri}
+	rewrite /img/* /public/{uri}
+
+	# Rewrite everything else
+	rewrite * /public/index.php
+
+	# Execute PHP files in the current directory and serve assets
+	php_server
+}
