@@ -43,7 +43,7 @@
         </div>
         <div class="row">
             Gold: <?php echo htmlspecialchars($Character->Data['gold']); ?> <BR />
-            Iron: <?php echo htmlspecialchars($Character->Data['iron']); ?>  <BR />
+            Iron: <?php echo htmlspecialchars($Character->Data['iron']); ?> <BR />
         </div>
         <div class="row">
             Herb: <?php echo htmlspecialchars($Character->Data['herbs']); ?> <BR />
