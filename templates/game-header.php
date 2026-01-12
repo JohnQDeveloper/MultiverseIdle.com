@@ -55,4 +55,14 @@
         </div>
         </div>
     </div>
+    <?php
+    # generic alerts for top of page
+      if(isset($alert_success) && $alert_success != '') {
+          echo '<div class="alert alert-success">' . htmlspecialchars($alert_success) . '</div>';
+      }
+      if(isset($alert_danger) && $alert_danger != '') {
+          echo '<div class="alert alert-danger">' . htmlspecialchars($alert_danger) . '</div>';
+      }
+
+    ?>
     <BR />

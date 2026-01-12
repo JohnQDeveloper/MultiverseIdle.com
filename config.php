@@ -51,6 +51,9 @@
     # RESEND
     define('RESEND_API_KEY', getenv('RESEND_API_KEY'));
 
+    # Func files
+    require_once(__DIR__ . '/func/format_functions.php');
+
     # Require data files
     require_once(__DIR__ . '/data/resources.php');
     require_once(__DIR__ . '/data/skillgems.php');
