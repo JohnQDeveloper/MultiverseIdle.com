@@ -1,5 +1,23 @@
 <?php
 
+    /**
+     * Calculate the cost for a worker upgrade based on current level
+     * 
+     * @param int $base_cost The initial cost at level 0
+     * @param int $multiplier The cost multiplier per level
+     * @param int $current_level The current level
+     * @return int The calculated cost
+     */
+    function calculate_worker_cost($base_cost, $multiplier, $current_level) {
+        $cost = $base_cost;
+        $x = 1;
+        while($x < $current_level + 1) {
+            $cost = $cost * $multiplier;
+            $x++;
+        }
+        return $cost;
+    }
+
     $current_workers = $Character->Data['worker_json']['workers'];
 
     $current_speed = isset($Character->Data['worker_json']['speed_upgrade_percent'])
@@ -8,26 +26,9 @@
     $current_intelligence = isset($Character->Data['worker_json']['intelligence_upgrade_percent'])
     ? $Character->Data['worker_json']['intelligence_upgrade_percent'] : 0;
 
-    $x = 1;
-    $new_worker_cost = 10000; # price in gold
-    while($x < $current_workers + 1) {
-        $new_worker_cost = $new_worker_cost * 10;
-        $x++;
-    }
-
-    $x = 1;
-    $next_intelligence_upgrade_cost = 2000;
-    while($x < $current_intelligence + 1) {
-        $next_intelligence_upgrade_cost = $next_intelligence_upgrade_cost * 2;
-        $x++;
-    }
-
-    $x = 1;
-    $next_speed_upgrade_cost = 2000;
-    while($x < $current_speed + 1) {
-        $next_speed_upgrade_cost = $next_speed_upgrade_cost * 2;
-        $x++;
-    }
+    $new_worker_cost = calculate_worker_cost(10000, 10, $current_workers);
+    $next_intelligence_upgrade_cost = calculate_worker_cost(2000, 2, $current_intelligence);
+    $next_speed_upgrade_cost = calculate_worker_cost(2000, 2, $current_speed);
 
     #print_r($_POST);
 
@@ -105,23 +106,7 @@
     $current_intelligence = isset($Character->Data['worker_json']['intelligence_upgrade_percent'])
     ? $Character->Data['worker_json']['intelligence_upgrade_percent'] : 0;
 
-    $x = 1;
-    $new_worker_cost = 10000; # price in gold
-    while($x < $current_workers + 1) {
-        $new_worker_cost = $new_worker_cost * 10;
-        $x++;
-    }
+    $new_worker_cost = calculate_worker_cost(10000, 10, $current_workers);
+    $next_intelligence_upgrade_cost = calculate_worker_cost(2000, 2, $current_intelligence);
+    $next_speed_upgrade_cost = calculate_worker_cost(2000, 2, $current_speed);
 
-    $x = 1;
-    $next_intelligence_upgrade_cost = 2000;
-    while($x < $current_intelligence + 1) {
-        $next_intelligence_upgrade_cost = $next_intelligence_upgrade_cost * 2;
-        $x++;
-    }
-
-    $x = 1;
-    $next_speed_upgrade_cost = 2000;
-    while($x < $current_speed + 1) {
-        $next_speed_upgrade_cost = $next_speed_upgrade_cost * 2;
-        $x++;
-    }
