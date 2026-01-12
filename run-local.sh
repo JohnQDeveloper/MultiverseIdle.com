@@ -15,4 +15,7 @@ docker run -v $PWD:/app -p 80:80 -p 443:443 --tty -it --rm \
 --env RESEND_API_KEY=$RESEND_API_KEY \
 --env REDIS_HOST=$REDIS_HOST \
 --env REDIS_PORT=$REDIS_PORT \
+--env DEBUG=true \
+--env ENVIRONMENT=Dev \
+--env HOSTNAME=localhost \
 --name multiverse-idle-local multiverse-idle:local

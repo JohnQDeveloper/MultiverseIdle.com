@@ -1,3 +1,4 @@
+<!-- footer template -->
     <main class="container">
         <footer class="footer">© 2025 JohnQDeveloper</footer>
     </main>

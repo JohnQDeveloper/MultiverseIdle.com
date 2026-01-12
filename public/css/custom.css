@@ -14,6 +14,27 @@ article {
     padding: 1em;
 }
 
+/* alert box */
+.alert {
+  padding: 1em;
+  color: var(--color); /* Text color */
+  border: 1px solid var(--border-color);
+  background-color: var(--background-color);
+}
+
+/* Example variations (e.g., for success, danger) */
+.alert-success {
+    --color: #000000;
+    --border-color: #05714B;
+    --background-color: #8EFAD5;
+}
+
+.alert-danger {
+    --color: #000000;
+    --border-color: #8B0000;
+    --background-color: #FFB8B8;
+}
+
 /* navigation css */
 .navbar {
     width: 100%;
