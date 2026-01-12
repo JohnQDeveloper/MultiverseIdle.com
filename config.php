@@ -43,3 +43,4 @@
     define('RESEND_API_KEY', getenv('RESEND_API_KEY'));
 
     # Require data files
+    require_once(__DIR__ . '/data/resources.php');
