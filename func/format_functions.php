@@ -1,5 +1,12 @@
 <?php
-
+    function affordable_button($current_gold, $cost) {
+        if($current_gold >= $cost) {
+            return 'success-button';
+        }
+        else {
+            return 'danger-button';
+        }
+    }
 
     function human_num($num) {
         if(is_numeric($num) == false) { # skip non-numbers for now

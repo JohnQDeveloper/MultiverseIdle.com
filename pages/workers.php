@@ -39,18 +39,21 @@
                 <b>#% of Speed Upgrades:</b><br />
                 <input type="text" name="worker_speed" value="1">
                 <input type="submit" role="button" name="upgrade_speed"
+                class="<?php echo affordable_button($Character->Data['gold'], $next_speed_upgrade_cost); ?>"
                 value="Upgrade Speed for <?php echo human_num($next_speed_upgrade_cost); ?> gold">
             </div>
             <div>
                 <b>#% of XP Gain Upgrades aka Worker Intelligence:</b><br />
                 <input type="text" name="worker_intelligence" value="1">
                 <input type="submit" role="button" name="upgrade_intelligence"
+                class="<?php echo affordable_button($Character->Data['gold'], $next_intelligence_upgrade_cost); ?>"
                 value="Upgrade Intelligence for <?php echo human_num($next_intelligence_upgrade_cost); ?> gold">
             </div>
         </div>
 
 
         <input type="submit" role="button" name="hire_workers"
+        class="<?php echo affordable_button($Character->Data['gold'], $new_worker_cost); ?>"
         value="Hire +1 Worker for <?php echo human_num($new_worker_cost); ?> gold"><br /><br />
 
         <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">

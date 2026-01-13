@@ -46,7 +46,7 @@
             Iron: <?php echo human_num($Character->Data['iron']); ?> <BR />
         </div>
         <div class="row">
-            Herb: <?php echo human_num($Character->Data['herbs']); ?> <BR />
+            Herbs: <?php echo human_num($Character->Data['herbs']); ?> <BR />
             Gems: <?php echo human_num($Character->Data['gems']); ?> <BR />
         </div>
         <div class="row">

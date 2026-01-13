@@ -15,6 +15,14 @@
         return round($base_cost * pow($multiplier, $current_level));
     }
 
+    # Worker Resource Assignment
+    if(isset($_POST['change_resource'])) {
+        $selected_resource = $_POST['resource'];
+        $Character->Data['worker_json']['resource'] = strtolower($selected_resource);
+        $alert_success = 'Workers have been assigned to gather ' . htmlspecialchars($selected_resource) . '.';
+    }
+
+    # Worker Upgrades
     $current_workers = $Character->Data['worker_json']['workers'];
 
     $current_speed = isset($Character->Data['worker_json']['speed_upgrade_percent'])
@@ -23,9 +31,9 @@
     $current_intelligence = isset($Character->Data['worker_json']['intelligence_upgrade_percent'])
     ? $Character->Data['worker_json']['intelligence_upgrade_percent'] : 0;
 
-    $new_worker_cost = calculate_worker_cost(10000, 10, $current_workers);
-    $next_intelligence_upgrade_cost = calculate_worker_cost(2000, 1.4, $current_intelligence);
-    $next_speed_upgrade_cost = calculate_worker_cost(2000, 1.4, $current_speed);
+    $new_worker_cost = calculate_worker_cost(1000, 10, $current_workers);
+    $next_intelligence_upgrade_cost = calculate_worker_cost(500, 1.4, $current_intelligence);
+    $next_speed_upgrade_cost = calculate_worker_cost(500, 1.4, $current_speed);
 
     #print_r($_POST);
 
@@ -103,6 +111,6 @@
     $current_intelligence = isset($Character->Data['worker_json']['intelligence_upgrade_percent'])
     ? $Character->Data['worker_json']['intelligence_upgrade_percent'] : 0;
 
-    $new_worker_cost = calculate_worker_cost(10000, 10, $current_workers);
-    $next_intelligence_upgrade_cost = calculate_worker_cost(2000, 1.4, $current_intelligence);
-    $next_speed_upgrade_cost = calculate_worker_cost(2000, 1.4, $current_speed);
+    $new_worker_cost = calculate_worker_cost(1000, 10, $current_workers);
+    $next_intelligence_upgrade_cost = calculate_worker_cost(500, 1.4, $current_intelligence);
+    $next_speed_upgrade_cost = calculate_worker_cost(500, 1.4, $current_speed);
