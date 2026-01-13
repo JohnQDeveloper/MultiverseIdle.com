@@ -3,6 +3,9 @@
         <footer class="footer">© 2025 JohnQDeveloper</footer>
     </main>
 
+    <!-- Analytics Script -->
+    <script defer src="https://analytics.johnqdeveloper.com/script.js" data-website-id="27f59e5d-bcba-4a9e-91dc-94d1925661c6"></script>
+
     <script>
       document.querySelector('.hamburger').addEventListener('click', function() {
         document.querySelector('.nav-menu').classList.toggle('active');
