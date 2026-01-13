@@ -38,11 +38,17 @@
     die();*/
 
     if (in_array(ltrim(strtolower($unsafe_main_page).".php","/"), $pages)) {
-        if(file_exists("../code/" . ltrim($unsafe_main_page, "/") . ".php")) {
-            require_once("../code/" . ltrim($unsafe_main_page, "/") . ".php");
+        if(!isset($_SESSION['auth_logged_in']) && $_SESSION['auth_logged_in'] !== 1 &&
+        !in_array(ltrim(strtolower($unsafe_main_page),"/"), ['login', 'register', 'index'])) {
+            require_once("../pages/login.php");
         }
-        if(file_exists("../pages/" . ltrim($unsafe_main_page, "/") . ".php")) {
-            require_once("../pages/" . ltrim($unsafe_main_page, "/") . ".php");
+        else {
+            if(file_exists("../code/" . ltrim($unsafe_main_page, "/") . ".php")) {
+                require_once("../code/" . ltrim($unsafe_main_page, "/") . ".php");
+            }
+            if(file_exists("../pages/" . ltrim($unsafe_main_page, "/") . ".php")) {
+                require_once("../pages/" . ltrim($unsafe_main_page, "/") . ".php");
+            }
         }
     }
     else {

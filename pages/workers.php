@@ -32,7 +32,7 @@
 
         <b>Select Resource to Assign Workers:</b><br />
         <?php echo Controls::ResourceSelectBox(); ?>
-        <input type="submit" role="button" name="change_resource" value="Change Resource"><br /><br />
+        <input type="submit" role="button" class="contrast" name="change_resource" value="Change Resource"><br /><br />
 
         <div class="grid">
             <div>

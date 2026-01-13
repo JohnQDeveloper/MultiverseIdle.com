@@ -26,5 +26,7 @@ RUN install-php-extensions \
 	opcache \
 	redis
 
+RUN apt-get update && apt-get install -y git libnss3-tools
+
 COPY "configs/Caddyfile" "/etc/frankenphp/Caddyfile"
 COPY "configs/php.ini-development" "/usr/local/etc/php/php.ini"

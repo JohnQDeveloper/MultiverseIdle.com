@@ -1,10 +1,10 @@
 <?php
     function affordable_button($current_gold, $cost) {
         if($current_gold >= $cost) {
-            return 'success-button';
+            return 'success-button contrast';
         }
         else {
-            return 'danger-button';
+            return 'danger-button secondary';
         }
     }
 
