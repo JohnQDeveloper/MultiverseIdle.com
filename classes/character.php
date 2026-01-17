@@ -164,7 +164,9 @@ class Character {
             `worker_json` = :worker_json,
             `rift_queued` = :rift_queued,
             `world_boss_queued` = :world_boss_queued,
-            `last_save` = NOW()
+            `last_save` = NOW(),
+            `last_arena_time` = :last_arena_time,
+            `last_arena_log` = :last_arena_log
             WHERE `user_id` = :user_id";
 
         $params = [
@@ -179,6 +181,8 @@ class Character {
             'worker_json' => json_encode($this->Data['worker_json']),
             'rift_queued' => $this->Data['rift_queued'],
             'world_boss_queued' => $this->Data['world_boss_queued'],
+            'last_arena_time' => $this->Data['last_arena_time'],
+            'last_arena_log' => $this->Data['last_arena_log'],
             'user_id' => $user_id
         ];
 

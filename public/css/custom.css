@@ -35,6 +35,18 @@ article {
     --background-color: #FFB8B8;
 }
 
+/* Txt Success/Danger */
+span.success {
+    color: #8EFAD5;
+    font-weight: bold;
+}
+
+/* Txt Success/Danger */
+span.danger {
+    color: #FFB8B8;
+    font-weight: bold;
+}
+
 /* button styles */
 input.success-button {
   padding: 1em;

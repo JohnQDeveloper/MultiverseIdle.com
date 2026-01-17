@@ -66,7 +66,9 @@
                 <form>
                 <br />
                 <select name="class">
-                    <option value="Ranger">Ranger</option>
+                    <option value="<?php echo $Character->Data['party_json']['members']['backline']['class']; ?>">
+                        <?php echo $Character->Data['party_json']['members']['backline']['class']; ?>
+                    </option>
                 </select>
 
                  <input type="submit" value="Update Class" />

@@ -3,7 +3,7 @@
     require_once('../config.php');
 
     // Must interact every 3 days to be marked as active
-    $rows = $DAL->r("SELECT user_id  FROM characters WHERE last_save > DATE_SUB(NOW(), INTERVAL 72 HOUR)");
+    $row = ActiveUsers();
 
     // Run active users
     foreach($rows as $r) {
