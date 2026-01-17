@@ -7,14 +7,16 @@
         <h3>Frontline Character</h3>
         <div class="grid">
             <div>
-                Strength: 365 <br />
-                Dexterity: 365 <br />
-                Health: 365 <br />
-                Wisdom: 365 <br />
+                Strength: <?php echo $Character->Data['party_json']['members']['frontline']['strength']; ?> <br />
+                Dexterity: <?php echo $Character->Data['party_json']['members']['frontline']['dexterity']; ?> <br />
+                Health: <?php echo $Character->Data['party_json']['members']['frontline']['health']; ?> <br />
+                Wisdom: <?php echo $Character->Data['party_json']['members']['frontline']['wisdom']; ?> <br />
                 <form>
                 <br />
                 <select name="class">
-                    <option value="Tank">Tank</option>
+                    <option value="<?php echo $Character->Data['party_json']['members']['frontline']['class']; ?>">
+                        <?php echo $Character->Data['party_json']['members']['frontline']['class']; ?>
+                    </option>
                 </select>
 
                  <input type="submit" value="Update Class" />
@@ -30,7 +32,7 @@
                 </select>
 
                 2nd Gear Slot:
-                <select name="gear_slot_1">
+                <select name="gear_slot_2">
                     <option value="Sword of Testing">Sword of Testing</option>
                     <option value="Shield of Testing">Shield of Testing</option>
                     <option value="Helmet of Testing">Helmet of Testing</option>
@@ -42,10 +44,12 @@
             <div>
                 <form>
                 1st Skill Gem:
-                <?php echo Controls::SkillGemSelectBox("skill_gem_1"); ?>
+                <?php echo Controls::SkillGemSelectBox("skill_gem_1",
+                $Character->Data['party_json']['members']['frontline']['skills'][0]); ?>
 
                 2nd Skill Gem:
-                <?php echo Controls::SkillGemSelectBox("skill_gem_2"); ?>
+                <?php echo Controls::SkillGemSelectBox("skill_gem_2",
+                $Character->Data['party_json']['members']['frontline']['skills'][1]); ?>
 
                  <input type="submit" value="Update Skills" />
                 </form>
@@ -55,10 +59,10 @@
         <h3>Backline Character</h3>
         <div class="grid">
 <div>
-                Strength: 365 <br />
-                Dexterity: 365 <br />
-                Health: 365 <br />
-                Wisdom: 365 <br />
+                Strength: <?php echo $Character->Data['party_json']['members']['backline']['strength']; ?> <br />
+                Dexterity: <?php echo $Character->Data['party_json']['members']['backline']['dexterity']; ?> <br />
+                Health: <?php echo $Character->Data['party_json']['members']['backline']['health']; ?> <br />
+                Wisdom: <?php echo $Character->Data['party_json']['members']['backline']['wisdom']; ?> <br />
                 <form>
                 <br />
                 <select name="class">
@@ -78,7 +82,7 @@
                 </select>
 
                 2nd Gear Slot:
-                <select name="gear_slot_1">
+                <select name="gear_slot_2">
                     <option value="Sword of Testing">Sword of Testing</option>
                     <option value="Shield of Testing">Shield of Testing</option>
                     <option value="Helmet of Testing">Helmet of Testing</option>
@@ -90,10 +94,12 @@
             <div>
                 <form>
                 1st Skill Gem:
-                <?php echo Controls::SkillGemSelectBox("skill_gem_1"); ?>
+                <?php echo Controls::SkillGemSelectBox("skill_gem_1",
+                $Character->Data['party_json']['members']['backline']['skills'][0]); ?>
 
                 2nd Skill Gem:
-                <?php echo Controls::SkillGemSelectBox("skill_gem_2"); ?>
+                <?php echo Controls::SkillGemSelectBox("skill_gem_2",
+                $Character->Data['party_json']['members']['backline']['skills'][1]); ?>
 
                  <input type="submit" value="Update Skills" />
                 </form>

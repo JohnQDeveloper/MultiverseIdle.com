@@ -22,10 +22,11 @@
             return $output;
         }
 
-        public static function SkillGemSelectBox($name) {
+        public static function SkillGemSelectBox($name, $selected = "") {
             $output = '<select name="' . htmlspecialchars($name) . '" class="skillgem-box">';
             foreach (SKILL_GEMS as $skillgem => $details) {
-                $output .= '<option value="' . htmlspecialchars($skillgem) . '">' . htmlspecialchars($skillgem) . '</option>';
+                $selected_attr = ($skillgem === $selected) ? ' selected' : '';
+                $output .= '<option' . $selected_attr . ' value="' . htmlspecialchars($skillgem) . '">' . htmlspecialchars($skillgem) . '</option>';
             }
             $output .= '</select>';
             return $output;

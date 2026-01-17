@@ -45,6 +45,31 @@ class Character {
             $name = $_SESSION['auth_username'];
         }
 
+        $party_json = json_encode([
+            "members" => [
+                "frontline" => [
+                    "class" => "warrior",
+                    "level" => 1,
+                    "strength" => 10,
+                    "dexterity" => 10,
+                    "health" => 10,
+                    "wisdom" => 10,
+                    "gear" => [],
+                    "skills" => ["Flaming Blades", "Antimage"],
+                ],
+                "backline" => [
+                    "class" => "healer",
+                    "level" => 1,
+                    "strength" => 10,
+                    "dexterity" => 10,
+                    "health" => 10,
+                    "wisdom" => 10,
+                    "gear" => [],
+                    "skills" => ["Healing Rain", "Firestorm"],
+                ]
+            ]
+        ]);
+
         $worker_json = json_encode([
             "resource" => "gold",
             "workers" => 1,
@@ -80,7 +105,7 @@ class Character {
             1,
             1,
             1,
-            '{}',
+            :party_json,
             :worker_json,
             NULL,
             NULL
@@ -89,6 +114,7 @@ class Character {
         $params = [
             'user_id' => $user_id,
             'name' => $name,
+            'party_json' => $party_json,
             'worker_json' => $worker_json
         ];
 
