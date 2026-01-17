@@ -39,7 +39,7 @@
 
     if (in_array(ltrim(strtolower($unsafe_main_page).".php","/"), $pages)) {
         if(!isset($_SESSION['auth_logged_in']) && $_SESSION['auth_logged_in'] !== 1 &&
-        !in_array(ltrim(strtolower($unsafe_main_page),"/"), ['login', 'register', 'index'])) {
+        !in_array(ltrim(strtolower($unsafe_main_page),"/"), ['login', 'register', 'index', 'verify-email'])) {
             require_once("../pages/login.php");
         }
         else {
