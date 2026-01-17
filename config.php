@@ -59,7 +59,9 @@
     if (empty($_SESSION['csrf-token'])) {
         $_SESSION['csrf-token'] = bin2hex(random_bytes(32));
     }
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST'
+    && 'register' != strtok(strtok($_SERVER["REQUEST_URI"], '?'), '/')
+    && 'login' != strtok(strtok($_SERVER["REQUEST_URI"], '?'), '/')) {
         if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf-token']) {
             die('CSRF token validation failed');
         }
