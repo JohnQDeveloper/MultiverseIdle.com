@@ -49,6 +49,7 @@
 
     # Func files
     require_once(__DIR__ . '/func/format_functions.php');
+    require_once(__DIR__ . '/func/formula_functions.php');
 
     # Require data files
     require_once(__DIR__ . '/data/resources.php');

@@ -44,7 +44,7 @@
             $intelligence_upgrades = $worker_config['intelligence_upgrades'];
 
             $harvests = 10; // 10 harvests per 10 minute tick basically
-            $harvests = round($harvests * (1 + ($speed_upgrades * 0.01)) * (1 + ($skill_level * 0.05)) * $num_workers);
+            $harvests = worker_yield($harvests, $speed_upgrades, $skill_level, $num_workers);
             echo "Gained ".$harvests." $resource\n";
             echo "Gained ".$harvests." skill xp\n";
 

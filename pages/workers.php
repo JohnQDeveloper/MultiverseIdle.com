@@ -11,6 +11,21 @@
 
         <form method="POST">
 
+        <b>Yield</b>:<BR />
+        <?php
+            $resource = $Character->Data['worker_json']['resource'];
+            $skill_level = $Character->Data['worker_json']['skills'][$resource];
+            $num_workers = $Character->Data['worker_json']['workers'];
+            $speed_upgrades = $Character->Data['worker_json']['speed_upgrade_percent'];
+            $intelligence_upgrades = $Character->Data['worker_json']['intelligence_upgrade_percent'];
+            $harvests = 10;
+            $harvests = worker_yield($harvests, $speed_upgrades, $skill_level, $num_workers);
+            echo human_num($harvests) . ' ' . htmlspecialchars(ucfirst($resource)) . ' every 10 minutes.';
+        ?>
+        <br />
+        <?php display_worker_yield_formula(); ?>
+        <br /><br />
+
         <b>Workers:</b>
         <?php echo $Character->Data['worker_json']['workers']; ?><br />  <br />
 
