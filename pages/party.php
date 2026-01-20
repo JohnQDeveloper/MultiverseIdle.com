@@ -18,7 +18,7 @@
                         <?php echo $Character->Data['party_json']['members']['frontline']['class']; ?>
                     </option>
                 </select>
-
+                 <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
                  <input type="submit" value="Update Class" />
                 </form>
             </div>
@@ -37,6 +37,7 @@
                     <option value="Shield of Testing">Shield of Testing</option>
                     <option value="Helmet of Testing">Helmet of Testing</option>
                 </select>
+                <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
 
                  <input type="submit" value="Update Gear" />
                 </form>
@@ -51,6 +52,7 @@
                 <?php echo Controls::SkillGemSelectBox("skill_gem_2",
                 $Character->Data['party_json']['members']['frontline']['skills'][1]); ?>
 
+                 <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
                  <input type="submit" value="Update Skills" />
                 </form>
             </div>
@@ -71,6 +73,7 @@
                     </option>
                 </select>
 
+                 <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
                  <input type="submit" value="Update Class" />
                 </form>
             </div>
@@ -90,6 +93,7 @@
                     <option value="Helmet of Testing">Helmet of Testing</option>
                 </select>
 
+                <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
                  <input type="submit" value="Update Gear" />
                 </form>
             </div>
@@ -103,6 +107,7 @@
                 <?php echo Controls::SkillGemSelectBox("skill_gem_2",
                 $Character->Data['party_json']['members']['backline']['skills'][1]); ?>
 
+                 <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
                  <input type="submit" value="Update Skills" />
                 </form>
             </div>
