@@ -128,8 +128,34 @@
                     $hit_chance = $dex / ($dex + $monster_config['members'][$target]['dexterity']);
                     if(rand(0, 100) / 100 <= $hit_chance) {
                         // Hit
-                        $monster_config['members'][$target]['current_health'] -= $str;
-                        $return_me_log[] = "Party Frontliner hits $target for $str damage.";
+                        $damage = $str;
+                        $damage_type = "";
+
+                        // Check for Flaming Blades buff
+                        if(isset($status_effects['party']['frontline']['FlamingBlades']) && $status_effects['party']['frontline']['FlamingBlades'] > 0) {
+                            $damage_type = " fire";
+                            // Check if target has Scorched for bonus fire damage
+                            if(isset($status_effects['monster'][$target]['Scorched']) && $status_effects['monster'][$target]['Scorched'] > 0) {
+                                $damage = floor($damage * 1.2);
+                            }
+                            // 50% chance to apply Scorched
+                            if(rand(0, 100) / 100 <= 0.5) {
+                                $status_effects['monster'][$target]['Scorched'] = 3;
+                                $return_me_log[] = "Party Frontliner's flaming attack scorches $target!";
+                            }
+                        }
+
+                        // Check for Antimage buff
+                        if(isset($status_effects['party']['frontline']['Antimage']) && $status_effects['party']['frontline']['Antimage'] > 0) {
+                            // 50% chance to apply Antimagic
+                            if(rand(0, 100) / 100 <= 0.5) {
+                                $status_effects['monster'][$target]['Antimagic'] = 3;
+                                $return_me_log[] = "Party Frontliner's attack applies Antimagic to $target!";
+                            }
+                        }
+
+                        $monster_config['members'][$target]['current_health'] -= $damage;
+                        $return_me_log[] = "Party Frontliner hits $target for $damage$damage_type damage.";
                     } else {
                         // Miss
                         $return_me_log[] = "Party Frontliner misses $target.";
@@ -137,6 +163,10 @@
 
                     // Ability Runs
                     $wis = $party_config['members']['frontline']['wisdom'];
+                    // Check for Antimagic debuff on caster
+                    if(isset($status_effects['party']['frontline']['Antimagic']) && $status_effects['party']['frontline']['Antimagic'] > 0) {
+                        $wis = floor($wis * 0.8); // 20% wisdom reduction
+                    }
 
                     // Pick a random living enemy for wisdom check
                     $living_enemies = [];
@@ -240,6 +270,16 @@
                                 $return_me_log[] = "Party Frontliner casts Firestorm, scorching and hitting Monster Backline for $damage fire damage.";
                             }
                         }
+                        if(in_array('Flaming Blades', $party_config['members']['frontline']['skills'])) {
+                            // Use Flaming Blades - switches basic attacks to fire damage for 3 rounds
+                            $status_effects['party']['frontline']['FlamingBlades'] = 3;
+                            $return_me_log[] = "Party Frontliner activates Flaming Blades!";
+                        }
+                        if(in_array('Antimage', $party_config['members']['frontline']['skills'])) {
+                            // Use Antimage - basic attacks apply Antimagic debuff 50% of the time for 3 rounds
+                            $status_effects['party']['frontline']['Antimage'] = 3;
+                            $return_me_log[] = "Party Frontliner activates Antimage!";
+                        }
                     }
                 }
 
@@ -261,8 +301,34 @@
                     $hit_chance = $dex / ($dex + $monster_config['members'][$target]['dexterity']);
                     if(rand(0, 100) / 100 <= $hit_chance) {
                         // Hit
-                        $monster_config['members'][$target]['current_health'] -= $str;
-                        $return_me_log[] = "Party Backliner hits $target for $str damage.";
+                        $damage = $str;
+                        $damage_type = "";
+
+                        // Check for Flaming Blades buff
+                        if(isset($status_effects['party']['backline']['FlamingBlades']) && $status_effects['party']['backline']['FlamingBlades'] > 0) {
+                            $damage_type = " fire";
+                            // Check if target has Scorched for bonus fire damage
+                            if(isset($status_effects['monster'][$target]['Scorched']) && $status_effects['monster'][$target]['Scorched'] > 0) {
+                                $damage = floor($damage * 1.2);
+                            }
+                            // 50% chance to apply Scorched
+                            if(rand(0, 100) / 100 <= 0.5) {
+                                $status_effects['monster'][$target]['Scorched'] = 3;
+                                $return_me_log[] = "Party Backliner's flaming attack scorches $target!";
+                            }
+                        }
+
+                        // Check for Antimage buff
+                        if(isset($status_effects['party']['backline']['Antimage']) && $status_effects['party']['backline']['Antimage'] > 0) {
+                            // 50% chance to apply Antimagic
+                            if(rand(0, 100) / 100 <= 0.5) {
+                                $status_effects['monster'][$target]['Antimagic'] = 3;
+                                $return_me_log[] = "Party Backliner's attack applies Antimagic to $target!";
+                            }
+                        }
+
+                        $monster_config['members'][$target]['current_health'] -= $damage;
+                        $return_me_log[] = "Party Backliner hits $target for $damage$damage_type damage.";
                     } else {
                         // Miss
                         $return_me_log[] = "Party Backliner misses $target.";
@@ -270,6 +336,10 @@
 
                     // Ability Runs
                     $wis = $party_config['members']['backline']['wisdom'];
+                    // Check for Antimagic debuff on caster
+                    if(isset($status_effects['party']['backline']['Antimagic']) && $status_effects['party']['backline']['Antimagic'] > 0) {
+                        $wis = floor($wis * 0.8); // 20% wisdom reduction
+                    }
 
                     // Pick a random living enemy for wisdom check
                     $living_enemies = [];
@@ -373,6 +443,16 @@
                                 $return_me_log[] = "Party Backliner casts Firestorm, scorching and hitting Monster Backline for $damage fire damage.";
                             }
                         }
+                        if(in_array('Flaming Blades', $party_config['members']['backline']['skills'])) {
+                            // Use Flaming Blades - switches basic attacks to fire damage for 3 rounds
+                            $status_effects['party']['backline']['FlamingBlades'] = 3;
+                            $return_me_log[] = "Party Backliner activates Flaming Blades!";
+                        }
+                        if(in_array('Antimage', $party_config['members']['backline']['skills'])) {
+                            // Use Antimage - basic attacks apply Antimagic debuff 50% of the time for 3 rounds
+                            $status_effects['party']['backline']['Antimage'] = 3;
+                            $return_me_log[] = "Party Backliner activates Antimage!";
+                        }
                     }
                 }
 
@@ -395,8 +475,34 @@
                     $hit_chance = $dex / ($dex + $party_config['members'][$target]['dexterity']);
                     if(rand(0, 100) / 100 <= $hit_chance) {
                         // Hit
-                        $party_config['members'][$target]['current_health'] -= $str;
-                        $return_me_log[] = "Monster Frontliner hits $target for $str damage.";
+                        $damage = $str;
+                        $damage_type = "";
+
+                        // Check for Flaming Blades buff
+                        if(isset($status_effects['monster']['frontline']['FlamingBlades']) && $status_effects['monster']['frontline']['FlamingBlades'] > 0) {
+                            $damage_type = " fire";
+                            // Check if target has Scorched for bonus fire damage
+                            if(isset($status_effects['party'][$target]['Scorched']) && $status_effects['party'][$target]['Scorched'] > 0) {
+                                $damage = floor($damage * 1.2);
+                            }
+                            // 50% chance to apply Scorched
+                            if(rand(0, 100) / 100 <= 0.5) {
+                                $status_effects['party'][$target]['Scorched'] = 3;
+                                $return_me_log[] = "Monster Frontliner's flaming attack scorches $target!";
+                            }
+                        }
+
+                        // Check for Antimage buff
+                        if(isset($status_effects['monster']['frontline']['Antimage']) && $status_effects['monster']['frontline']['Antimage'] > 0) {
+                            // 50% chance to apply Antimagic
+                            if(rand(0, 100) / 100 <= 0.5) {
+                                $status_effects['party'][$target]['Antimagic'] = 3;
+                                $return_me_log[] = "Monster Frontliner's attack applies Antimagic to $target!";
+                            }
+                        }
+
+                        $party_config['members'][$target]['current_health'] -= $damage;
+                        $return_me_log[] = "Monster Frontliner hits $target for $damage$damage_type damage.";
                     } else {
                         // Miss
                         $return_me_log[] = "Monster Frontliner misses $target.";
@@ -404,6 +510,10 @@
 
                     // Ability Runs
                     $wis = $monster_config['members']['frontline']['wisdom'];
+                    // Check for Antimagic debuff on caster
+                    if(isset($status_effects['monster']['frontline']['Antimagic']) && $status_effects['monster']['frontline']['Antimagic'] > 0) {
+                        $wis = floor($wis * 0.8); // 20% wisdom reduction
+                    }
 
                     // Pick a random living enemy for wisdom check
                     $living_enemies = [];
@@ -507,6 +617,16 @@
                                 $return_me_log[] = "Monster Frontliner casts Firestorm, scorching and hitting Party Backline for $damage fire damage.";
                             }
                         }
+                        if(in_array('Flaming Blades', $monster_config['members']['frontline']['skills'])) {
+                            // Use Flaming Blades - switches basic attacks to fire damage for 3 rounds
+                            $status_effects['monster']['frontline']['FlamingBlades'] = 3;
+                            $return_me_log[] = "Monster Frontliner activates Flaming Blades!";
+                        }
+                        if(in_array('Antimage', $monster_config['members']['frontline']['skills'])) {
+                            // Use Antimage - basic attacks apply Antimagic debuff 50% of the time for 3 rounds
+                            $status_effects['monster']['frontline']['Antimage'] = 3;
+                            $return_me_log[] = "Monster Frontliner activates Antimage!";
+                        }
                     }
                 }
 
@@ -526,8 +646,34 @@
                     $hit_chance = $dex / ($dex + $party_config['members'][$target]['dexterity']);
                     if(rand(0, 100) / 100 <= $hit_chance) {
                         // Hit
-                        $party_config['members'][$target]['current_health'] -= $str;
-                        $return_me_log[] = "Monster Backliner hits $target for $str damage.";
+                        $damage = $str;
+                        $damage_type = "";
+
+                        // Check for Flaming Blades buff
+                        if(isset($status_effects['monster']['backline']['FlamingBlades']) && $status_effects['monster']['backline']['FlamingBlades'] > 0) {
+                            $damage_type = " fire";
+                            // Check if target has Scorched for bonus fire damage
+                            if(isset($status_effects['party'][$target]['Scorched']) && $status_effects['party'][$target]['Scorched'] > 0) {
+                                $damage = floor($damage * 1.2);
+                            }
+                            // 50% chance to apply Scorched
+                            if(rand(0, 100) / 100 <= 0.5) {
+                                $status_effects['party'][$target]['Scorched'] = 3;
+                                $return_me_log[] = "Monster Backliner's flaming attack scorches $target!";
+                            }
+                        }
+
+                        // Check for Antimage buff
+                        if(isset($status_effects['monster']['backline']['Antimage']) && $status_effects['monster']['backline']['Antimage'] > 0) {
+                            // 50% chance to apply Antimagic
+                            if(rand(0, 100) / 100 <= 0.5) {
+                                $status_effects['party'][$target]['Antimagic'] = 3;
+                                $return_me_log[] = "Monster Backliner's attack applies Antimagic to $target!";
+                            }
+                        }
+
+                        $party_config['members'][$target]['current_health'] -= $damage;
+                        $return_me_log[] = "Monster Backliner hits $target for $damage$damage_type damage.";
                     } else {
                         // Miss
                         $return_me_log[] = "Monster Backliner misses $target.";
@@ -535,6 +681,10 @@
 
                     // Ability Runs
                     $wis = $monster_config['members']['backline']['wisdom'];
+                    // Check for Antimagic debuff on caster
+                    if(isset($status_effects['monster']['backline']['Antimagic']) && $status_effects['monster']['backline']['Antimagic'] > 0) {
+                        $wis = floor($wis * 0.8); // 20% wisdom reduction
+                    }
 
                     // Pick a random living enemy for wisdom check
                     $living_enemies = [];
@@ -636,6 +786,16 @@
                                 $party_config['members']['backline']['current_health'] -= $damage;
                                 $return_me_log[] = "Monster Backliner casts Firestorm, scorching and hitting Party Backline for $damage fire damage.";
                             }
+                        }
+                        if(in_array('Flaming Blades', $monster_config['members']['backline']['skills'])) {
+                            // Use Flaming Blades - switches basic attacks to fire damage for 3 rounds
+                            $status_effects['monster']['backline']['FlamingBlades'] = 3;
+                            $return_me_log[] = "Monster Backliner activates Flaming Blades!";
+                        }
+                        if(in_array('Antimage', $monster_config['members']['backline']['skills'])) {
+                            // Use Antimage - basic attacks apply Antimagic debuff 50% of the time for 3 rounds
+                            $status_effects['monster']['backline']['Antimage'] = 3;
+                            $return_me_log[] = "Monster Backliner activates Antimage!";
                         }
                     }
                 }
