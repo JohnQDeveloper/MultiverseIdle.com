@@ -2,7 +2,7 @@
 
     class Battle {
 
-        public function SimulateArenaFloor($Character, $floor) {
+        public function SimulateArenaFloor($Character, $arena_floor) {
             $won = 0;
             $lost = 0;
             $total = 1000;
@@ -10,8 +10,6 @@
             // Testing loop
             while($total > 0) {
                 $party_config = $Character->Data['party_json'];
-
-                $arena_floor = $Character->Data['arena_floor'];
 
                 $monster_strength = 10 * $arena_floor;
                 $monster_dexterity = 10 * $arena_floor;

@@ -9,7 +9,7 @@
             (i.e. healer = lucky wisdom drops, warrior = lucky strength drops)
         </p>
         <?php if(!empty($simulated_results)) {
-            $class = $simulated_results['won'] > $simulated_results['lost'] ? 'alert-success' : 'alert-error';
+            $class = $simulated_results['won'] > $simulated_results['lost'] ? 'alert-success' : 'alert-danger';
         ?>
         <div class="alert <?php echo $class; ?>">
             <b>Simulation Results for Floor <?php echo intval($_POST['new_floor']); ?></b> <BR />
