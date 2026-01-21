@@ -42,3 +42,5 @@ CREATE TABLE
     `name` varchar(255) DEFAULT NULL,
     PRIMARY KEY (`id`)
   ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci
+
+ALTER TABLE gear ADD COLUMN favorite TINYINT(1) DEFAULT 0;
