@@ -2,6 +2,139 @@
 
     class Battle {
 
+        // Helper function to calculate gear bonuses for a party member
+        private function calculateGearBonuses($equipped_weapon, $equipped_armor) {
+            $gear = new Gear();
+            $bonuses = [
+                // Flat stat bonuses
+                'strength' => 0,
+                'health' => 0,
+                'dexterity' => 0,
+                'wisdom' => 0,
+                // Percent stat bonuses (from base_bonuses)
+                'strength_percent' => 0,
+                'health_percent' => 0,
+                'dexterity_percent' => 0,
+                'wisdom_percent' => 0,
+                'resistances_percent' => 0, // All resistances from base_bonuses
+                // Damage bonuses (percent)
+                'physical_damage' => 0,
+                'cold_damage' => 0,
+                'fire_damage' => 0,
+                // Resistance bonuses (percent)
+                'physical_resistance' => 0,
+                'cold_resistance' => 0,
+                'fire_resistance' => 0,
+            ];
+
+            // Process weapon
+            if ($equipped_weapon > 0 && $gear->LoadItemByGearID($equipped_weapon)) {
+                $this->applyGearBonuses($bonuses, $gear->Data);
+            }
+
+            // Process armor
+            if ($equipped_armor > 0 && $gear->LoadItemByGearID($equipped_armor)) {
+                $this->applyGearBonuses($bonuses, $gear->Data);
+            }
+
+            return $bonuses;
+        }
+
+        // Helper to apply a single gear item's bonuses
+        private function applyGearBonuses(&$bonuses, $gearData) {
+            // Apply base bonuses (these are percentage bonuses to stats)
+            if (!empty($gearData['base_bonuses'])) {
+                foreach ($gearData['base_bonuses'] as $stat => $value) {
+                    if ($stat === 'resistances') {
+                        $bonuses['resistances_percent'] += $value;
+                    } elseif (isset($bonuses[$stat . '_percent'])) {
+                        $bonuses[$stat . '_percent'] += $value;
+                    }
+                }
+            }
+
+            // Apply affixes
+            if (!empty($gearData['affixes'])) {
+                foreach ($gearData['affixes'] as $affix) {
+                    $key = $affix['key'];
+                    $value = $affix['value'];
+                    $type = $affix['type'];
+
+                    // Flat stat bonuses
+                    if ($type === 'flat' && isset($bonuses[$key])) {
+                        $bonuses[$key] += $value;
+                    }
+                    // Percent bonuses (damage and resistance)
+                    elseif ($type === 'percent' && isset($bonuses[$key])) {
+                        $bonuses[$key] += $value;
+                    }
+                }
+            }
+        }
+
+        // Apply gear bonuses to party config stats
+        private function applyGearToStats(&$member, $bonuses) {
+            // Apply percent bonuses from base_bonuses first (multiply base stat)
+            if ($bonuses['strength_percent'] > 0) {
+                $member['strength'] += floor($member['strength'] * $bonuses['strength_percent'] / 100);
+            }
+            if ($bonuses['health_percent'] > 0) {
+                $member['health'] += floor($member['health'] * $bonuses['health_percent'] / 100);
+            }
+            if ($bonuses['dexterity_percent'] > 0) {
+                $member['dexterity'] += floor($member['dexterity'] * $bonuses['dexterity_percent'] / 100);
+            }
+            if ($bonuses['wisdom_percent'] > 0) {
+                $member['wisdom'] += floor($member['wisdom'] * $bonuses['wisdom_percent'] / 100);
+            }
+
+            // Apply flat stat bonuses from affixes
+            $member['strength'] += $bonuses['strength'];
+            $member['health'] += $bonuses['health'];
+            $member['dexterity'] += $bonuses['dexterity'];
+            $member['wisdom'] += $bonuses['wisdom'];
+        }
+
+        // Apply damage bonus based on damage type
+        private function applyDamageBonus($damage, $damage_type, $bonuses) {
+            $bonus_percent = 0;
+            if ($damage_type === '' || $damage_type === ' physical') {
+                $bonus_percent = $bonuses['physical_damage'];
+            } elseif ($damage_type === ' fire') {
+                $bonus_percent = $bonuses['fire_damage'];
+            } elseif ($damage_type === ' cold') {
+                $bonus_percent = $bonuses['cold_damage'];
+            }
+
+            if ($bonus_percent > 0) {
+                $damage += floor($damage * $bonus_percent / 100);
+            }
+            return $damage;
+        }
+
+        // Apply resistance reduction based on damage type
+        private function applyResistance($damage, $damage_type, $bonuses) {
+            $resistance_percent = 0;
+            if ($damage_type === '' || $damage_type === ' physical') {
+                $resistance_percent = $bonuses['physical_resistance'];
+            } elseif ($damage_type === ' fire') {
+                $resistance_percent = $bonuses['fire_resistance'];
+            } elseif ($damage_type === ' cold') {
+                $resistance_percent = $bonuses['cold_resistance'];
+            }
+
+            // Apply resistances_percent bonus (from plate armor) to all resistances
+            $resistance_percent += $bonuses['resistances_percent'];
+
+            // Cap resistance at 75%
+            $resistance_percent = min($resistance_percent, 75);
+
+            if ($resistance_percent > 0) {
+                $damage -= floor($damage * $resistance_percent / 100);
+            }
+            return max($damage, 1); // Minimum 1 damage
+        }
+
         public function SimulateArenaFloor($Character, $arena_floor) {
             $won = 0;
             $lost = 0;
@@ -64,11 +197,34 @@
         }
         public function Battle($party_config, $monster_config, $echo_log = true) {
           $return_me_log = [];
+
+          // Calculate and apply gear bonuses for party members
+          $gear_bonuses = [
+              'party' => [
+                  'frontline' => $this->calculateGearBonuses(
+                      $party_config['members']['frontline']['equipped_weapon'] ?? 0,
+                      $party_config['members']['frontline']['equipped_armor'] ?? 0
+                  ),
+                  'backline' => $this->calculateGearBonuses(
+                      $party_config['members']['backline']['equipped_weapon'] ?? 0,
+                      $party_config['members']['backline']['equipped_armor'] ?? 0
+                  )
+              ],
+              'monster' => [
+                  'frontline' => $this->calculateGearBonuses(0, 0), // Monsters have no gear
+                  'backline' => $this->calculateGearBonuses(0, 0)
+              ]
+          ];
+
+          // Apply stat bonuses from gear to party members
+          $this->applyGearToStats($party_config['members']['frontline'], $gear_bonuses['party']['frontline']);
+          $this->applyGearToStats($party_config['members']['backline'], $gear_bonuses['party']['backline']);
+
         // Actual health is 5x normal for battle purposes
           $party_config['members']['frontline']['current_health'] =
           $party_config['members']['frontline']['health'] * 5;
           $party_config['members']['backline']['current_health'] =
-          $party_config['members']['backline']['health'] * 5;;
+          $party_config['members']['backline']['health'] * 5;
 
           $monster_config['members']['frontline']['current_health'] =
           $monster_config['members']['frontline']['health'] * 5;
@@ -171,6 +327,11 @@
                             }
                         }
 
+                        // Apply damage bonus from gear
+                        $damage = $this->applyDamageBonus($damage, $damage_type, $gear_bonuses['party']['frontline']);
+                        // Apply resistance from target's gear
+                        $damage = $this->applyResistance($damage, $damage_type, $gear_bonuses['monster'][$target]);
+
                         $monster_config['members'][$target]['current_health'] -= $damage;
                         $return_me_log[] = "Party Frontliner hits $target for $damage$damage_type damage.";
                     } else {
@@ -272,6 +433,9 @@
                                 if(isset($status_effects['monster']['frontline']['Scorched']) && $status_effects['monster']['frontline']['Scorched'] > 0) {
                                     $damage = floor($damage * 1.2); // 20% more fire damage
                                 }
+                                // Apply gear bonuses and resistances
+                                $damage = $this->applyDamageBonus($damage, ' fire', $gear_bonuses['party']['frontline']);
+                                $damage = $this->applyResistance($damage, ' fire', $gear_bonuses['monster']['frontline']);
                                 $monster_config['members']['frontline']['current_health'] -= $damage;
                                 $return_me_log[] = "Party Frontliner casts Firestorm, scorching and hitting Monster Frontline for $damage fire damage.";
                             }
@@ -283,6 +447,9 @@
                                 if(isset($status_effects['monster']['backline']['Scorched']) && $status_effects['monster']['backline']['Scorched'] > 0) {
                                     $damage = floor($damage * 1.2); // 20% more fire damage
                                 }
+                                // Apply gear bonuses and resistances
+                                $damage = $this->applyDamageBonus($damage, ' fire', $gear_bonuses['party']['frontline']);
+                                $damage = $this->applyResistance($damage, ' fire', $gear_bonuses['monster']['backline']);
                                 $monster_config['members']['backline']['current_health'] -= $damage;
                                 $return_me_log[] = "Party Frontliner casts Firestorm, scorching and hitting Monster Backline for $damage fire damage.";
                             }
@@ -294,15 +461,23 @@
                             // Apply Hypothermia and deal damage to frontline enemy
                             if($monster_config['members']['frontline']['current_health'] > 0) {
                                 $status_effects['monster']['frontline']['Hypothermia'] = 3;
-                                $monster_config['members']['frontline']['current_health'] -= $base_damage;
-                                $return_me_log[] = "Party Frontliner casts Blizzard, chilling and hitting Monster Frontline for $base_damage cold damage.";
+                                $damage = $base_damage;
+                                // Apply gear bonuses and resistances
+                                $damage = $this->applyDamageBonus($damage, ' cold', $gear_bonuses['party']['frontline']);
+                                $damage = $this->applyResistance($damage, ' cold', $gear_bonuses['monster']['frontline']);
+                                $monster_config['members']['frontline']['current_health'] -= $damage;
+                                $return_me_log[] = "Party Frontliner casts Blizzard, chilling and hitting Monster Frontline for $damage cold damage.";
                             }
 
                             // Apply Hypothermia and deal damage to backline enemy
                             if($monster_config['members']['backline']['current_health'] > 0) {
                                 $status_effects['monster']['backline']['Hypothermia'] = 3;
-                                $monster_config['members']['backline']['current_health'] -= $base_damage;
-                                $return_me_log[] = "Party Frontliner casts Blizzard, chilling and hitting Monster Backline for $base_damage cold damage.";
+                                $damage = $base_damage;
+                                // Apply gear bonuses and resistances
+                                $damage = $this->applyDamageBonus($damage, ' cold', $gear_bonuses['party']['frontline']);
+                                $damage = $this->applyResistance($damage, ' cold', $gear_bonuses['monster']['backline']);
+                                $monster_config['members']['backline']['current_health'] -= $damage;
+                                $return_me_log[] = "Party Frontliner casts Blizzard, chilling and hitting Monster Backline for $damage cold damage.";
                             }
                         }
                         if(in_array('Flaming Blades', $party_config['members']['frontline']['skills'])) {
@@ -385,6 +560,11 @@
                                 $return_me_log[] = "Party Backliner's attack applies Antimagic to $target!";
                             }
                         }
+
+                        // Apply damage bonus from gear
+                        $damage = $this->applyDamageBonus($damage, $damage_type, $gear_bonuses['party']['backline']);
+                        // Apply resistance from target's gear
+                        $damage = $this->applyResistance($damage, $damage_type, $gear_bonuses['monster'][$target]);
 
                         $monster_config['members'][$target]['current_health'] -= $damage;
                         $return_me_log[] = "Party Backliner hits $target for $damage$damage_type damage.";
@@ -487,6 +667,9 @@
                                 if(isset($status_effects['monster']['frontline']['Scorched']) && $status_effects['monster']['frontline']['Scorched'] > 0) {
                                     $damage = floor($damage * 1.2); // 20% more fire damage
                                 }
+                                // Apply gear bonuses and resistances
+                                $damage = $this->applyDamageBonus($damage, ' fire', $gear_bonuses['party']['backline']);
+                                $damage = $this->applyResistance($damage, ' fire', $gear_bonuses['monster']['frontline']);
                                 $monster_config['members']['frontline']['current_health'] -= $damage;
                                 $return_me_log[] = "Party Backliner casts Firestorm, scorching and hitting Monster Frontline for $damage fire damage.";
                             }
@@ -498,6 +681,9 @@
                                 if(isset($status_effects['monster']['backline']['Scorched']) && $status_effects['monster']['backline']['Scorched'] > 0) {
                                     $damage = floor($damage * 1.2); // 20% more fire damage
                                 }
+                                // Apply gear bonuses and resistances
+                                $damage = $this->applyDamageBonus($damage, ' fire', $gear_bonuses['party']['backline']);
+                                $damage = $this->applyResistance($damage, ' fire', $gear_bonuses['monster']['backline']);
                                 $monster_config['members']['backline']['current_health'] -= $damage;
                                 $return_me_log[] = "Party Backliner casts Firestorm, scorching and hitting Monster Backline for $damage fire damage.";
                             }
@@ -509,15 +695,23 @@
                             // Apply Hypothermia and deal damage to frontline enemy
                             if($monster_config['members']['frontline']['current_health'] > 0) {
                                 $status_effects['monster']['frontline']['Hypothermia'] = 3;
-                                $monster_config['members']['frontline']['current_health'] -= $base_damage;
-                                $return_me_log[] = "Party Backliner casts Blizzard, chilling and hitting Monster Frontline for $base_damage cold damage.";
+                                $damage = $base_damage;
+                                // Apply gear bonuses and resistances
+                                $damage = $this->applyDamageBonus($damage, ' cold', $gear_bonuses['party']['backline']);
+                                $damage = $this->applyResistance($damage, ' cold', $gear_bonuses['monster']['frontline']);
+                                $monster_config['members']['frontline']['current_health'] -= $damage;
+                                $return_me_log[] = "Party Backliner casts Blizzard, chilling and hitting Monster Frontline for $damage cold damage.";
                             }
 
                             // Apply Hypothermia and deal damage to backline enemy
                             if($monster_config['members']['backline']['current_health'] > 0) {
                                 $status_effects['monster']['backline']['Hypothermia'] = 3;
-                                $monster_config['members']['backline']['current_health'] -= $base_damage;
-                                $return_me_log[] = "Party Backliner casts Blizzard, chilling and hitting Monster Backline for $base_damage cold damage.";
+                                $damage = $base_damage;
+                                // Apply gear bonuses and resistances
+                                $damage = $this->applyDamageBonus($damage, ' cold', $gear_bonuses['party']['backline']);
+                                $damage = $this->applyResistance($damage, ' cold', $gear_bonuses['monster']['backline']);
+                                $monster_config['members']['backline']['current_health'] -= $damage;
+                                $return_me_log[] = "Party Backliner casts Blizzard, chilling and hitting Monster Backline for $damage cold damage.";
                             }
                         }
                         if(in_array('Flaming Blades', $party_config['members']['backline']['skills'])) {
@@ -601,6 +795,11 @@
                                 $return_me_log[] = "Monster Frontliner's attack applies Antimagic to $target!";
                             }
                         }
+
+                        // Apply damage bonus from gear
+                        $damage = $this->applyDamageBonus($damage, $damage_type, $gear_bonuses['monster']['frontline']);
+                        // Apply resistance from target's gear
+                        $damage = $this->applyResistance($damage, $damage_type, $gear_bonuses['party'][$target]);
 
                         $party_config['members'][$target]['current_health'] -= $damage;
                         $return_me_log[] = "Monster Frontliner hits $target for $damage$damage_type damage.";
@@ -703,6 +902,9 @@
                                 if(isset($status_effects['party']['frontline']['Scorched']) && $status_effects['party']['frontline']['Scorched'] > 0) {
                                     $damage = floor($damage * 1.2); // 20% more fire damage
                                 }
+                                // Apply gear bonuses and resistances
+                                $damage = $this->applyDamageBonus($damage, ' fire', $gear_bonuses['monster']['frontline']);
+                                $damage = $this->applyResistance($damage, ' fire', $gear_bonuses['party']['frontline']);
                                 $party_config['members']['frontline']['current_health'] -= $damage;
                                 $return_me_log[] = "Monster Frontliner casts Firestorm, scorching and hitting Party Frontline for $damage fire damage.";
                             }
@@ -714,6 +916,9 @@
                                 if(isset($status_effects['party']['backline']['Scorched']) && $status_effects['party']['backline']['Scorched'] > 0) {
                                     $damage = floor($damage * 1.2); // 20% more fire damage
                                 }
+                                // Apply gear bonuses and resistances
+                                $damage = $this->applyDamageBonus($damage, ' fire', $gear_bonuses['monster']['frontline']);
+                                $damage = $this->applyResistance($damage, ' fire', $gear_bonuses['party']['backline']);
                                 $party_config['members']['backline']['current_health'] -= $damage;
                                 $return_me_log[] = "Monster Frontliner casts Firestorm, scorching and hitting Party Backline for $damage fire damage.";
                             }
@@ -725,15 +930,23 @@
                             // Apply Hypothermia and deal damage to frontline enemy
                             if($party_config['members']['frontline']['current_health'] > 0) {
                                 $status_effects['party']['frontline']['Hypothermia'] = 3;
-                                $party_config['members']['frontline']['current_health'] -= $base_damage;
-                                $return_me_log[] = "Monster Frontliner casts Blizzard, chilling and hitting Party Frontline for $base_damage cold damage.";
+                                $damage = $base_damage;
+                                // Apply gear bonuses and resistances
+                                $damage = $this->applyDamageBonus($damage, ' cold', $gear_bonuses['monster']['frontline']);
+                                $damage = $this->applyResistance($damage, ' cold', $gear_bonuses['party']['frontline']);
+                                $party_config['members']['frontline']['current_health'] -= $damage;
+                                $return_me_log[] = "Monster Frontliner casts Blizzard, chilling and hitting Party Frontline for $damage cold damage.";
                             }
 
                             // Apply Hypothermia and deal damage to backline enemy
                             if($party_config['members']['backline']['current_health'] > 0) {
                                 $status_effects['party']['backline']['Hypothermia'] = 3;
-                                $party_config['members']['backline']['current_health'] -= $base_damage;
-                                $return_me_log[] = "Monster Frontliner casts Blizzard, chilling and hitting Party Backline for $base_damage cold damage.";
+                                $damage = $base_damage;
+                                // Apply gear bonuses and resistances
+                                $damage = $this->applyDamageBonus($damage, ' cold', $gear_bonuses['monster']['frontline']);
+                                $damage = $this->applyResistance($damage, ' cold', $gear_bonuses['party']['backline']);
+                                $party_config['members']['backline']['current_health'] -= $damage;
+                                $return_me_log[] = "Monster Frontliner casts Blizzard, chilling and hitting Party Backline for $damage cold damage.";
                             }
                         }
                         if(in_array('Flaming Blades', $monster_config['members']['frontline']['skills'])) {
@@ -814,6 +1027,11 @@
                                 $return_me_log[] = "Monster Backliner's attack applies Antimagic to $target!";
                             }
                         }
+
+                        // Apply damage bonus from gear
+                        $damage = $this->applyDamageBonus($damage, $damage_type, $gear_bonuses['monster']['backline']);
+                        // Apply resistance from target's gear
+                        $damage = $this->applyResistance($damage, $damage_type, $gear_bonuses['party'][$target]);
 
                         $party_config['members'][$target]['current_health'] -= $damage;
                         $return_me_log[] = "Monster Backliner hits $target for $damage$damage_type damage.";
@@ -915,6 +1133,9 @@
                                 if(isset($status_effects['party']['frontline']['Scorched']) && $status_effects['party']['frontline']['Scorched'] > 0) {
                                     $damage = floor($damage * 1.2); // 20% more fire damage
                                 }
+                                // Apply gear bonuses and resistances
+                                $damage = $this->applyDamageBonus($damage, ' fire', $gear_bonuses['monster']['backline']);
+                                $damage = $this->applyResistance($damage, ' fire', $gear_bonuses['party']['frontline']);
                                 $party_config['members']['frontline']['current_health'] -= $damage;
                                 $return_me_log[] = "Monster Backliner casts Firestorm, scorching and hitting Party Frontline for $damage fire damage.";
                             }
@@ -926,6 +1147,9 @@
                                 if(isset($status_effects['party']['backline']['Scorched']) && $status_effects['party']['backline']['Scorched'] > 0) {
                                     $damage = floor($damage * 1.2); // 20% more fire damage
                                 }
+                                // Apply gear bonuses and resistances
+                                $damage = $this->applyDamageBonus($damage, ' fire', $gear_bonuses['monster']['backline']);
+                                $damage = $this->applyResistance($damage, ' fire', $gear_bonuses['party']['backline']);
                                 $party_config['members']['backline']['current_health'] -= $damage;
                                 $return_me_log[] = "Monster Backliner casts Firestorm, scorching and hitting Party Backline for $damage fire damage.";
                             }
@@ -937,15 +1161,23 @@
                             // Apply Hypothermia and deal damage to frontline enemy
                             if($party_config['members']['frontline']['current_health'] > 0) {
                                 $status_effects['party']['frontline']['Hypothermia'] = 3;
-                                $party_config['members']['frontline']['current_health'] -= $base_damage;
-                                $return_me_log[] = "Monster Backliner casts Blizzard, chilling and hitting Party Frontline for $base_damage cold damage.";
+                                $damage = $base_damage;
+                                // Apply gear bonuses and resistances
+                                $damage = $this->applyDamageBonus($damage, ' cold', $gear_bonuses['monster']['backline']);
+                                $damage = $this->applyResistance($damage, ' cold', $gear_bonuses['party']['frontline']);
+                                $party_config['members']['frontline']['current_health'] -= $damage;
+                                $return_me_log[] = "Monster Backliner casts Blizzard, chilling and hitting Party Frontline for $damage cold damage.";
                             }
 
                             // Apply Hypothermia and deal damage to backline enemy
                             if($party_config['members']['backline']['current_health'] > 0) {
                                 $status_effects['party']['backline']['Hypothermia'] = 3;
-                                $party_config['members']['backline']['current_health'] -= $base_damage;
-                                $return_me_log[] = "Monster Backliner casts Blizzard, chilling and hitting Party Backline for $base_damage cold damage.";
+                                $damage = $base_damage;
+                                // Apply gear bonuses and resistances
+                                $damage = $this->applyDamageBonus($damage, ' cold', $gear_bonuses['monster']['backline']);
+                                $damage = $this->applyResistance($damage, ' cold', $gear_bonuses['party']['backline']);
+                                $party_config['members']['backline']['current_health'] -= $damage;
+                                $return_me_log[] = "Monster Backliner casts Blizzard, chilling and hitting Party Backline for $damage cold damage.";
                             }
                         }
                         if(in_array('Flaming Blades', $monster_config['members']['backline']['skills'])) {
