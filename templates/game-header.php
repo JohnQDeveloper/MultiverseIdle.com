@@ -38,7 +38,7 @@
     <div class="wrapper">
     <div class="resources">
         <div class="row">
-            Level: <?php echo htmlspecialchars($Character->Data['level']); ?> <BR />
+            Level: <?php echo htmlspecialchars($Character->Data['party_json']['members']['frontline']['level']); ?> <BR />
             Arena: <?php echo htmlspecialchars($Character->Data['arena_floor']); ?> <BR />
         </div>
         <div class="row">

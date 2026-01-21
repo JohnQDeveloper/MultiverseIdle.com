@@ -20,7 +20,7 @@
             $intelligence_upgrades = $Character->Data['worker_json']['intelligence_upgrade_percent'];
             $harvests = 10;
             $harvests = worker_yield($harvests, $speed_upgrades, $skill_level, $num_workers);
-            echo human_num($harvests) . ' ' . htmlspecialchars(ucfirst($resource)) . ' every 10 minutes.';
+            echo human_num($harvests) . ' ' . htmlspecialchars(ucfirst($resource)) . ' every minute.';
         ?>
         <br />
         <?php display_worker_yield_formula(); ?>

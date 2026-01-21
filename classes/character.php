@@ -35,6 +35,32 @@ class Character {
         return true;
     }
 
+    public function IncrementPartyXP($xp_amount, $user_id = "") {
+        // Load Session Defaults
+        if($user_id == "") {
+            $user_id = $_SESSION['auth_user_id'];
+        }
+
+        $this->Data['party_json']['members']['frontline']['xp'] += $xp_amount;
+        $this->Data['party_json']['members']['backline']['xp'] += $xp_amount;
+
+        $level = $this->Data['party_json']['members']['frontline']['level'];
+        $xp_required = 50 * $level * ($level + 1);
+
+        if($this->Data['party_json']['members']['frontline']['xp'] >= $xp_required) {
+            // Level Up both members
+            $this->Data['party_json']['members']['frontline']['level'] += 1;
+            $this->Data['party_json']['members']['backline']['level'] += 1;
+
+            // Subtract required XP
+            $this->Data['party_json']['members']['frontline']['xp'] -= $xp_required;
+            $this->Data['party_json']['members']['backline']['xp'] -= $xp_required;
+        }
+
+
+        return true;
+    }
+
     public function CreateCharacter($user_id = "", $name = "") {
         // Load Session Defaults
         if($user_id == "") {

@@ -100,8 +100,7 @@
 
                 // Award XP equal to arena floor * 10
                 $xp_award = $arena_floor * 10;
-                $Character->Data['party_json']['members']['frontline']['xp'] += $xp_award;
-                $Character->Data['party_json']['members']['backline']['xp'] += $xp_award;
+                $Character->IncrementPartyXP($xp_award);
                 $ArenaLog = "<span class='success'>Both party members gained $xp_award XP!</span><BR />\n$ArenaLog";
 
             } else {

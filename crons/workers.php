@@ -9,7 +9,7 @@
     // Run active users
     foreach($rows as $r) {
         // Run 8 hours of ticks per cron run; should be set to 1 in production
-        $number_of_ticks = NUMBER_OF_MINUTES_PER_RUN/10;
+        $number_of_ticks = NUMBER_OF_MINUTES_PER_RUN;
 
         while($number_of_ticks > 0) {
             $number_of_ticks--;
@@ -44,7 +44,7 @@
             $speed_upgrades = $worker_config['speed_upgrades'];
             $intelligence_upgrades = $worker_config['intelligence_upgrades'];
 
-            $harvests = 10; // 10 harvests per 10 minute tick basically
+            $harvests = 10; // 10 harvests per 1 minute tick basically
             $harvests = worker_yield($harvests, $speed_upgrades, $skill_level, $num_workers);
             echo "Gained ".$harvests." $resource\n";
             echo "Gained ".$harvests." skill xp\n";

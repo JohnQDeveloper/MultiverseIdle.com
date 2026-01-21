@@ -7,6 +7,7 @@
         <h3>Frontline Character</h3>
         <div class="grid">
             <div>
+                Level: <?php echo $Character->Data['party_json']['members']['frontline']['level']; ?> <br />
                 Strength: <?php echo $Character->Data['party_json']['members']['frontline']['strength']; ?> <br />
                 Dexterity: <?php echo $Character->Data['party_json']['members']['frontline']['dexterity']; ?> <br />
                 Health: <?php echo $Character->Data['party_json']['members']['frontline']['health']; ?> <br />
@@ -61,6 +62,7 @@
         <h3>Backline Character</h3>
         <div class="grid">
 <div>
+                Level: <?php echo $Character->Data['party_json']['members']['backline']['level']; ?> <br />
                 Strength: <?php echo $Character->Data['party_json']['members']['backline']['strength']; ?> <br />
                 Dexterity: <?php echo $Character->Data['party_json']['members']['backline']['dexterity']; ?> <br />
                 Health: <?php echo $Character->Data['party_json']['members']['backline']['health']; ?> <br />
