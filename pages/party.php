@@ -44,7 +44,7 @@
                 </form>
             </div>
             <div>
-                <form>
+                <form method="POST" action="/party?update=frontline_skills">
                 1st Skill Gem:
                 <?php echo Controls::SkillGemSelectBox("skill_gem_1",
                 $Character->Data['party_json']['members']['frontline']['skills'][0]); ?>
@@ -100,7 +100,7 @@
                 </form>
             </div>
             <div>
-                <form>
+                <form method="POST" action="/party?update=backline_skills">
                 1st Skill Gem:
                 <?php echo Controls::SkillGemSelectBox("skill_gem_1",
                 $Character->Data['party_json']['members']['backline']['skills'][0]); ?>

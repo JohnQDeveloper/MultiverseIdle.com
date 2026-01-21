@@ -11,10 +11,10 @@
             while($total > 0) {
                 $party_config = $Character->Data['party_json'];
 
-                $monster_strength = 10 * $arena_floor;
-                $monster_dexterity = 10 * $arena_floor;
-                $monster_health = 10 * $arena_floor;
-                $monster_wisdom = 10 * $arena_floor;
+                $monster_strength = calculate_monster_attribute($arena_floor);
+                $monster_dexterity = calculate_monster_attribute($arena_floor);
+                $monster_health = calculate_monster_attribute($arena_floor);
+                $monster_wisdom = calculate_monster_attribute($arena_floor);
                 $monster_ability = SKILL_GEMS[array_rand(SKILL_GEMS)]['Name'];
 
                 $ArenaLog .= "Monster stats are $monster_strength STR, $monster_dexterity DEX,

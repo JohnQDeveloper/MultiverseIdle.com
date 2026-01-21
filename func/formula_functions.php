@@ -9,6 +9,11 @@
         echo 'round(10 * (1 + ($speed_upgrades * 0.05)) * (1 + ($skill_level * 0.05)) * $num_workers)';
     }
 
+    function calculate_monster_attribute($monster_level) {
+        $base_stat = 10;
+        return round($base_stat * pow($monster_level, 1.4));
+    }
+
     /**
      * Calculate the cost for a worker upgrade or hire based on current level
      *
