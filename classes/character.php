@@ -48,7 +48,8 @@ class Character {
         $party_json = json_encode([
             "members" => [
                 "frontline" => [
-                    "class" => "warrior",
+                    "class" => "strength",
+                    "xp" => 0,
                     "level" => 1,
                     "strength" => 10,
                     "dexterity" => 10,
@@ -58,7 +59,8 @@ class Character {
                     "skills" => ["Flaming Blades", "Antimage"],
                 ],
                 "backline" => [
-                    "class" => "healer",
+                    "class" => "wisdom",
+                    "xp" => 0,
                     "level" => 1,
                     "strength" => 10,
                     "dexterity" => 10,

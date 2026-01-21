@@ -4,7 +4,7 @@
     define('ENVIRONMENT', getenv('ENVIRONMENT')); # Dev / QA / Prod
     define('URL', 'https://'.getenv('HOSTNAME').'/');
     define('BASE_URL', 'https://'.getenv('HOSTNAME'));
-    define('NUMBER_OF_TICKS_PER_RUN', 18); // for crons
+    define('NUMBER_OF_MINUTES_PER_RUN', 480); // 8 hours of normal gameplay per run
 
     # Harden Sessions
     ini_set('session.cookie_httponly', 1);

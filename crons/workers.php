@@ -1,14 +1,15 @@
 <?php
 
+    $time_start = microtime(true);
     require_once('../config.php');
 
     // Must interact every 3 days to be marked as active
-    $row = ActiveUsers();
+    $rows = ActiveUsers();
 
     // Run active users
     foreach($rows as $r) {
-        // Run 3 hours of ticks per cron run; should be set to 1 in production with a 10 minute cron
-        $number_of_ticks = NUMBER_OF_TICKS_PER_RUN;
+        // Run 8 hours of ticks per cron run; should be set to 1 in production
+        $number_of_ticks = NUMBER_OF_MINUTES_PER_RUN/10;
 
         while($number_of_ticks > 0) {
             $number_of_ticks--;
@@ -68,3 +69,7 @@
             $Character->SaveByUserId($r['user_id']);
         }
     }
+
+    $time_end = microtime(true);
+    $execution_time = ($time_end - $time_start);
+    echo "Workers script execution time: ".$execution_time." seconds\n";
