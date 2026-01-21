@@ -1,5 +1,12 @@
 <?php require_once('../templates/game-header.php'); ?>
     <!-- Page Details -->
+    <?php
+        // Get all currently equipped item IDs to prevent double-equipping
+        $frontline_weapon = $Character->Data['party_json']['members']['frontline']['equipped_weapon'] ?? 0;
+        $frontline_armor = $Character->Data['party_json']['members']['frontline']['equipped_armor'] ?? 0;
+        $backline_weapon = $Character->Data['party_json']['members']['backline']['equipped_weapon'] ?? 0;
+        $backline_armor = $Character->Data['party_json']['members']['backline']['equipped_armor'] ?? 0;
+    ?>
     <div class="wrapper">
     <article class="main">
         <h1>Party Management</h1>
@@ -24,24 +31,37 @@
                 </form>
             </div>
             <div>
-                <form>
-                1st Gear Slot:
-                <select name="gear_slot_1">
-                    <option value="Sword of Testing">Sword of Testing</option>
-                    <option value="Shield of Testing">Shield of Testing</option>
-                    <option value="Helmet of Testing">Helmet of Testing</option>
+                <form method="POST" action="/party?update=frontline_gear">
+                Weapon Slot:
+                <select name="weapon_slot">
+                    <option value="0">-- None --</option>
+                    <?php
+                    foreach ($favorite_weapons as $weapon):
+                        // Skip if equipped by backline
+                        if ($weapon['id'] == $backline_weapon) continue;
+                        $selected = ($weapon['id'] == $frontline_weapon) ? 'selected' : '';
+                    ?>
+                    <option value="<?php echo $weapon['id']; ?>" <?php echo $selected; ?>><?php echo htmlspecialchars($weapon['name']); ?></option>
+                    <?php endforeach; ?>
                 </select>
 
-                2nd Gear Slot:
-                <select name="gear_slot_2">
-                    <option value="Sword of Testing">Sword of Testing</option>
-                    <option value="Shield of Testing">Shield of Testing</option>
-                    <option value="Helmet of Testing">Helmet of Testing</option>
+                Armor Slot:
+                <select name="armor_slot">
+                    <option value="0">-- None --</option>
+                    <?php
+                    foreach ($favorite_armors as $armor):
+                        // Skip if equipped by backline
+                        if ($armor['id'] == $backline_armor) continue;
+                        $selected = ($armor['id'] == $frontline_armor) ? 'selected' : '';
+                    ?>
+                    <option value="<?php echo $armor['id']; ?>" <?php echo $selected; ?>><?php echo htmlspecialchars($armor['name']); ?></option>
+                    <?php endforeach; ?>
                 </select>
                 <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
 
                  <input type="submit" value="Update Gear" />
                 </form>
+                <small><a href="/inventory">Favorite items in Inventory to equip them</a></small>
             </div>
             <div>
                 <form method="POST" action="/party?update=frontline_skills">
@@ -80,24 +100,37 @@
                 </form>
             </div>
             <div>
-                <form>
-                1st Gear Slot:
-                <select name="gear_slot_1">
-                    <option value="Sword of Testing">Sword of Testing</option>
-                    <option value="Shield of Testing">Shield of Testing</option>
-                    <option value="Helmet of Testing">Helmet of Testing</option>
+                <form method="POST" action="/party?update=backline_gear">
+                Weapon Slot:
+                <select name="weapon_slot">
+                    <option value="0">-- None --</option>
+                    <?php
+                    foreach ($favorite_weapons as $weapon):
+                        // Skip if equipped by frontline
+                        if ($weapon['id'] == $frontline_weapon) continue;
+                        $selected = ($weapon['id'] == $backline_weapon) ? 'selected' : '';
+                    ?>
+                    <option value="<?php echo $weapon['id']; ?>" <?php echo $selected; ?>><?php echo htmlspecialchars($weapon['name']); ?></option>
+                    <?php endforeach; ?>
                 </select>
 
-                2nd Gear Slot:
-                <select name="gear_slot_2">
-                    <option value="Sword of Testing">Sword of Testing</option>
-                    <option value="Shield of Testing">Shield of Testing</option>
-                    <option value="Helmet of Testing">Helmet of Testing</option>
+                Armor Slot:
+                <select name="armor_slot">
+                    <option value="0">-- None --</option>
+                    <?php
+                    foreach ($favorite_armors as $armor):
+                        // Skip if equipped by frontline
+                        if ($armor['id'] == $frontline_armor) continue;
+                        $selected = ($armor['id'] == $backline_armor) ? 'selected' : '';
+                    ?>
+                    <option value="<?php echo $armor['id']; ?>" <?php echo $selected; ?>><?php echo htmlspecialchars($armor['name']); ?></option>
+                    <?php endforeach; ?>
                 </select>
 
                 <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
                  <input type="submit" value="Update Gear" />
                 </form>
+                <small><a href="/inventory">Favorite items in Inventory to equip them</a></small>
             </div>
             <div>
                 <form method="POST" action="/party?update=backline_skills">

@@ -75,4 +75,33 @@
             return $this->DAL->rows_affected() > 0;
         }
 
+        function GetFavoriteItemsByOwnerAndSlot($owner_id, $slot) {
+            $gear_records = $this->DAL->r("SELECT * FROM gear WHERE owner_id=:owner_id AND favorite=1 ORDER BY created_at DESC", [
+                ':owner_id' => $owner_id
+            ]);
+
+            $items = [];
+            if ($gear_records) {
+                foreach ($gear_records as $record) {
+                    $item = json_decode($record['details'], true);
+                    if (isset($item['slot']) && $item['slot'] === $slot) {
+                        $item['id'] = $record['id'];
+                        $item['name'] = $record['name'];
+                        $item['market_price'] = $record['market_price'];
+                        $item['owner_id'] = $record['owner_id'];
+                        $items[] = $item;
+                    }
+                }
+            }
+            return $items;
+        }
+
+        function VerifyOwnership($gear_id, $owner_id) {
+            $gear_record = $this->DAL->r("SELECT id FROM gear WHERE id=:id AND owner_id=:owner_id", [
+                ':id' => $gear_id,
+                ':owner_id' => $owner_id
+            ]);
+            return !empty($gear_record);
+        }
+
     }
