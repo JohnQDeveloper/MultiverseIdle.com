@@ -26,10 +26,10 @@
             <b>Select First Affix:</b><br />
             <select name="affix_1">
                 <optgroup label="Stats">
-                    <option value="strength">Strength (+5 per gear level)</option>
-                    <option value="health">Health (+5 per gear level)</option>
-                    <option value="dexterity">Dexterity (+5 per gear level)</option>
-                    <option value="wisdom">Wisdom (+5 per gear level)</option>
+                    <option value="strength">Strength (+20 per gear level)</option>
+                    <option value="health">Health (+20 per gear level)</option>
+                    <option value="dexterity">Dexterity (+20 per gear level)</option>
+                    <option value="wisdom">Wisdom (+20 per gear level)</option>
                 </optgroup>
                 <optgroup label="Damage">
                     <option value="cold_damage">Increased Cold Damage (+2% per level)</option>
@@ -47,10 +47,10 @@
             <b>Select Second Affix:</b><br />
             <select name="affix_2">
                 <optgroup label="Stats">
-                    <option value="strength">Strength (+5 per gear level)</option>
-                    <option value="health">Health (+5 per gear level)</option>
-                    <option value="dexterity">Dexterity (+5 per gear level)</option>
-                    <option value="wisdom">Wisdom (+5 per gear level)</option>
+                    <option value="strength">Strength (+20 per gear level)</option>
+                    <option value="health">Health (+20 per gear level)</option>
+                    <option value="dexterity">Dexterity (+20 per gear level)</option>
+                    <option value="wisdom">Wisdom (+20 per gear level)</option>
                 </optgroup>
                 <optgroup label="Damage">
                     <option value="cold_damage">Increased Cold Damage (+2% per level)</option>

@@ -2,10 +2,10 @@
 
     # Affix definitions with their scaling per level
     $affix_definitions = [
-        'strength' => ['name' => 'Strength', 'per_level' => 5, 'type' => 'flat'],
-        'health' => ['name' => 'Health', 'per_level' => 5, 'type' => 'flat'],
-        'dexterity' => ['name' => 'Dexterity', 'per_level' => 5, 'type' => 'flat'],
-        'wisdom' => ['name' => 'Wisdom', 'per_level' => 5, 'type' => 'flat'],
+        'strength' => ['name' => 'Strength', 'per_level' => 20, 'type' => 'flat'],
+        'health' => ['name' => 'Health', 'per_level' => 20, 'type' => 'flat'],
+        'dexterity' => ['name' => 'Dexterity', 'per_level' => 20, 'type' => 'flat'],
+        'wisdom' => ['name' => 'Wisdom', 'per_level' => 20, 'type' => 'flat'],
         'cold_damage' => ['name' => 'Increased Cold Damage', 'per_level' => 2, 'type' => 'percent'],
         'fire_damage' => ['name' => 'Increased Fire Damage', 'per_level' => 2, 'type' => 'percent'],
         'physical_damage' => ['name' => 'Increased Physical Damage', 'per_level' => 1, 'type' => 'percent'],
