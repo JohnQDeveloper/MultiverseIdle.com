@@ -30,6 +30,10 @@
             return $this->statement->rowCount();
         }
 
+        function last_insert_id() {
+            return $this->dbh->lastInsertId();
+        }
+
         function write($query, $preparedArray = null) {
            if($this->dbh === false) {
                 return false;

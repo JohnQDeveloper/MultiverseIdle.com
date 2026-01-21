@@ -39,5 +39,6 @@ CREATE TABLE
     `details` json DEFAULT NULL,
     `market_price` bigint unsigned DEFAULT NULL,
     `owner_id` bigint unsigned DEFAULT NULL,
+    `name` varchar(255) DEFAULT NULL,
     PRIMARY KEY (`id`)
   ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci
