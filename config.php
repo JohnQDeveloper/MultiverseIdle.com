@@ -55,6 +55,7 @@
     # Require data files
     require_once(__DIR__ . '/data/resources.php');
     require_once(__DIR__ . '/data/skillgems.php');
+    require_once(__DIR__ . '/data/gearnames.php');
 
     # Minimal CSRF Protection
     if (empty($_SESSION['csrf-token'])) {

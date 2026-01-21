@@ -71,10 +71,16 @@
             $affix_1_value = $affix_1_level * $affix_definitions[$affix_1]['per_level'];
             $affix_2_value = $affix_2_level * $affix_definitions[$affix_2]['per_level'];
 
+            # Generate random item name: PREFIX MATERIAL ITEM_TYPE SUFFIX
+            $random_prefix = GEARNAMES_PREFIX[array_rand(GEARNAMES_PREFIX)];
+            $random_material = GEARNAMES_MATERIAL[array_rand(GEARNAMES_MATERIAL)];
+            $random_suffix = GEARNAMES_SUFFIX[array_rand(GEARNAMES_SUFFIX)];
+            $item_name = $random_prefix . ' ' . $random_material . ' ' . $item_type_definitions[$item_type]['name'] . ' ' . $random_suffix;
+
             # Create the item array
             $crafted_item = [
                 'type' => $item_type,
-                'name' => $item_type_definitions[$item_type]['name'],
+                'name' => $item_name,
                 'slot' => $item_type_definitions[$item_type]['slot'],
                 'base_bonuses' => $item_type_definitions[$item_type]['bonuses'],
                 'affixes' => [
@@ -108,6 +114,6 @@
 
             # Save the crafted item
             $gear = new Gear();
-            $new_gear_id = $gear->CreateItem($crafted_item);
+            $new_gear_id = $gear->CreateItem($crafted_item['name'], $crafted_item);
         }
     }

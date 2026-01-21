@@ -9,11 +9,13 @@
             $this->DAL = $DAL;
         }
 
-        function CreateItem($gear_details) {
+        function CreateItem($name, $gear_details) {
             // remember that 0 market price items aren't listed or < 1 I suppose.
-            $this->DAL->w("INSERT INTO gear SET created_at=NOW(), details=:details, market_price=0, owner_id=:owner_id", [
+            $this->DAL->w("INSERT INTO gear SET created_at=NOW(), name=:name, details=:details, market_price=0,
+            owner_id=:owner_id", [
+                ':name' => $name,
                 ':details' => json_encode($gear_details),
-                ':owner_id' => $_SESSION['user_id'] ?? null
+                ':owner_id' => $_SESSION['auth_user_id'] ?? null
             ]);
 
             // return new gear ID
