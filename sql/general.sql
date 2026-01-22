@@ -16,6 +16,10 @@ CREATE TABLE
     `rift_queued` bigint unsigned DEFAULT NULL,
     `world_boss_queued` int DEFAULT NULL,
     `user_id` int DEFAULT NULL,
+    `last_arena_log` text,
+    `last_arena_time` datetime DEFAULT NULL,
+    `active_potion_id` int DEFAULT NULL,
+    `potion_expire_time` datetime DEFAULT NULL,
     PRIMARY KEY (`id`)
   ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci
 
@@ -44,3 +48,16 @@ CREATE TABLE
   ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci
 
 ALTER TABLE gear ADD COLUMN favorite TINYINT(1) DEFAULT 0;
+
+/* POTIONS TABLE */
+CREATE TABLE
+  `potions` (
+    `id` int unsigned NOT NULL AUTO_INCREMENT,
+    `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `level` int DEFAULT NULL,
+    `prefix` varchar(255) DEFAULT NULL,
+    `suffix` varchar(255) DEFAULT NULL,
+    `name` varchar(255) DEFAULT NULL,
+    `owner_id` int DEFAULT NULL,
+    PRIMARY KEY (`id`)
+  ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci

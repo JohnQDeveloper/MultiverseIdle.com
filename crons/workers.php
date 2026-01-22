@@ -19,6 +19,11 @@
             $Character->LoadByUserId($r['user_id']);
             $worker_config = $Character->Data['worker_json'];
             echo "Loaded & running workers for user_id: ".$r['user_id']."\n";
+
+            # Load potion bonuses
+            $Potion = new Potion();
+            $potion_bonuses = $Potion->GetActivePotionBonuses($Character->Data['id']);
+            echo "Loaded potion bonuses for user_id: ".$r['user_id']."\n";
             #print_r($worker_config);
             /*
             Array
@@ -41,13 +46,26 @@
             $resource = $worker_config['resource'];
             $skill_level = $worker_config['skills'][$resource];
             $num_workers = $worker_config['workers'];
-            $speed_upgrades = $worker_config['speed_upgrades'];
-            $intelligence_upgrades = $worker_config['intelligence_upgrades'];
+            $speed_upgrades = $worker_config['speed_upgrade_percent'];
+            $intelligence_upgrades = $worker_config['intelligence_upgrade_percent'];
+
+            # Get the specific potion bonus for this resource type
+            $potion_bonus_key = $resource . '_worker_yield';
+            $potion_bonus = isset($potion_bonuses[$potion_bonus_key]) ? $potion_bonuses[$potion_bonus_key] : 0;
 
             $harvests = 10; // 10 harvests per 1 minute tick basically
-            $harvests = worker_yield($harvests, $speed_upgrades, $skill_level, $num_workers);
-            echo "Gained ".$harvests." $resource\n";
-            echo "Gained ".$harvests." skill xp\n";
+            $harvests_without_potion = worker_yield($harvests, $speed_upgrades, $skill_level, $num_workers, 0);
+            $harvests_with_potion = worker_yield($harvests, $speed_upgrades, $skill_level, $num_workers, $potion_bonus);
+
+            echo display_worker_yield_formula(10, $speed_upgrades, $skill_level, $num_workers, $potion_bonus);
+            if ($potion_bonus > 0) {
+                echo "Gained ".$harvests_with_potion." $resource (base: ".$harvests_without_potion.", +".$potion_bonus."% potion bonus: +".($harvests_with_potion - $harvests_without_potion).")\n";
+            } else {
+                echo "Gained ".$harvests_with_potion." $resource\n";
+            }
+            echo "Gained ".$harvests_with_potion." skill xp\n";
+
+            $harvests = $harvests_with_potion;
 
             # Worker XP Calculation
             $Character->Data['worker_json']['skill_xp'][$worker_config['resource']] += $harvests;

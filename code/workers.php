@@ -99,3 +99,8 @@
     $new_worker_cost = calculate_worker_cost(1000, 10, $current_workers);
     $next_intelligence_upgrade_cost = calculate_worker_cost(500, 1.4, $current_intelligence);
     $next_speed_upgrade_cost = calculate_worker_cost(500, 1.4, $current_speed);
+
+    # Load active potion bonuses
+    $potion = new Potion();
+    $potion_bonuses = $potion->GetActivePotionBonuses($Character->Data['id']);
+    $active_potion = $potion->GetActivePotion($Character->Data['id']);

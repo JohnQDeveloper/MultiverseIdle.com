@@ -1,12 +1,16 @@
 <?php
 
-    function worker_yield($harvests, $speed_upgrades, $skill_level, $num_workers) {
-        return round($harvests * (1 + ($speed_upgrades * 0.05)) * (1 + ($skill_level * 0.05)) * $num_workers);
+    function worker_yield($harvests, $speed_upgrades, $skill_level, $num_workers, $potion_bonus_percent = 0) {
+        $base_yield = $harvests * (1 + ($speed_upgrades * 0.05)) * (1 + ($skill_level * 0.05)) * $num_workers;
+        $potion_multiplier = 1 + ($potion_bonus_percent / 100);
+        return round($base_yield * $potion_multiplier);
     }
 
-    function display_worker_yield_formula() {
+    function display_worker_yield_formula($harvests, $speed_upgrades, $skill_level, $num_workers, $potion_bonus_percent = 0) {
         #echo 'round($harvests * (1 + ($speed_upgrades * 0.01)) * (1 + ($skill_level * 0.05)) * $num_workers)';
-        echo 'round(10 * (1 + ($speed_upgrades * 0.05)) * (1 + ($skill_level * 0.05)) * $num_workers)';
+        echo 'round(10 * (1 + ($speed_upgrades * 0.05)) * (1 + ($skill_level * 0.05)) * $num_workers * $potion_multiplier) <BR />';
+        $potion_multiplier = 1 + ($potion_bonus_percent / 100);
+        echo "round($harvests * (1 + ($speed_upgrades * 0.05)) * (1 + ($skill_level * 0.05)) * $num_workers * $potion_multiplier)";
     }
 
     function calculate_monster_attribute($monster_level) {

@@ -1,21 +1,27 @@
-name: Auto-approve own PRs
+# .github/workflows/triage.yml
+name: Auto-Triage Issues
 
-on:
-  pull_request:
-    branches: [ main ]
-  workflow_dispatch: # Allows manual runs
+on: [issues]
 
 jobs:
-  auto-approve:
+  add_triage_label:
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' && github.event.pull_request.user.login == github.repository_owner
-    permissions:
-      pull-requests: write
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Check for Priority Label and Add needs_triage
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const issueLabels = context.payload.issue.labels.map(label => label.name);
+            const hasPriority = issueLabels.some(label => label.endsWith('Priority'));
 
-      - name: Auto-approve PR
-        run: gh pr review ${{ github.event.pull_request.number }} --approve
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
+            if (!hasPriority) {
+              console.log("No priority label found, adding needs_triage.");
+              github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                labels: ['needs_triage']
+              });
+            } else {
+              console.log("Priority label found, skipping needs_triage.");
+            }

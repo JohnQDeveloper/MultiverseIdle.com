@@ -3,13 +3,25 @@
     <div class="wrapper">
     <article class="main">
         <h1>Craft</h1>
-        <p>Craft powerful gear to enhance your party's abilities. Each item type provides different stat bonuses.</p>
+        <p>Craft powerful gear and potions to enhance your party's abilities.</p>
 
         <?php
             $party_level = $Character->Data['party_json']['members']['frontline']['level'];
+            $active_tab = $_GET['tab'] ?? 'gear';
         ?>
 
-        <form method="POST" action="/craft">
+        <!-- Tab Navigation -->
+        <div style="margin-bottom: 20px; border-bottom: 2px solid #ccc;">
+            <a href="/craft?tab=gear" style="display: inline-block; padding: 10px 20px; margin-right: 5px; text-decoration: none; <?php echo $active_tab === 'gear' ? 'border-bottom: 3px solid #007bff; font-weight: bold;' : ''; ?>">Gear Crafting</a>
+            <a href="/craft?tab=potions" style="display: inline-block; padding: 10px 20px; text-decoration: none; <?php echo $active_tab === 'potions' ? 'border-bottom: 3px solid #007bff; font-weight: bold;' : ''; ?>">Potion Crafting</a>
+        </div>
+
+        <?php if ($active_tab === 'gear'): ?>
+        <!-- Gear Crafting Tab -->
+        <h2>Gear Crafting</h2>
+        <p>Craft powerful gear to enhance your party's abilities. Each item type provides different stat bonuses.</p>
+
+        <form method="POST" action="/craft?tab=gear">
             <b>Select Item to Craft:</b><br />
             <select name="item_type">
                 <optgroup label="Weapons">
@@ -73,6 +85,52 @@
             <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
             <input type="submit" role="button" name="craft_item" value="Craft Item">
         </form>
+
+        <?php elseif ($active_tab === 'potions'): ?>
+        <!-- Potion Crafting Tab -->
+        <h2>Potion Crafting</h2>
+        <p>Brew potions to boost your resource gains and experience. Potions have a prefix and suffix affix.</p>
+
+        <form method="POST" action="/craft?tab=potions">
+            <b>Select Prefix Affix:</b><br />
+            <select name="prefix_affix">
+                <optgroup label="Worker Yields">
+                    <option value="herb_worker_yield">Herb Worker Yield (+1% per level)</option>
+                    <option value="gold_worker_yield">Gold Worker Yield (+1% per level)</option>
+                    <option value="iron_worker_yield">Iron Worker Yield (+1% per level)</option>
+                    <option value="gems_worker_yield">Gems Worker Yield (+1% per level)</option>
+                </optgroup>
+                <optgroup label="Resource Drops">
+                    <option value="arena_resource_drops">Arena Resource Drops (+1% per level)</option>
+                    <option value="rift_drops">Rift Drops (+1% per level)</option>
+                </optgroup>
+            </select>
+            <br /><br />
+
+            <b>Select Suffix Affix:</b><br />
+            <select name="suffix_affix">
+                <optgroup label="Experience Gains">
+                    <option value="arena_xp">Arena XP (+1% per level)</option>
+                    <option value="rift_xp">Rift XP (+1% per level)</option>
+                    <option value="world_boss_xp">World Boss XP (+100% per level)</option>
+                </optgroup>
+                <optgroup label="Stat Gains">
+                    <option value="arena_stat_gains">Arena Stat Gains (+1% per level)</option>
+                    <option value="rift_stat_gains">Rift Stat Gains (+1% per level)</option>
+                </optgroup>
+            </select>
+            <br /><br />
+
+            <p>
+                <b>Potion Level:</b> <?php echo $party_level; ?> (Equal to Party Level <?php echo $party_level; ?>)<br />
+                <small>Crafting cost: <?php echo ($party_level * 100); ?> Herbs. Potion level is fixed at your current party level.</small>
+            </p>
+
+            <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
+            <input type="submit" role="button" name="craft_potion" value="Craft Potion">
+        </form>
+
+        <?php endif; ?>
 
     </article>
     </div>

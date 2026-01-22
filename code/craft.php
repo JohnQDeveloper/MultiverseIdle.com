@@ -26,6 +26,27 @@
     $valid_affixes = array_keys($affix_definitions);
     $valid_item_types = array_keys($item_type_definitions);
 
+    # Potion affix definitions
+    $potion_prefix_definitions = [
+        'herb_worker_yield' => ['name' => 'Herb Worker Yield', 'per_level' => 1],
+        'gold_worker_yield' => ['name' => 'Gold Worker Yield', 'per_level' => 1],
+        'iron_worker_yield' => ['name' => 'Iron Worker Yield', 'per_level' => 1],
+        'gems_worker_yield' => ['name' => 'Gems Worker Yield', 'per_level' => 1],
+        'arena_resource_drops' => ['name' => 'Arena Resource Drops', 'per_level' => 1],
+        'rift_drops' => ['name' => 'Rift Drops', 'per_level' => 1],
+    ];
+
+    $potion_suffix_definitions = [
+        'arena_xp' => ['name' => 'Arena XP', 'per_level' => 1],
+        'arena_stat_gains' => ['name' => 'Arena Stat Gains', 'per_level' => 1],
+        'rift_xp' => ['name' => 'Rift XP', 'per_level' => 1],
+        'rift_stat_gains' => ['name' => 'Rift Stat Gains', 'per_level' => 1],
+        'world_boss_xp' => ['name' => 'World Boss XP', 'per_level' => 100],
+    ];
+
+    $valid_potion_prefixes = array_keys($potion_prefix_definitions);
+    $valid_potion_suffixes = array_keys($potion_suffix_definitions);
+
     # Craft Item
     if (isset($_POST['craft_item'])) {
         $item_type = $_POST['item_type'] ?? '';
@@ -115,5 +136,41 @@
             # Save the crafted item
             $gear = new Gear();
             $new_gear_id = $gear->CreateItem($crafted_item['name'], $crafted_item);
+        }
+    }
+
+    # Craft Potion
+    if (isset($_POST['craft_potion'])) {
+        $prefix_affix = $_POST['prefix_affix'] ?? '';
+        $suffix_affix = $_POST['suffix_affix'] ?? '';
+
+        # Validate inputs
+        if (!in_array($prefix_affix, $valid_potion_prefixes)) {
+            $alert_danger = 'Invalid prefix affix selected.';
+        } elseif (!in_array($suffix_affix, $valid_potion_suffixes)) {
+            $alert_danger = 'Invalid suffix affix selected.';
+        } else {
+            # Get party level - this is the potion level
+            $party_level = $Character->Data['party_json']['members']['frontline']['level'];
+            $potion_level = $party_level;
+
+            # Calculate affix values based on level
+            $prefix_value = $potion_level * $potion_prefix_definitions[$prefix_affix]['per_level'];
+            $suffix_value = $potion_level * $potion_suffix_definitions[$suffix_affix]['per_level'];
+
+            # Generate potion name
+            $potion_name = $potion_prefix_definitions[$prefix_affix]['name'] . ' and ' . $potion_suffix_definitions[$suffix_affix]['name'] . ' Potion';
+
+            # Deduct crafting cost
+            $Character->Data['herbs'] -= ($potion_level * 100);
+
+            # Format success message
+            $alert_success = 'Crafted Level ' . $potion_level . ' ' . htmlspecialchars($potion_name) . ' with ' .
+                '+' . $prefix_value . '% ' . htmlspecialchars($potion_prefix_definitions[$prefix_affix]['name']) .
+                ' and +' . $suffix_value . '% ' . htmlspecialchars($potion_suffix_definitions[$suffix_affix]['name']);
+
+            # Save the crafted potion
+            $potion = new Potion();
+            $new_potion_id = $potion->CreatePotion($potion_name, $prefix_affix, $suffix_affix, $potion_level);
         }
     }
