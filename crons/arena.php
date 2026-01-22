@@ -19,6 +19,10 @@
 
             $arena_floor = $Character->Data['arena_floor'];
 
+            # Load potion bonuses
+            $Potion = new Potion();
+            $potion_bonuses = $Potion->GetActivePotionBonuses($Character->Data['id']);
+
             echo "Loaded & running party for user_id: ".$r['user_id']."\n";
 
             $monster_strength = calculate_monster_attribute($arena_floor);
@@ -67,6 +71,9 @@
                 // Both characters gain 1 point in a random stat
                 $stats = ['strength', 'dexterity', 'health', 'wisdom'];
 
+                # Get arena stat gain bonus (percentage chance for +1 additional stat)
+                $arena_stat_bonus = isset($potion_bonuses['arena_stat_gains']) ? $potion_bonuses['arena_stat_gains'] : 0;
+
                 $frontline_stat = $stats[array_rand($stats)];
                 $frontline_stat_lucky = $stats[array_rand($stats)];
 
@@ -75,8 +82,18 @@
                     $frontline_stat = $Character->Data['party_json']['members']['frontline']['class'];
                 }
 
-                $Character->Data['party_json']['members']['frontline'][$frontline_stat]++;
-                $ArenaLog = "<span class='success'>Frontline gained +1 $frontline_stat!</span><BR />\n$ArenaLog";
+                $frontline_stat_gain = 1;
+                # Roll for bonus stat from potion (percentage chance)
+                if ($arena_stat_bonus > 0 && rand(1, 100) <= $arena_stat_bonus) {
+                    $frontline_stat_gain++;
+                }
+
+                $Character->Data['party_json']['members']['frontline'][$frontline_stat] += $frontline_stat_gain;
+                if ($frontline_stat_gain > 1) {
+                    $ArenaLog = "<span class='success'>Frontline gained +$frontline_stat_gain $frontline_stat (+1 bonus from potion)!</span><BR />\n$ArenaLog";
+                } else {
+                    $ArenaLog = "<span class='success'>Frontline gained +$frontline_stat_gain $frontline_stat!</span><BR />\n$ArenaLog";
+                }
 
                 $backline_stat = $stats[array_rand($stats)];
                 $backline_stat_lucky = $stats[array_rand($stats)];
@@ -85,23 +102,58 @@
                     $backline_stat = $Character->Data['party_json']['members']['backline']['class'];
                 }
 
-                $Character->Data['party_json']['members']['backline'][$backline_stat]++;
-                $ArenaLog = "<span class='success'>Backline gained +1 $backline_stat!</span><BR />\n$ArenaLog";
+                $backline_stat_gain = 1;
+                # Roll for bonus stat from potion (percentage chance)
+                while($arena_stat_bonus > 0 && rand(1, 100) <= $arena_stat_bonus) {
+                    $backline_stat_gain++;
+                    $arena_stat_bonus -= 100; // Only allow 1 bonus per 100% chance
+                }
 
-                // Award gold equal to arena floor
-                $Character->Data['gold'] += $arena_floor;
-                $ArenaLog = "<span class='success'>You gained $arena_floor gold!</span><BR />\n$ArenaLog";
+                $Character->Data['party_json']['members']['backline'][$backline_stat] += $backline_stat_gain;
+                if ($backline_stat_gain > 1) {
+                    $ArenaLog = "<span class='success'>Backline gained +$backline_stat_gain $backline_stat (+".($backline_stat_gain-1)." bonus from potion)!</span><BR />\n$ArenaLog";
+                } else {
+                    $ArenaLog = "<span class='success'>Backline gained +$backline_stat_gain $backline_stat!</span><BR />\n$ArenaLog";
+                }
 
-                // Award bonus resource equal to arena floor
+                // Award gold equal to arena floor (with potion bonus)
+                $arena_resource_bonus = isset($potion_bonuses['arena_resource_drops']) ? $potion_bonuses['arena_resource_drops'] : 0;
+                $base_gold = $arena_floor;
+                $gold_multiplier = 1 + ($arena_resource_bonus / 100);
+                $gold_award = round($base_gold * $gold_multiplier);
+
+                $Character->Data['gold'] += $gold_award;
+                if ($arena_resource_bonus > 0) {
+                    $ArenaLog = "<span class='success'>You gained $gold_award gold (base: $base_gold, +".$arena_resource_bonus."% potion bonus: +".($gold_award - $base_gold).")!</span><BR />\n$ArenaLog";
+                } else {
+                    $ArenaLog = "<span class='success'>You gained $gold_award gold!</span><BR />\n$ArenaLog";
+                }
+
+                // Award bonus resource equal to arena floor (with potion bonus)
                 $bonus_resources = ['iron', 'herbs', 'gems'];
                 $bonus_resource = $bonus_resources[array_rand($bonus_resources)];
-                $Character->Data[$bonus_resource] += $arena_floor;
-                $ArenaLog = "<span class='success'>You gained $arena_floor $bonus_resource!</span><BR />\n$ArenaLog";
+                $base_resource = $arena_floor;
+                $resource_award = round($base_resource * $gold_multiplier); // Same multiplier as gold
 
-                // Award XP equal to arena floor * 10
-                $xp_award = $arena_floor * 10;
+                $Character->Data[$bonus_resource] += $resource_award;
+                if ($arena_resource_bonus > 0) {
+                    $ArenaLog = "<span class='success'>You gained $resource_award $bonus_resource (base: $base_resource, +".$arena_resource_bonus."% potion bonus: +".($resource_award - $base_resource).")!</span><BR />\n$ArenaLog";
+                } else {
+                    $ArenaLog = "<span class='success'>You gained $resource_award $bonus_resource!</span><BR />\n$ArenaLog";
+                }
+
+                // Award XP equal to arena floor * 10 (with potion bonus)
+                $arena_xp_bonus = isset($potion_bonuses['arena_xp']) ? $potion_bonuses['arena_xp'] : 0;
+                $base_xp = $arena_floor * 10;
+                $xp_multiplier = 1 + ($arena_xp_bonus / 100);
+                $xp_award = round($base_xp * $xp_multiplier);
+
                 $Character->IncrementPartyXP($xp_award);
-                $ArenaLog = "<span class='success'>Both party members gained $xp_award XP!</span><BR />\n$ArenaLog";
+                if ($arena_xp_bonus > 0) {
+                    $ArenaLog = "<span class='success'>Both party members gained $xp_award XP (base: $base_xp, +".$arena_xp_bonus."% potion bonus: +".($xp_award - $base_xp).")!</span><BR />\n$ArenaLog";
+                } else {
+                    $ArenaLog = "<span class='success'>Both party members gained $xp_award XP!</span><BR />\n$ArenaLog";
+                }
 
             } else {
                 $ArenaLog .= "<span class='danger'>You lost the arena battle on floor $arena_floor.</span><BR />\n";
