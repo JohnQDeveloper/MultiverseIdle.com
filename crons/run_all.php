@@ -11,6 +11,10 @@
     require_once('arena.php');
     echo "Arena Cron Completed.\n";
 
+    echo "Starting Potions Cron...\n";
+    require_once('potions.php');
+    echo "Potions Cron Completed.\n";
+
     echo "All Crons Completed.\n";
 
     $run_all_time_end = microtime(true);
