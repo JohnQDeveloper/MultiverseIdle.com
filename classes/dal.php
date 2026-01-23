@@ -1,86 +1,123 @@
 <?php
-    class DAL {
-        public $dbh;
-        private $statement;
 
-        /*
-        function __construct($username, $password, $hostname, $defaultDatabase) {
-            try {
-                $this->dbh = new PDO("mysql:host=$hostname;dbname=$defaultDatabase", $username, $password);
-            }
-            catch(PDOException $e) {
-                LogEvent("EMERGENCY", $e); #DB is down is bad obviously
-                $this->dbh = false;
-            }
-        }*/
+declare(strict_types=1);
 
-        function __construct($db) {
-            $this->dbh = $db;
+class DAL
+{
+    public object $dbh;
+    private object|false $statement;
+
+    /**
+     * @param object $db PDO database connection object
+     */
+    public function __construct(object $db)
+    {
+        $this->dbh = $db;
+        $this->statement = false;
+    }
+
+    /**
+     * Alias for write method
+     *
+     * @param string $query SQL query with placeholders
+     * @param array<string, mixed>|null $preparedArray Parameters for prepared statement
+     */
+    public function w(string $query, ?array $preparedArray = null): bool
+    {
+        return $this->write($query, $preparedArray);
+    }
+
+    /**
+     * Alias for read method
+     *
+     * @param string $query SQL query with placeholders
+     * @param array<string, mixed>|null $preparedArray Parameters for prepared statement
+     * @param int $fetchMode PDO fetch mode constant
+     * @return array<int, array<string, mixed>>|false
+     */
+    public function r(string $query, ?array $preparedArray = null, int $fetchMode = PDO::FETCH_ASSOC): array|false
+    {
+        return $this->read($query, $preparedArray, $fetchMode);
+    }
+
+    /**
+     * Get number of rows affected by last statement
+     */
+    public function rows_affected(): int
+    {
+        if ($this->statement === false) {
+            return 0;
+        }
+        return $this->statement->rowCount();
+    }
+
+    /**
+     * Get last inserted ID
+     */
+    public function last_insert_id(): string|false
+    {
+        return $this->dbh->lastInsertId();
+    }
+
+    /**
+     * Execute a write query (INSERT, UPDATE, DELETE)
+     *
+     * @param string $query SQL query with placeholders
+     * @param array<string, mixed>|null $preparedArray Parameters for prepared statement
+     */
+    public function write(string $query, ?array $preparedArray = null): bool
+    {
+        if ($this->dbh === false) {
+            return false;
         }
 
-        function w($query, $preparedArray = null) {
-            return $this->write($query, $preparedArray);
-        }
+        try {
+            $this->statement = $this->dbh->prepare($query);
 
-        function r($query, $preparedArray = null, $fetchMode=PDO::FETCH_ASSOC) {
-            return $this->read($query, $preparedArray, $fetchMode);
-        }
-
-        function rows_affected() {
-            return $this->statement->rowCount();
-        }
-
-        function last_insert_id() {
-            return $this->dbh->lastInsertId();
-        }
-
-        function write($query, $preparedArray = null) {
-           if($this->dbh === false) {
-                return false;
+            if ($preparedArray === null) {
+                $this->statement->execute();
+            } else {
+                $this->statement->execute($preparedArray);
             }
 
-            try {
-                $this->statement = $this->dbh->prepare($query);
-
-                if($preparedArray == null)
-                    $this->statement->execute();
-                else {
-                    $this->statement->execute($preparedArray);
-                    #echo "<h1>E: ";
-                    #print_r($this->dbh->errorInfo());
-                    #echo "</h1>";
-                }
-
-                return true;
+            return true;
+        } catch (PDOException $e) {
+            if (DEBUG) {
+                echo $e . "<BR />";
             }
-            catch(PDOException $e) {
-                if(DEBUG)
-                    echo $e."<BR />";
-                return false;
-            }
-
-        }
-
-        // This eventually needs cache, read/write splitting logic
-        function read($query, $preparedArray = null, $fetchMode=PDO::FETCH_ASSOC) {
-            if($this->dbh === false) {
-                return false;
-            }
-
-            try {
-                $this->statement = $this->dbh->prepare($query);
-
-                if($preparedArray == null)
-                    $this->statement->execute();
-                else
-                    $this->statement->execute($preparedArray);
-
-                return $this->statement->fetchAll($fetchMode);
-            }
-            catch(PDOException $e) {
-                if(DEBUG)
-                    echo $e."<BR />";
-                return false;
-            }
+            return false;
         }
     }
+
+    /**
+     * Execute a read query (SELECT)
+     *
+     * @param string $query SQL query with placeholders
+     * @param array<string, mixed>|null $preparedArray Parameters for prepared statement
+     * @param int $fetchMode PDO fetch mode constant
+     * @return array<int, array<string, mixed>>|false
+     */
+    public function read(string $query, ?array $preparedArray = null, int $fetchMode = PDO::FETCH_ASSOC): array|false
+    {
+        if ($this->dbh === false) {
+            return false;
+        }
+
+        try {
+            $this->statement = $this->dbh->prepare($query);
+
+            if ($preparedArray === null) {
+                $this->statement->execute();
+            } else {
+                $this->statement->execute($preparedArray);
+            }
+
+            return $this->statement->fetchAll($fetchMode);
+        } catch (PDOException $e) {
+            if (DEBUG) {
+                echo $e . "<BR />";
+            }
+            return false;
+        }
+    }
+}
