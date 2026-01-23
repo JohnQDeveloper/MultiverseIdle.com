@@ -64,6 +64,7 @@
     require_once('../templates/footer.php');
 
     if($CharacterDataCache != $Character->Data) {
+        $Character->Data['last_seen'] = date('Y-m-d H:i:s');
         $Character->SaveByUserId();
     }
     else {

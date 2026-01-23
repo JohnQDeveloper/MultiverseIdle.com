@@ -20,6 +20,7 @@ CREATE TABLE
     `last_arena_time` datetime DEFAULT NULL,
     `active_potion_id` int DEFAULT NULL,
     `potion_expire_time` datetime DEFAULT NULL,
+    `last_seen` datetime DEFAULT NULL,
     PRIMARY KEY (`id`)
   ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci
 

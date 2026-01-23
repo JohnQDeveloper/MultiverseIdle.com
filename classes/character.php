@@ -28,7 +28,7 @@ class Character {
             $user_id = $_SESSION['auth_user_id'];
         }
 
-        $this->DAL->w("UPDATE `characters` SET `last_save` = NOW() WHERE `user_id` = :user_id", [
+        $this->DAL->w("UPDATE `characters` SET `last_seen` = NOW() WHERE `user_id` = :user_id", [
             'user_id' => $user_id
         ]);
 
@@ -194,7 +194,8 @@ class Character {
             `world_boss_queued` = :world_boss_queued,
             `last_save` = NOW(),
             `last_arena_time` = :last_arena_time,
-            `last_arena_log` = :last_arena_log
+            `last_arena_log` = :last_arena_log,
+            `last_seen` = :last_seen
             WHERE `user_id` = :user_id";
 
         $params = [
@@ -211,7 +212,8 @@ class Character {
             'world_boss_queued' => $this->Data['world_boss_queued'],
             'last_arena_time' => $this->Data['last_arena_time'],
             'last_arena_log' => $this->Data['last_arena_log'],
-            'user_id' => $user_id
+            'user_id' => $user_id,
+            'last_seen' => $this->Data['last_seen']
         ];
 
         $this->DAL->w($query, $params);
