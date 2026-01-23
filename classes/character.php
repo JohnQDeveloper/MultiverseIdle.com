@@ -1,18 +1,45 @@
 <?php
 
-class Character {
-    private $DAL;
-    public $Data;
+declare(strict_types=1);
 
-    public function __construct() {
+class Character
+{
+    // Class constants for magic numbers
+    private const DEFAULT_STAT_VALUE = 10;
+    private const DEFAULT_LEVEL = 1;
+    private const DEFAULT_RESOURCE_AMOUNT = 1;
+    private const XP_MULTIPLIER = 50;
+
+    private object $DAL;
+
+    /**
+     * @var array<string, mixed> Character data including party_json and worker_json
+     */
+    public array $Data = [];
+
+    public function __construct()
+    {
         global $DAL;
         $this->DAL = $DAL;
     }
 
-    public function CharacterExists($user_id = "") {
-        // Load Session Defaults
-        if($user_id == "") {
-            $user_id = $_SESSION['auth_user_id'];
+    /**
+     * Get user ID from parameter or session
+     */
+    private function getUserId(int $user_id = 0): int
+    {
+        if ($user_id === 0 && isset($_SESSION['auth_user_id'])) {
+            return (int)$_SESSION['auth_user_id'];
+        }
+        return $user_id;
+    }
+
+    public function CharacterExists(int $user_id = 0): bool
+    {
+        $user_id = $this->getUserId($user_id);
+
+        if ($user_id <= 0) {
+            return false;
         }
 
         $query = "SELECT COUNT(*) as `count` FROM `characters` WHERE `user_id` = :user_id";
@@ -22,10 +49,12 @@ class Character {
         return ($result[0]['count'] > 0);
     }
 
-    public function ActivityCheck($user_id = "") {
-        // Load Session Defaults
-        if($user_id == "") {
-            $user_id = $_SESSION['auth_user_id'];
+    public function ActivityCheck(int $user_id = 0): bool
+    {
+        $user_id = $this->getUserId($user_id);
+
+        if ($user_id <= 0) {
+            return false;
         }
 
         $this->DAL->w("UPDATE `characters` SET `last_seen` = NOW() WHERE `user_id` = :user_id", [
@@ -35,19 +64,21 @@ class Character {
         return true;
     }
 
-    public function IncrementPartyXP($xp_amount, $user_id = "") {
-        // Load Session Defaults
-        if($user_id == "") {
-            $user_id = $_SESSION['auth_user_id'];
+    public function IncrementPartyXP(int $xp_amount, int $user_id = 0): bool
+    {
+        $user_id = $this->getUserId($user_id);
+
+        if ($user_id <= 0) {
+            return false;
         }
 
         $this->Data['party_json']['members']['frontline']['xp'] += $xp_amount;
         $this->Data['party_json']['members']['backline']['xp'] += $xp_amount;
 
-        $level = $this->Data['party_json']['members']['frontline']['level'];
-        $xp_required = 50 * $level * ($level + 1);
+        $level = (int)$this->Data['party_json']['members']['frontline']['level'];
+        $xp_required = self::XP_MULTIPLIER * $level * ($level + 1);
 
-        if($this->Data['party_json']['members']['frontline']['xp'] >= $xp_required) {
+        if ($this->Data['party_json']['members']['frontline']['xp'] >= $xp_required) {
             // Level Up both members
             $this->Data['party_json']['members']['frontline']['level'] += 1;
             $this->Data['party_json']['members']['backline']['level'] += 1;
@@ -57,18 +88,23 @@ class Character {
             $this->Data['party_json']['members']['backline']['xp'] -= $xp_required;
         }
 
-
         return true;
     }
 
-    public function CreateCharacter($user_id = "", $name = "") {
-        // Load Session Defaults
-        if($user_id == "") {
-            $user_id = $_SESSION['auth_user_id'];
+    public function CreateCharacter(int $user_id = 0, string $name = ""): bool
+    {
+        $user_id = $this->getUserId($user_id);
+
+        if ($user_id <= 0) {
+            return false;
         }
 
-        if($name == "") {
-            $name = $_SESSION['auth_username'];
+        if ($name === "" && isset($_SESSION['auth_username'])) {
+            $name = (string)$_SESSION['auth_username'];
+        }
+
+        if ($name === "") {
+            return false;
         }
 
         $party_json = json_encode([
@@ -76,22 +112,22 @@ class Character {
                 "frontline" => [
                     "class" => "strength",
                     "xp" => 0,
-                    "level" => 1,
-                    "strength" => 10,
-                    "dexterity" => 10,
-                    "health" => 10,
-                    "wisdom" => 10,
+                    "level" => self::DEFAULT_LEVEL,
+                    "strength" => self::DEFAULT_STAT_VALUE,
+                    "dexterity" => self::DEFAULT_STAT_VALUE,
+                    "health" => self::DEFAULT_STAT_VALUE,
+                    "wisdom" => self::DEFAULT_STAT_VALUE,
                     "gear" => [],
                     "skills" => ["Flaming Blades", "Antimage"],
                 ],
                 "backline" => [
                     "class" => "wisdom",
                     "xp" => 0,
-                    "level" => 1,
-                    "strength" => 10,
-                    "dexterity" => 10,
-                    "health" => 10,
-                    "wisdom" => 10,
+                    "level" => self::DEFAULT_LEVEL,
+                    "strength" => self::DEFAULT_STAT_VALUE,
+                    "dexterity" => self::DEFAULT_STAT_VALUE,
+                    "health" => self::DEFAULT_STAT_VALUE,
+                    "wisdom" => self::DEFAULT_STAT_VALUE,
                     "gear" => [],
                     "skills" => ["Healing Rain", "Firestorm"],
                 ]
@@ -100,14 +136,14 @@ class Character {
 
         $worker_json = json_encode([
             "resource" => "gold",
-            "workers" => 1,
-            "intelligence_upgrades" => 1,
-            "speed_upgrades" => 1,
+            "workers" => self::DEFAULT_LEVEL,
+            "intelligence_upgrades" => self::DEFAULT_LEVEL,
+            "speed_upgrades" => self::DEFAULT_LEVEL,
             "skills" => [
-                "gold" => 1,
-                "iron" => 1,
-                "herbs" => 1,
-                "gems" => 1
+                "gold" => self::DEFAULT_LEVEL,
+                "iron" => self::DEFAULT_LEVEL,
+                "herbs" => self::DEFAULT_LEVEL,
+                "gems" => self::DEFAULT_LEVEL
             ]
         ]);
 
@@ -127,12 +163,12 @@ class Character {
         ) VALUES (
             :user_id,
             :name,
-            1,
-            1,
-            1,
-            1,
-            1,
-            1,
+            :level,
+            :arena_floor,
+            :gold,
+            :iron,
+            :herbs,
+            :gems,
             :party_json,
             :worker_json,
             NULL,
@@ -142,6 +178,12 @@ class Character {
         $params = [
             'user_id' => $user_id,
             'name' => $name,
+            'level' => self::DEFAULT_LEVEL,
+            'arena_floor' => self::DEFAULT_LEVEL,
+            'gold' => self::DEFAULT_RESOURCE_AMOUNT,
+            'iron' => self::DEFAULT_RESOURCE_AMOUNT,
+            'herbs' => self::DEFAULT_RESOURCE_AMOUNT,
+            'gems' => self::DEFAULT_RESOURCE_AMOUNT,
             'party_json' => $party_json,
             'worker_json' => $worker_json
         ];
@@ -153,17 +195,19 @@ class Character {
         return true;
     }
 
-    public function LoadByUserId($user_id = "") {
-        // Load Session Defaults
-        if($user_id == "") {
-            $user_id = $_SESSION['auth_user_id'];
+    public function LoadByUserId(int $user_id = 0): bool
+    {
+        $user_id = $this->getUserId($user_id);
+
+        if ($user_id <= 0) {
+            return false;
         }
 
         $query = "SELECT * FROM `characters` WHERE `user_id` = :user_id LIMIT 1";
         $params = ['user_id' => $user_id];
         $result = $this->DAL->r($query, $params);
 
-        if(empty($result)) {
+        if (empty($result)) {
             return false;
         }
 
@@ -174,10 +218,12 @@ class Character {
         return true;
     }
 
-    public function SaveByUserId($user_id = "") {
-         // Load Session Defaults
-        if($user_id == "") {
-            $user_id = $_SESSION['auth_user_id'];
+    public function SaveByUserId(int $user_id = 0): bool
+    {
+        $user_id = $this->getUserId($user_id);
+
+        if ($user_id <= 0) {
+            return false;
         }
 
         $query = "UPDATE `characters` SET
@@ -220,5 +266,4 @@ class Character {
 
         return true;
     }
-
 }
