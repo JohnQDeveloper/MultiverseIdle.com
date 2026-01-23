@@ -15,6 +15,10 @@
     require_once('potions.php');
     echo "Potions Cron Completed.\n";
 
+    echo "Starting World Boss Cron...\n";
+    require_once('world-boss.php');
+    echo "World Boss Cron Completed.\n";
+
     echo "All Crons Completed.\n";
 
     $run_all_time_end = microtime(true);
