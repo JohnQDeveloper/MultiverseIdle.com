@@ -1,7 +1,7 @@
     <main class="container">
         <div class="wrapper">
             <article class="main">
-                <form method="POST">
+                <form method="POST" action="/register">
                     <h2>Register</h2>
                     <label for="username">Username:</label>
                     <input type="text" id="username" name="username" required>

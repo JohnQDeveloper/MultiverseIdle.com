@@ -1,7 +1,7 @@
     <main class="container">
         <div class="wrapper">
             <article class="main">
-                <form method="POST">
+                <form method="POST" action="/login">
                     <h2>Login</h2>
                     <label for="email">Email:</label>
                     <input type="email" id="email" name="email" required>
