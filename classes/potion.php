@@ -268,6 +268,48 @@ class Potion
     }
 
     /**
+     * Cancel active potion for a character and delete the potion
+     *
+     * @param int $character_id Character ID
+     * @param int $owner_id Owner user ID (for security check)
+     * @return bool True if potion was cancelled and deleted, false otherwise
+     */
+    public function CancelActivePotion(int $character_id, int $owner_id): bool
+    {
+        // Get the active potion
+        $active_potion = $this->GetActivePotion($character_id);
+
+        if (!$active_potion) {
+            return false;
+        }
+
+        // Verify ownership
+        if (!$this->VerifyOwnership((int)$active_potion['id'], $owner_id)) {
+            return false;
+        }
+
+        // Clear the active potion from the character
+        $this->DAL->w(
+            "UPDATE characters SET active_potion_id=NULL, potion_expire_time=NULL WHERE id=:character_id AND user_id=:user_id",
+            [
+                ':character_id' => $character_id,
+                ':user_id' => $owner_id
+            ]
+        );
+
+        // Delete the potion
+        $this->DAL->w(
+            "DELETE FROM potions WHERE id=:id AND owner_id=:owner_id",
+            [
+                ':id' => $active_potion['id'],
+                ':owner_id' => $owner_id
+            ]
+        );
+
+        return $this->DAL->rows_affected() > 0;
+    }
+
+    /**
      * Get active potion bonuses for a character
      *
      * @param int $character_id Character ID

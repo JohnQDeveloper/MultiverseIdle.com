@@ -162,6 +162,11 @@
                                     <input type="hidden" name="potion_id" value="<?php echo $potion['id']; ?>">
                                     <input type="submit" role="button" name="destroy_potion" value="Destroy" class="contrast">
                                 </form>
+                            <?php else: ?>
+                                <form method="POST" action="/inventory?tab=potions" style="display: inline;" onsubmit="return confirm('Are you sure you want to cancel this active potion? The potion will be deleted and effects will end immediately.');">
+                                    <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
+                                    <input type="submit" role="button" name="cancel_potion" value="Cancel Potion" class="contrast">
+                                </form>
                             <?php endif; ?>
                         </div>
                     </div>

@@ -16,16 +16,16 @@ require_once('../config.php');
 $current_hour = (int) date('G');
 $current_minute = (int) date('i'); # Only run at 00:00 to 00:03, slight buffer for cron timing
 if (($current_hour !== 0) || ($current_minute > 3)) {
-    #echo "World Boss cron skipped - not midnight (current hour: $current_hour:$current_minute)\n";
-    #return;
+    echo "World Boss cron skipped - not midnight (current hour: $current_hour:$current_minute)\n";
+    return;
 }
 
 // Check if already ran today using Redis to prevent duplicate runs
 $today_key = 'world_boss_ran_' . date('Y-m-d');
-/*if ($redis->exists($today_key)) {
+if ($redis->exists($today_key)) {
     echo "World Boss cron already ran today, skipping.\n";
     return;
-}*/
+}
 
 // Get all characters in the world boss queue
 $queued_characters = $DAL->r("SELECT c.id, c.user_id, c.party_json FROM characters c WHERE c.world_boss_queued = 1");

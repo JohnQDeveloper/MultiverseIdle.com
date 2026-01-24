@@ -58,6 +58,18 @@
         }
     }
 
+    # Cancel Active Potion
+    if (isset($_POST['cancel_potion'])) {
+        $owner_id = $_SESSION['auth_user_id'];
+        $character_id = $Character->Data['id'];
+
+        if ($potion->CancelActivePotion($character_id, $owner_id)) {
+            $alert_success = 'Active potion has been cancelled and deleted.';
+        } else {
+            $alert_danger = 'Failed to cancel active potion.';
+        }
+    }
+
     # Load all player's items and potions
     $player_items = $gear->GetAllItemsByOwner($_SESSION['auth_user_id']);
     $player_potions = $potion->GetAllPotionsByOwner($_SESSION['auth_user_id']);
