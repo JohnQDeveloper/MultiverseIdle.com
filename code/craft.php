@@ -26,23 +26,9 @@
     $valid_affixes = array_keys($affix_definitions);
     $valid_item_types = array_keys($item_type_definitions);
 
-    # Potion affix definitions
-    $potion_prefix_definitions = [
-        'herb_worker_yield' => ['name' => 'Herb Worker Yield', 'per_level' => 1],
-        'gold_worker_yield' => ['name' => 'Gold Worker Yield', 'per_level' => 1],
-        'iron_worker_yield' => ['name' => 'Iron Worker Yield', 'per_level' => 1],
-        'gems_worker_yield' => ['name' => 'Gems Worker Yield', 'per_level' => 1],
-        'arena_resource_drops' => ['name' => 'Arena Resource Drops', 'per_level' => 1],
-        'rift_drops' => ['name' => 'Rift Drops', 'per_level' => 1],
-    ];
-
-    $potion_suffix_definitions = [
-        'arena_xp' => ['name' => 'Arena XP', 'per_level' => 1],
-        'arena_stat_gains' => ['name' => 'Arena Stat Gains', 'per_level' => 1],
-        'rift_xp' => ['name' => 'Rift XP', 'per_level' => 1],
-        'rift_stat_gains' => ['name' => 'Rift Stat Gains', 'per_level' => 1],
-        'world_boss_xp' => ['name' => 'World Boss XP', 'per_level' => 25],
-    ];
+    # Potion affix definitions (from Potion class)
+    $potion_prefix_definitions = Potion::getPrefixDefinitions();
+    $potion_suffix_definitions = Potion::getSuffixDefinitions();
 
     $valid_potion_prefixes = array_keys($potion_prefix_definitions);
     $valid_potion_suffixes = array_keys($potion_suffix_definitions);

@@ -44,33 +44,33 @@ class Potion
     /**
      * Get potion prefix definitions
      *
-     * @return array<string, array<string, int>>
+     * @return array<string, array<string, int|string>>
      */
-    private function getPrefixDefinitions(): array
+    public static function getPrefixDefinitions(): array
     {
         return [
-            'herb_worker_yield' => ['per_level' => 1],
-            'gold_worker_yield' => ['per_level' => 1],
-            'iron_worker_yield' => ['per_level' => 1],
-            'gems_worker_yield' => ['per_level' => 1],
-            'arena_resource_drops' => ['per_level' => 1],
-            'rift_drops' => ['per_level' => 1],
+            'herb_worker_yield' => ['name' => 'Herb Worker Yield', 'per_level' => 1],
+            'gold_worker_yield' => ['name' => 'Gold Worker Yield', 'per_level' => 1],
+            'iron_worker_yield' => ['name' => 'Iron Worker Yield', 'per_level' => 1],
+            'gems_worker_yield' => ['name' => 'Gems Worker Yield', 'per_level' => 1],
+            'arena_resource_drops' => ['name' => 'Arena Resource Drops', 'per_level' => 1],
+            'rift_drops' => ['name' => 'Rift Drops', 'per_level' => 1],
         ];
     }
 
     /**
      * Get potion suffix definitions
      *
-     * @return array<string, array<string, int>>
+     * @return array<string, array<string, int|string>>
      */
-    private function getSuffixDefinitions(): array
+    public static function getSuffixDefinitions(): array
     {
         return [
-            'arena_xp' => ['per_level' => 1],
-            'arena_stat_gains' => ['per_level' => 1],
-            'rift_xp' => ['per_level' => 1],
-            'rift_stat_gains' => ['per_level' => 1],
-            'world_boss_xp' => ['per_level' => 25],
+            'arena_xp' => ['name' => 'Arena XP', 'per_level' => 1],
+            'arena_stat_gains' => ['name' => 'Arena Stat Gains', 'per_level' => 1],
+            'rift_xp' => ['name' => 'Rift XP', 'per_level' => 1],
+            'rift_stat_gains' => ['name' => 'Rift Stat Gains', 'per_level' => 1],
+            'world_boss_xp' => ['name' => 'World Boss XP', 'per_level' => 25],
         ];
     }
 
@@ -284,8 +284,8 @@ class Potion
         }
 
         // Get definitions
-        $prefix_definitions = $this->getPrefixDefinitions();
-        $suffix_definitions = $this->getSuffixDefinitions();
+        $prefix_definitions = self::getPrefixDefinitions();
+        $suffix_definitions = self::getSuffixDefinitions();
 
         // Calculate bonuses
         $bonuses = $this->getDefaultBonuses();

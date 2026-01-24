@@ -95,23 +95,9 @@
             <p><b>Total Potions:</b> <?php echo count($player_potions); ?></p>
 
             <?php
-                # Load potion definitions for display
-                $potion_prefix_definitions = [
-                    'herb_worker_yield' => ['name' => 'Herb Worker Yield', 'per_level' => 1],
-                    'gold_worker_yield' => ['name' => 'Gold Worker Yield', 'per_level' => 1],
-                    'iron_worker_yield' => ['name' => 'Iron Worker Yield', 'per_level' => 1],
-                    'gems_worker_yield' => ['name' => 'Gems Worker Yield', 'per_level' => 1],
-                    'arena_resource_drops' => ['name' => 'Arena Resource Drops', 'per_level' => 1],
-                    'rift_drops' => ['name' => 'Rift Drops', 'per_level' => 1],
-                ];
-
-                $potion_suffix_definitions = [
-                    'arena_xp' => ['name' => 'Arena XP', 'per_level' => 1],
-                    'arena_stat_gains' => ['name' => 'Arena Stat Gains', 'per_level' => 1],
-                    'rift_xp' => ['name' => 'Rift XP', 'per_level' => 1],
-                    'rift_stat_gains' => ['name' => 'Rift Stat Gains', 'per_level' => 1],
-                    'world_boss_xp' => ['name' => 'World Boss XP', 'per_level' => 100],
-                ];
+                # Load potion definitions for display (from Potion class)
+                $potion_prefix_definitions = Potion::getPrefixDefinitions();
+                $potion_suffix_definitions = Potion::getSuffixDefinitions();
 
                 # Sort potions: active potion first, then by creation date
                 usort($player_potions, function($a, $b) use ($active_potion) {
