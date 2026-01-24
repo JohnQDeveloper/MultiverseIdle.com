@@ -19,6 +19,10 @@
     require_once('world-boss.php');
     echo "World Boss Cron Completed.\n";
 
+    echo "Starting Rifts Cron...\n";
+    require_once('rifts.php');
+    echo "Rifts Cron Completed.\n";
+
     echo "All Crons Completed.\n";
 
     $run_all_time_end = microtime(true);

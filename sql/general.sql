@@ -25,6 +25,10 @@ CREATE TABLE
     PRIMARY KEY (`id`)
   ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci
 
+ALTER TABLE characters
+ADD COLUMN last_rift_time DATETIME DEFAULT NULL,
+ADD COLUMN last_rift_log TEXT DEFAULT NULL;
+
 /* RIFT QUEUE TABLE */
 CREATE TABLE
   `rifts` (
