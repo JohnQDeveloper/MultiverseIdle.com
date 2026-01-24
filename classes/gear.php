@@ -18,6 +18,42 @@ class Gear
     }
 
     /**
+     * Get gear affix definitions
+     *
+     * @return array<string, array<string, int|string>>
+     */
+    public static function getAffixDefinitions(): array
+    {
+        return [
+            'strength' => ['name' => 'Strength', 'per_level' => 20, 'type' => 'flat'],
+            'health' => ['name' => 'Health', 'per_level' => 20, 'type' => 'flat'],
+            'dexterity' => ['name' => 'Dexterity', 'per_level' => 20, 'type' => 'flat'],
+            'wisdom' => ['name' => 'Wisdom', 'per_level' => 20, 'type' => 'flat'],
+            'cold_damage' => ['name' => 'Increased Cold Damage', 'per_level' => 2, 'type' => 'percent'],
+            'fire_damage' => ['name' => 'Increased Fire Damage', 'per_level' => 2, 'type' => 'percent'],
+            'physical_damage' => ['name' => 'Increased Physical Damage', 'per_level' => 1, 'type' => 'percent'],
+            'physical_resistance' => ['name' => 'Physical Resistance', 'per_level' => 1, 'type' => 'percent'],
+            'cold_resistance' => ['name' => 'Cold Resistance', 'per_level' => 3, 'type' => 'percent'],
+            'fire_resistance' => ['name' => 'Fire Resistance', 'per_level' => 3, 'type' => 'percent'],
+        ];
+    }
+
+    /**
+     * Get gear item type definitions
+     *
+     * @return array<string, array<string, mixed>>
+     */
+    public static function getItemTypeDefinitions(): array
+    {
+        return [
+            'weapon' => ['name' => 'Weapon', 'slot' => 'weapon', 'bonuses' => ['strength' => 15, 'health' => 15]],
+            'wand' => ['name' => 'Wand', 'slot' => 'weapon', 'bonuses' => ['wisdom' => 30]],
+            'plate' => ['name' => 'Plate', 'slot' => 'armor', 'bonuses' => ['health' => 15, 'resistances' => 15]],
+            'robe' => ['name' => 'Robe', 'slot' => 'armor', 'bonuses' => ['dexterity' => 15, 'wisdom' => 15]],
+        ];
+    }
+
+    /**
      * Create a new gear item
      *
      * @param string $name Item name

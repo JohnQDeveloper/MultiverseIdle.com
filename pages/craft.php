@@ -8,6 +8,10 @@
         <?php
             $party_level = $Character->Data['party_json']['members']['frontline']['level'];
             $active_tab = $_GET['tab'] ?? 'gear';
+
+            # Load gear definitions for dynamic dropdowns
+            $affix_definitions = Gear::getAffixDefinitions();
+            $item_type_definitions = Gear::getItemTypeDefinitions();
         ?>
 
         <!-- Tab Navigation -->
@@ -24,56 +28,81 @@
         <form method="POST" action="/craft?tab=gear">
             <b>Select Item to Craft:</b><br />
             <select name="item_type">
-                <optgroup label="Weapons">
-                    <option value="weapon">Weapon (+15% Strength, +15% Health)</option>
-                    <option value="wand">Wand (+30% Wisdom)</option>
+                <?php
+                    # Group items by slot type
+                    $items_by_slot = [];
+                    foreach ($item_type_definitions as $key => $item) {
+                        $items_by_slot[$item['slot']][$key] = $item;
+                    }
+                ?>
+                <?php foreach ($items_by_slot as $slot => $items): ?>
+                <optgroup label="<?php echo htmlspecialchars(ucfirst($slot) . 's'); ?>">
+                    <?php foreach ($items as $key => $item): ?>
+                        <?php
+                            # Build bonus description
+                            $bonus_parts = [];
+                            foreach ($item['bonuses'] as $bonus_stat => $bonus_value) {
+                                $bonus_parts[] = '+' . $bonus_value . '% ' . ucfirst($bonus_stat);
+                            }
+                            $bonus_text = implode(', ', $bonus_parts);
+                        ?>
+                        <option value="<?php echo htmlspecialchars($key); ?>"><?php echo htmlspecialchars($item['name']); ?> (<?php echo htmlspecialchars($bonus_text); ?>)</option>
+                    <?php endforeach; ?>
                 </optgroup>
-                <optgroup label="Armor">
-                    <option value="plate">Plate (+15% Health, +15% Resistances)</option>
-                    <option value="robe">Robe (+15% Dexterity, +15% Wisdom)</option>
-                </optgroup>
+                <?php endforeach; ?>
             </select>
             <br /><br />
 
             <b>Select First Affix:</b><br />
             <select name="affix_1">
-                <optgroup label="Stats">
-                    <option value="strength">Strength (+20 per gear level)</option>
-                    <option value="health">Health (+20 per gear level)</option>
-                    <option value="dexterity">Dexterity (+20 per gear level)</option>
-                    <option value="wisdom">Wisdom (+20 per gear level)</option>
-                </optgroup>
-                <optgroup label="Damage">
-                    <option value="cold_damage">Increased Cold Damage (+2% per level)</option>
-                    <option value="fire_damage">Increased Fire Damage (+2% per level)</option>
-                    <option value="physical_damage">Increased Physical Damage (+1% per level)</option>
-                </optgroup>
-                <optgroup label="Resistances">
-                    <option value="physical_resistance">Physical Resistance (+1% per level)</option>
-                    <option value="cold_resistance">Cold Resistance (+3% per level)</option>
-                    <option value="fire_resistance">Fire Resistance (+3% per level)</option>
-                </optgroup>
+                <?php
+                    # Group affixes by type
+                    $affixes_by_group = [
+                        'Stats' => [],
+                        'Damage' => [],
+                        'Resistances' => []
+                    ];
+                    foreach ($affix_definitions as $key => $affix) {
+                        if (str_contains($key, 'damage')) {
+                            $affixes_by_group['Damage'][$key] = $affix;
+                        } elseif (str_contains($key, 'resistance')) {
+                            $affixes_by_group['Resistances'][$key] = $affix;
+                        } else {
+                            $affixes_by_group['Stats'][$key] = $affix;
+                        }
+                    }
+                ?>
+                <?php foreach ($affixes_by_group as $group_name => $affixes): ?>
+                    <?php if (!empty($affixes)): ?>
+                    <optgroup label="<?php echo htmlspecialchars($group_name); ?>">
+                        <?php foreach ($affixes as $key => $affix): ?>
+                            <?php
+                                $suffix = $affix['type'] === 'percent' ? '%' : '';
+                                $description = htmlspecialchars($affix['name']) . ' (+' . $affix['per_level'] . $suffix . ' per level)';
+                            ?>
+                            <option value="<?php echo htmlspecialchars($key); ?>"><?php echo $description; ?></option>
+                        <?php endforeach; ?>
+                    </optgroup>
+                    <?php endif; ?>
+                <?php endforeach; ?>
             </select>
             <br /><br />
 
             <b>Select Second Affix:</b><br />
             <select name="affix_2">
-                <optgroup label="Stats">
-                    <option value="strength">Strength (+20 per gear level)</option>
-                    <option value="health">Health (+20 per gear level)</option>
-                    <option value="dexterity">Dexterity (+20 per gear level)</option>
-                    <option value="wisdom">Wisdom (+20 per gear level)</option>
-                </optgroup>
-                <optgroup label="Damage">
-                    <option value="cold_damage">Increased Cold Damage (+2% per level)</option>
-                    <option value="fire_damage">Increased Fire Damage (+2% per level)</option>
-                    <option value="physical_damage">Increased Physical Damage (+1% per level)</option>
-                </optgroup>
-                <optgroup label="Resistances">
-                    <option value="physical_resistance">Physical Resistance (+1% per level)</option>
-                    <option value="cold_resistance">Cold Resistance (+3% per level)</option>
-                    <option value="fire_resistance">Fire Resistance (+3% per level)</option>
-                </optgroup>
+                <?php foreach ($affixes_by_group as $group_name => $affixes): ?>
+                    <?php if (!empty($affixes)): ?>
+                    <optgroup label="<?php echo htmlspecialchars($group_name); ?>">
+                        <?php foreach ($affixes as $key => $affix): ?>
+                            <?php
+                                $suffix = $affix['type'] === 'percent' ? '%' : '';
+                                $description = htmlspecialchars($affix['name']) . ' (+' . $affix['per_level'] . $suffix . ' per level)';
+                            ?>
+                            <option value="<?php echo htmlspecialchars($key); ?>"><?php echo $description; ?></option>
+                        <?php endforeach; ?>
+                    </optgroup>
+                    <?php endif; ?>
+                <?php endforeach; ?>
             </select>
             <br /><br />
 

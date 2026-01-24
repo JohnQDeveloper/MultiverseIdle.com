@@ -40,7 +40,6 @@
         'Orderly',
         'Primal',
         'Feral',
-        'Savage',
         'Regal',
         'Imperial',
         'Royal',
