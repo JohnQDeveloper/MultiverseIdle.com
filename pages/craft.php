@@ -95,14 +95,14 @@
             <b>Select Prefix Affix:</b><br />
             <select name="prefix_affix">
                 <optgroup label="Worker Yields">
-                    <option value="herb_worker_yield">Herb Worker Yield (+1% per level)</option>
-                    <option value="gold_worker_yield">Gold Worker Yield (+1% per level)</option>
-                    <option value="iron_worker_yield">Iron Worker Yield (+1% per level)</option>
-                    <option value="gems_worker_yield">Gems Worker Yield (+1% per level)</option>
+                    <?php foreach (['herb_worker_yield', 'gold_worker_yield', 'iron_worker_yield', 'gems_worker_yield'] as $key): ?>
+                    <option value="<?php echo $key; ?>"><?php echo $potion_prefix_definitions[$key]['name']; ?> (+<?php echo $potion_prefix_definitions[$key]['per_level']; ?>% per level)</option>
+                    <?php endforeach; ?>
                 </optgroup>
                 <optgroup label="Resource Drops">
-                    <option value="arena_resource_drops">Arena Resource Drops (+1% per level)</option>
-                    <option value="rift_drops">Rift Drops (+1% per level)</option>
+                    <?php foreach (['arena_resource_drops', 'rift_drops'] as $key): ?>
+                    <option value="<?php echo $key; ?>"><?php echo $potion_prefix_definitions[$key]['name']; ?> (+<?php echo $potion_prefix_definitions[$key]['per_level']; ?>% per level)</option>
+                    <?php endforeach; ?>
                 </optgroup>
             </select>
             <br /><br />
@@ -110,13 +110,14 @@
             <b>Select Suffix Affix:</b><br />
             <select name="suffix_affix">
                 <optgroup label="Experience Gains">
-                    <option value="arena_xp">Arena XP (+1% per level)</option>
-                    <option value="rift_xp">Rift XP (+1% per level)</option>
-                    <option value="world_boss_xp">World Boss XP (+25% per level)</option>
+                    <?php foreach (['arena_xp', 'rift_xp', 'world_boss_xp'] as $key): ?>
+                    <option value="<?php echo $key; ?>"><?php echo $potion_suffix_definitions[$key]['name']; ?> (+<?php echo $potion_suffix_definitions[$key]['per_level']; ?>% per level)</option>
+                    <?php endforeach; ?>
                 </optgroup>
                 <optgroup label="Stat Gains">
-                    <option value="arena_stat_gains">Arena Stat Gains (+1% per level)</option>
-                    <option value="rift_stat_gains">Rift Stat Gains (+1% per level)</option>
+                    <?php foreach (['arena_stat_gains', 'rift_stat_gains'] as $key): ?>
+                    <option value="<?php echo $key; ?>"><?php echo $potion_suffix_definitions[$key]['name']; ?> (+<?php echo $potion_suffix_definitions[$key]['per_level']; ?>% per level)</option>
+                    <?php endforeach; ?>
                 </optgroup>
             </select>
             <br /><br />
