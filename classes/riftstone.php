@@ -152,4 +152,117 @@ class RiftStone
         ]);
         return !empty($rift_stone_record);
     }
+
+    /**
+     * Get available (not queued) rift stones owned by a user
+     *
+     * @param int $owner_id User ID of the owner
+     * @return array<int, array<string, mixed>> Array of available rift stones
+     */
+    public function GetAvailableRiftStonesByOwner(int $owner_id): array
+    {
+        $rift_stone_records = $this->DAL->r(
+            "SELECT * FROM rifts WHERE owner_id=:owner_id AND queue_position IS NULL ORDER BY created_at DESC",
+            [':owner_id' => $owner_id]
+        );
+
+        $rift_stones = [];
+        if ($rift_stone_records) {
+            foreach ($rift_stone_records as $record) {
+                $rift_stone = json_decode($record['details'], true);
+                $rift_stone['id'] = $record['id'];
+                $rift_stone['owner_id'] = $record['owner_id'];
+                $rift_stone['queue_position'] = $record['queue_position'];
+                $rift_stone['market_price'] = $record['market_price'];
+                $rift_stone['created_at'] = $record['created_at'];
+                $rift_stones[] = $rift_stone;
+            }
+        }
+        return $rift_stones;
+    }
+
+    /**
+     * Get queued rift stones owned by a user
+     *
+     * @param int $owner_id User ID of the owner
+     * @return array<int, array<string, mixed>> Array of queued rift stones ordered by position
+     */
+    public function GetQueuedRiftsByOwner(int $owner_id): array
+    {
+        $rift_stone_records = $this->DAL->r(
+            "SELECT * FROM rifts WHERE owner_id=:owner_id AND queue_position IS NOT NULL ORDER BY queue_position ASC",
+            [':owner_id' => $owner_id]
+        );
+
+        $rift_stones = [];
+        if ($rift_stone_records) {
+            foreach ($rift_stone_records as $record) {
+                $rift_stone = json_decode($record['details'], true);
+                $rift_stone['id'] = $record['id'];
+                $rift_stone['owner_id'] = $record['owner_id'];
+                $rift_stone['queue_position'] = $record['queue_position'];
+                $rift_stone['market_price'] = $record['market_price'];
+                $rift_stone['created_at'] = $record['created_at'];
+                $rift_stones[] = $rift_stone;
+            }
+        }
+        return $rift_stones;
+    }
+
+    /**
+     * Queue a rift stone for running
+     *
+     * @param int $rift_stone_id Rift stone ID
+     * @param int $position Queue position (1-6)
+     * @param int $owner_id Owner user ID (for security check)
+     * @return bool True if rift was queued, false otherwise
+     */
+    public function QueueRift(int $rift_stone_id, int $position, int $owner_id): bool
+    {
+        $this->DAL->w(
+            "UPDATE rifts SET queue_position=:position WHERE id=:id AND owner_id=:owner_id",
+            [
+                ':position' => $position,
+                ':id' => $rift_stone_id,
+                ':owner_id' => $owner_id
+            ]
+        );
+        return $this->DAL->rows_affected() > 0;
+    }
+
+    /**
+     * Remove a rift stone from queue and reorder remaining rifts
+     *
+     * @param int $rift_stone_id Rift stone ID
+     * @param int $owner_id Owner user ID (for security check)
+     * @return bool True if rift was removed from queue, false otherwise
+     */
+    public function RemoveFromQueue(int $rift_stone_id, int $owner_id): bool
+    {
+        # Get the current position of the rift being removed
+        $rift_record = $this->DAL->r(
+            "SELECT queue_position FROM rifts WHERE id=:id AND owner_id=:owner_id",
+            [':id' => $rift_stone_id, ':owner_id' => $owner_id]
+        );
+
+        if (empty($rift_record) || $rift_record[0]['queue_position'] === null) {
+            return false;
+        }
+
+        $removed_position = (int)$rift_record[0]['queue_position'];
+
+        # Remove from queue
+        $this->DAL->w(
+            "UPDATE rifts SET queue_position=NULL WHERE id=:id AND owner_id=:owner_id",
+            [':id' => $rift_stone_id, ':owner_id' => $owner_id]
+        );
+
+        # Reorder remaining rifts (decrement position for all rifts after the removed one)
+        $this->DAL->w(
+            "UPDATE rifts SET queue_position = queue_position - 1 WHERE owner_id=:owner_id AND queue_position > :removed_position",
+            [':owner_id' => $owner_id, ':removed_position' => $removed_position]
+        );
+
+        return true;
+    }
 }

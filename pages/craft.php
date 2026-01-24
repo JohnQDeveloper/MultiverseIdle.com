@@ -192,6 +192,19 @@
             </select>
             <br /><br />
 
+            <b>Select Rift Level:</b><br />
+            <select name="rift_level">
+                <?php
+                    $min_rift_level = (int)floor($party_level * 0.8);
+                    for ($level = $party_level; $level >= $min_rift_level; $level--):
+                ?>
+                    <option value="<?php echo $level; ?>"><?php echo $level; ?></option>
+                <?php endfor; ?>
+            </select>
+            <br />
+            <small>Choose a rift level between <?php echo $min_rift_level; ?> and <?php echo $party_level; ?> (80-100% of Party Level <?php echo $party_level; ?>)</small>
+            <br /><br />
+
             <div>
                 <b>Random Affixes (3 will be rolled automatically):</b>
                 <ul style="margin: 5px 0;">
@@ -201,10 +214,9 @@
                 </ul>
                 <small><i>These affixes increase monster difficulty and can appear multiple times on the same stone.</i></small>
             </div>
-            <BR />
+            <br />
             <div>
-                <b>Rift Level Range:</b> <?php echo floor($party_level * 0.8); ?> - <?php echo $party_level; ?> (80-100% of Party Level <?php echo $party_level; ?>)<br />
-                <small>Crafting cost: <?php echo ($party_level * 50); ?> Gems. The rift level is randomly rolled within the range shown.</small>
+                <b>Crafting Cost:</b> <?php echo ($party_level * 50); ?> Gems
             </div>
             <br />
             <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">

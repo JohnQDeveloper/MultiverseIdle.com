@@ -153,16 +153,18 @@
     # Craft Rift Stone
     if (isset($_POST['craft_rift_stone'])) {
         $implicit = $_POST['implicit'] ?? '';
+        $rift_level = intval($_POST['rift_level'] ?? 0);
+
+        # Get party level
+        $party_level = $Character->Data['party_json']['members']['frontline']['level'];
+        $min_rift_level = (int)floor($party_level * 0.8);
 
         # Validate inputs
         if (!in_array($implicit, $valid_rift_stone_implicits)) {
             $alert_danger = 'Invalid implicit selected.';
+        } elseif ($rift_level < $min_rift_level || $rift_level > $party_level) {
+            $alert_danger = 'Invalid rift level selected. Must be between ' . $min_rift_level . ' and ' . $party_level . '.';
         } else {
-            # Get party level
-            $party_level = $Character->Data['party_json']['members']['frontline']['level'];
-
-            # Calculate rift level (80-100% of party level)
-            $rift_level = rand((int)floor($party_level * 0.8), $party_level);
 
             # Roll 3 random affixes (can repeat)
             $affixes = [];
@@ -174,7 +176,7 @@
             $rift_stone_name = 'Level ' . $rift_level . ' Rift Stone (' . $rift_stone_implicit_definitions[$implicit]['name'] . ')';
 
             # Deduct crafting cost (gems based on party level)
-            $crafting_cost = $party_level * 80;
+            $crafting_cost = $party_level * 50;
             $Character->Data['gems'] -= $crafting_cost;
 
             # Create the rift stone details array

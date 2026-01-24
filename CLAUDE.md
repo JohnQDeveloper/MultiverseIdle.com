@@ -19,6 +19,7 @@
 ### Code Style for HTML & CSS
 - Use vanilla HTML and CSS where possible
 - Place css customizations in the public/css/custom.css file
+- DRY (Do Not Repeat Yourself) coding practices for CSS
 
 # General Rules
 ### Database
