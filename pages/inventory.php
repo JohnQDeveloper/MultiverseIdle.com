@@ -26,18 +26,45 @@
             <p><b>Total Items:</b> <?php echo count($player_items); ?></p>
 
             <?php foreach ($player_items as $item): ?>
-                <div class="inventory-item" style="border: 1px solid #ccc; padding: 15px; margin-bottom: 15px; border-radius: 5px; <?php echo $item['favorite'] ? 'border-color: gold; background-color: rgba(255, 215, 0, 0.1);' : ''; ?>">
+                <?php
+                    $is_equipped = in_array($item['id'], $equipped_gear_ids);
+                    $border_style = '';
+                    if ($is_equipped) {
+                        $border_style = 'border-color: #007bff; border-width: 2px; background-color: rgba(0, 123, 255, 0.05);';
+                    } elseif ($item['favorite']) {
+                        $border_style = 'border-color: gold; background-color: rgba(255, 215, 0, 0.1);';
+                    }
+                ?>
+                <div class="inventory-item" style="border: 1px solid #ccc; padding: 15px; margin-bottom: 15px; border-radius: 5px; <?php echo $border_style; ?>">
                     <div class="grid">
                         <div>
                             <h3>
                                 <?php if ($item['favorite']): ?>
                                     <span style="color: gold;">&#9733;</span>
                                 <?php endif; ?>
+                                <?php if (in_array($item['id'], $equipped_gear_ids)): ?>
+                                    <span style="background-color: #007bff; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; margin-right: 8px;">EQUIPPED</span>
+                                <?php endif; ?>
                                 <?php echo htmlspecialchars($item['name']); ?>
                             </h3>
                             <p>
                                 <b>Type:</b> <?php echo htmlspecialchars(ucfirst($item['type'])); ?> |
                                 <b>Slot:</b> <?php echo htmlspecialchars(ucfirst($item['slot'])); ?>
+                                <?php if (in_array($item['id'], $equipped_gear_ids)): ?>
+                                    <?php
+                                        # Determine which character has this equipped
+                                        $equipped_by = [];
+                                        if (($Character->Data['party_json']['members']['frontline']['equipped_weapon'] ?? 0) == $item['id'] ||
+                                            ($Character->Data['party_json']['members']['frontline']['equipped_armor'] ?? 0) == $item['id']) {
+                                            $equipped_by[] = 'Frontline';
+                                        }
+                                        if (($Character->Data['party_json']['members']['backline']['equipped_weapon'] ?? 0) == $item['id'] ||
+                                            ($Character->Data['party_json']['members']['backline']['equipped_armor'] ?? 0) == $item['id']) {
+                                            $equipped_by[] = 'Backline';
+                                        }
+                                    ?>
+                                    | <b style="color: #007bff;">Equipped by:</b> <?php echo implode(', ', $equipped_by); ?>
+                                <?php endif; ?>
                             </p>
 
                             <?php if (!empty($item['base_bonuses'])): ?>

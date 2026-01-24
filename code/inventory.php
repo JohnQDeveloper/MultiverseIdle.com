@@ -76,3 +76,12 @@
 
     # Load active potion if any
     $active_potion = $potion->GetActivePotion($Character->Data['id']);
+
+    # Get equipped gear IDs for display
+    $equipped_gear_ids = [
+        $Character->Data['party_json']['members']['frontline']['equipped_weapon'] ?? 0,
+        $Character->Data['party_json']['members']['frontline']['equipped_armor'] ?? 0,
+        $Character->Data['party_json']['members']['backline']['equipped_weapon'] ?? 0,
+        $Character->Data['party_json']['members']['backline']['equipped_armor'] ?? 0,
+    ];
+    $equipped_gear_ids = array_filter($equipped_gear_ids); # Remove zeros
