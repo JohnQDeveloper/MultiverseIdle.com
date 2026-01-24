@@ -3,16 +3,21 @@
     <div class="wrapper">
     <article class="main">
         <h1>Inventory</h1>
-        <p>Manage your gear and potion collections.</p>
+        <p>Manage your gear, potion, and rift stone collections.</p>
 
         <?php
             $active_tab = $_GET['tab'] ?? 'gear';
+
+            # Load rift stone definitions for display
+            $rift_stone_implicit_definitions = RiftStone::getImplicitDefinitions();
+            $rift_stone_affix_definitions = RiftStone::getAffixDefinitions();
         ?>
 
         <!-- Tab Navigation -->
         <div style="margin-bottom: 20px; border-bottom: 2px solid #ccc;">
             <a href="/inventory?tab=gear" style="display: inline-block; padding: 10px 20px; margin-right: 5px; text-decoration: none; <?php echo $active_tab === 'gear' ? 'border-bottom: 3px solid #007bff; font-weight: bold;' : ''; ?>">Gear</a>
-            <a href="/inventory?tab=potions" style="display: inline-block; padding: 10px 20px; text-decoration: none; <?php echo $active_tab === 'potions' ? 'border-bottom: 3px solid #007bff; font-weight: bold;' : ''; ?>">Potions</a>
+            <a href="/inventory?tab=potions" style="display: inline-block; padding: 10px 20px; margin-right: 5px; text-decoration: none; <?php echo $active_tab === 'potions' ? 'border-bottom: 3px solid #007bff; font-weight: bold;' : ''; ?>">Potions</a>
+            <a href="/inventory?tab=rift_stones" style="display: inline-block; padding: 10px 20px; text-decoration: none; <?php echo $active_tab === 'rift_stones' ? 'border-bottom: 3px solid #007bff; font-weight: bold;' : ''; ?>">Rift Stones</a>
         </div>
 
         <?php if ($active_tab === 'gear'): ?>
@@ -200,6 +205,54 @@
                 </div>
             <?php endforeach; ?>
         <?php endif; ?> <!-- end of empty check for potions -->
+
+        <?php elseif ($active_tab === 'rift_stones'): ?>
+        <!-- Rift Stones Tab -->
+        <h2>Rift Stone Inventory</h2>
+        <p>Manage your rift stone collection. Each stone can be used to run a 10-battle Rift Delve for rewards.</p>
+
+        <?php if (empty($player_rift_stones)): ?>
+            <p><em>You don't have any rift stones yet. Visit the <a href="/craft?tab=rift_stones">Craft</a> page to create some!</em></p>
+        <?php else: ?>
+            <p><b>Total Rift Stones:</b> <?php echo count($player_rift_stones); ?></p>
+
+            <?php foreach ($player_rift_stones as $rift_stone): ?>
+                <div class="inventory-item" style="border: 1px solid #ccc; padding: 15px; margin-bottom: 15px; border-radius: 5px;">
+                    <div class="grid">
+                        <div>
+                            <h3><?php echo htmlspecialchars($rift_stone['name']); ?></h3>
+                            <p><b>Rift Level:</b> <?php echo $rift_stone['level']; ?></p>
+
+                            <p><b>Reward Implicit:</b></p>
+                            <ul>
+                                <li style="color: #007bff; font-weight: bold;">
+                                    <?php echo htmlspecialchars($rift_stone_implicit_definitions[$rift_stone['implicit']]['description']); ?>
+                                </li>
+                            </ul>
+
+                            <p><b>Difficulty Affixes:</b></p>
+                            <ul>
+                                <?php foreach ($rift_stone['affixes'] as $affix_key): ?>
+                                    <li style="color: #dc3545;">
+                                        <?php echo htmlspecialchars($rift_stone_affix_definitions[$affix_key]['description']); ?>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+
+                            <p><small>Crafted at Party Level: <?php echo $rift_stone['party_level_at_craft'] ?? 'N/A'; ?></small></p>
+                            <p><small>Created: <?php echo $rift_stone['created_at']; ?></small></p>
+                        </div>
+                        <div>
+                            <form method="POST" action="/inventory?tab=rift_stones" style="display: inline;" onsubmit="return confirm('Are you sure you want to destroy this rift stone? This cannot be undone.');">
+                                <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
+                                <input type="hidden" name="rift_stone_id" value="<?php echo $rift_stone['id']; ?>">
+                                <input type="submit" role="button" name="destroy_rift_stone" value="Destroy" class="contrast">
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        <?php endif; ?> <!-- end of empty check for rift stones -->
 
         <?php endif; ?> <!-- end of tab check -->
 

@@ -12,12 +12,17 @@
             # Load gear definitions for dynamic dropdowns
             $affix_definitions = Gear::getAffixDefinitions();
             $item_type_definitions = Gear::getItemTypeDefinitions();
+
+            # Load rift stone definitions for dynamic dropdowns
+            $rift_stone_implicit_definitions = RiftStone::getImplicitDefinitions();
+            $rift_stone_affix_definitions = RiftStone::getAffixDefinitions();
         ?>
 
         <!-- Tab Navigation -->
         <div style="margin-bottom: 20px; border-bottom: 2px solid #ccc;">
             <a href="/craft?tab=gear" style="display: inline-block; padding: 10px 20px; margin-right: 5px; text-decoration: none; <?php echo $active_tab === 'gear' ? 'border-bottom: 3px solid #007bff; font-weight: bold;' : ''; ?>">Gear Crafting</a>
-            <a href="/craft?tab=potions" style="display: inline-block; padding: 10px 20px; text-decoration: none; <?php echo $active_tab === 'potions' ? 'border-bottom: 3px solid #007bff; font-weight: bold;' : ''; ?>">Potion Crafting</a>
+            <a href="/craft?tab=potions" style="display: inline-block; padding: 10px 20px; margin-right: 5px; text-decoration: none; <?php echo $active_tab === 'potions' ? 'border-bottom: 3px solid #007bff; font-weight: bold;' : ''; ?>">Potion Crafting</a>
+            <a href="/craft?tab=rift_stones" style="display: inline-block; padding: 10px 20px; text-decoration: none; <?php echo $active_tab === 'rift_stones' ? 'border-bottom: 3px solid #007bff; font-weight: bold;' : ''; ?>">Rift Stones</a>
         </div>
 
         <?php if ($active_tab === 'gear'): ?>
@@ -158,6 +163,52 @@
 
             <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
             <input type="submit" role="button" name="craft_potion" value="Craft Potion">
+        </form>
+
+        <?php elseif ($active_tab === 'rift_stones'): ?>
+        <!-- Rift Stones Crafting Tab -->
+        <h2>Rift Stone Crafting</h2>
+        <p>Craft Rift Stones to unlock challenging 10-battle Rift Delves. Choose one implicit modifier that defines your rewards, and receive 3 random difficulty affixes.</p>
+
+        <div>
+            <h3 style="margin-top: 0;">What are Rift Delves?</h3>
+            <ul>
+                <li><b>10 consecutive battles</b> against random monsters</li>
+                <li><b>Heal to full</b> before each battle</li>
+                <li><b>Rewards only if you win all 10 battles</b></li>
+                <li><b>Rift Level:</b> Rolls between 80-100% of your party level</li>
+                <li><b>3 random affixes</b> make monsters stronger (can repeat)</li>
+            </ul>
+        </div>
+
+        <form method="POST" action="/craft?tab=rift_stones">
+            <b>Select Reward Implicit:</b><br />
+            <select name="implicit">
+                <?php foreach ($rift_stone_implicit_definitions as $key => $implicit): ?>
+                    <option value="<?php echo htmlspecialchars($key); ?>">
+                        <?php echo htmlspecialchars($implicit['name']); ?> - <?php echo htmlspecialchars($implicit['description']); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <br /><br />
+
+            <div>
+                <b>Random Affixes (3 will be rolled automatically):</b>
+                <ul style="margin: 5px 0;">
+                    <?php foreach ($rift_stone_affix_definitions as $affix): ?>
+                        <li><?php echo htmlspecialchars($affix['description']); ?></li>
+                    <?php endforeach; ?>
+                </ul>
+                <small><i>These affixes increase monster difficulty and can appear multiple times on the same stone.</i></small>
+            </div>
+            <BR />
+            <div>
+                <b>Rift Level Range:</b> <?php echo floor($party_level * 0.8); ?> - <?php echo $party_level; ?> (80-100% of Party Level <?php echo $party_level; ?>)<br />
+                <small>Crafting cost: <?php echo ($party_level * 50); ?> Gems. The rift level is randomly rolled within the range shown.</small>
+            </div>
+            <br />
+            <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
+            <input type="submit" role="button" name="craft_rift_stone" value="Craft Rift Stone">
         </form>
 
         <?php endif; ?>

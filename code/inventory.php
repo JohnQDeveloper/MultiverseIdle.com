@@ -2,6 +2,7 @@
 
     $gear = new Gear();
     $potion = new Potion();
+    $rift_stone = new RiftStone();
 
     # Destroy Item
     if (isset($_POST['destroy_item'])) {
@@ -70,9 +71,22 @@
         }
     }
 
-    # Load all player's items and potions
+    # Destroy Rift Stone
+    if (isset($_POST['destroy_rift_stone'])) {
+        $rift_stone_id = intval($_POST['rift_stone_id']);
+        $owner_id = $_SESSION['auth_user_id'];
+
+        if ($rift_stone->DestroyRiftStone($rift_stone_id, $owner_id)) {
+            $alert_success = 'Rift stone has been destroyed.';
+        } else {
+            $alert_danger = 'Failed to destroy rift stone.';
+        }
+    }
+
+    # Load all player's items, potions, and rift stones
     $player_items = $gear->GetAllItemsByOwner($_SESSION['auth_user_id']);
     $player_potions = $potion->GetAllPotionsByOwner($_SESSION['auth_user_id']);
+    $player_rift_stones = $rift_stone->GetAllRiftStonesByOwner($_SESSION['auth_user_id']);
 
     # Load active potion if any
     $active_potion = $potion->GetActivePotion($Character->Data['id']);

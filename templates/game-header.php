@@ -14,7 +14,7 @@
                 <a href="#">Actions</a>
                 <ul class="dropdown-content">
                   <li><a href="/arena">2v2 Arena</a></li>
-                  <li><a href="/rift-delves">Rift Delves</a></li>
+                  <li><a href="/rift-delves">Rifts</a></li>
                   <li><a href="/world-boss">World Boss</a></li>
                 </ul>
               </li>

@@ -15,6 +15,13 @@
     $valid_potion_prefixes = array_keys($potion_prefix_definitions);
     $valid_potion_suffixes = array_keys($potion_suffix_definitions);
 
+    # Rift stone definitions (from RiftStone class)
+    $rift_stone_implicit_definitions = RiftStone::getImplicitDefinitions();
+    $rift_stone_affix_definitions = RiftStone::getAffixDefinitions();
+
+    $valid_rift_stone_implicits = array_keys($rift_stone_implicit_definitions);
+    $valid_rift_stone_affixes = array_keys($rift_stone_affix_definitions);
+
     # Craft Item
     if (isset($_POST['craft_item'])) {
         $item_type = $_POST['item_type'] ?? '';
@@ -140,5 +147,56 @@
             # Save the crafted potion
             $potion = new Potion();
             $new_potion_id = $potion->CreatePotion($potion_name, $prefix_affix, $suffix_affix, $potion_level);
+        }
+    }
+
+    # Craft Rift Stone
+    if (isset($_POST['craft_rift_stone'])) {
+        $implicit = $_POST['implicit'] ?? '';
+
+        # Validate inputs
+        if (!in_array($implicit, $valid_rift_stone_implicits)) {
+            $alert_danger = 'Invalid implicit selected.';
+        } else {
+            # Get party level
+            $party_level = $Character->Data['party_json']['members']['frontline']['level'];
+
+            # Calculate rift level (80-100% of party level)
+            $rift_level = rand((int)floor($party_level * 0.8), $party_level);
+
+            # Roll 3 random affixes (can repeat)
+            $affixes = [];
+            for ($i = 0; $i < 3; $i++) {
+                $affixes[] = array_rand($rift_stone_affix_definitions);
+            }
+
+            # Generate rift stone name
+            $rift_stone_name = 'Level ' . $rift_level . ' Rift Stone (' . $rift_stone_implicit_definitions[$implicit]['name'] . ')';
+
+            # Deduct crafting cost (gems based on party level)
+            $crafting_cost = $party_level * 80;
+            $Character->Data['gems'] -= $crafting_cost;
+
+            # Create the rift stone details array
+            $rift_stone_details = [
+                'name' => $rift_stone_name,
+                'implicit' => $implicit,
+                'affixes' => $affixes,
+                'level' => $rift_level,
+                'party_level_at_craft' => $party_level,
+            ];
+
+            # Format success message with affixes
+            $affix_names = [];
+            foreach ($affixes as $affix_key) {
+                $affix_names[] = $rift_stone_affix_definitions[$affix_key]['name'];
+            }
+
+            $alert_success = 'Crafted ' . htmlspecialchars($rift_stone_name) . ' with affixes: ' .
+                htmlspecialchars(implode(', ', $affix_names));
+
+            # Save the crafted rift stone
+            $rift_stone = new RiftStone();
+            $new_rift_stone_id = $rift_stone->CreateRiftStone($rift_stone_details);
         }
     }
