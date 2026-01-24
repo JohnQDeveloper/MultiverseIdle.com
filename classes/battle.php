@@ -732,4 +732,241 @@ class Battle
             'log' => $return_me_log
            ];
         }
+
+        /**
+         * Simulates a world boss battle for 100 rounds, tracking total damage dealt
+         *
+         * The world boss is a damage sponge that doesn't attack back.
+         * Players deal damage for 100 rounds and the total is recorded.
+         *
+         * @param array{members: array{frontline: array<string, mixed>, backline: array<string, mixed>}} $party_config
+         * @return array{total_damage: int, log: array<string>} Total damage dealt and combat log
+         */
+        public function WorldBossBattle(array $party_config): array
+        {
+            $total_damage = 0;
+            $return_me_log = [];
+            $rounds = 100;
+
+            // Calculate and apply gear bonuses for party members
+            $gear_bonuses = [
+                'party' => [
+                    'frontline' => $this->calculateGearBonuses(
+                        $party_config['members']['frontline']['equipped_weapon'] ?? 0,
+                        $party_config['members']['frontline']['equipped_armor'] ?? 0
+                    ),
+                    'backline' => $this->calculateGearBonuses(
+                        $party_config['members']['backline']['equipped_weapon'] ?? 0,
+                        $party_config['members']['backline']['equipped_armor'] ?? 0
+                    )
+                ],
+                'monster' => [
+                    'frontline' => $this->calculateGearBonuses(0, 0),
+                    'backline' => $this->calculateGearBonuses(0, 0)
+                ]
+            ];
+
+            // Apply stat bonuses from gear to party members
+            $this->applyGearToStats($party_config['members']['frontline'], $gear_bonuses['party']['frontline']);
+            $this->applyGearToStats($party_config['members']['backline'], $gear_bonuses['party']['backline']);
+
+            // Set party health
+            $party_config['members']['frontline']['current_health'] =
+                $party_config['members']['frontline']['health'] * self::HEALTH_MULTIPLIER;
+            $party_config['members']['backline']['current_health'] =
+                $party_config['members']['backline']['health'] * self::HEALTH_MULTIPLIER;
+
+            // World boss is a damage sponge - infinite health, no attacks
+            $world_boss_health = PHP_INT_MAX;
+
+            // Initialize status effects tracking
+            $status_effects = [
+                'party' => [
+                    'frontline' => [],
+                    'backline' => []
+                ],
+                'monster' => [
+                    'frontline' => [],
+                    'backline' => []
+                ]
+            ];
+
+            for ($round = 1; $round <= $rounds; $round++) {
+                $round_damage = 0;
+
+                // Frontline attack
+                if ($party_config['members']['frontline']['current_health'] > 0) {
+                    $damage = $this->calculateWorldBossAttackDamage(
+                        $party_config['members']['frontline'],
+                        $status_effects,
+                        $gear_bonuses['party']['frontline'],
+                        'frontline'
+                    );
+                    $round_damage += $damage;
+                }
+
+                // Backline attack
+                if ($party_config['members']['backline']['current_health'] > 0) {
+                    $damage = $this->calculateWorldBossAttackDamage(
+                        $party_config['members']['backline'],
+                        $status_effects,
+                        $gear_bonuses['party']['backline'],
+                        'backline'
+                    );
+                    $round_damage += $damage;
+                }
+
+                // Execute ability damage (wisdom-based)
+                $ability_damage = $this->calculateWorldBossAbilityDamage(
+                    $party_config,
+                    $status_effects,
+                    $gear_bonuses
+                );
+                $round_damage += $ability_damage;
+
+                $total_damage += $round_damage;
+
+                // Tick down status effects at end of round
+                foreach (['party', 'monster'] as $side) {
+                    foreach (['frontline', 'backline'] as $position) {
+                        foreach ($status_effects[$side][$position] as $effect => $duration) {
+                            $status_effects[$side][$position][$effect]--;
+                            if ($status_effects[$side][$position][$effect] <= 0) {
+                                unset($status_effects[$side][$position][$effect]);
+                            }
+                        }
+                    }
+                }
+            }
+
+            $return_me_log[] = "World Boss battle completed after $rounds rounds.";
+            $return_me_log[] = "Total damage dealt: $total_damage";
+
+            return [
+                'total_damage' => $total_damage,
+                'log' => $return_me_log
+            ];
+        }
+
+        /**
+         * Calculates damage for a single attack against the world boss
+         *
+         * @param array<string, mixed> $attacker Party member config
+         * @param array<string, array<string, array<string, int>>> $status_effects Status effects tracker
+         * @param array<string, int> $gear_bonuses Attacker's gear bonuses
+         * @param string $position 'frontline' or 'backline'
+         * @return int Damage dealt
+         */
+        private function calculateWorldBossAttackDamage(
+            array $attacker,
+            array &$status_effects,
+            array $gear_bonuses,
+            string $position
+        ): int {
+            $dex = (int)$attacker['dexterity'];
+            $str = (int)$attacker['strength'];
+
+            // Apply Hypothermia debuff
+            if (isset($status_effects['party'][$position]['Hypothermia']) &&
+                $status_effects['party'][$position]['Hypothermia'] > 0) {
+                $dex = (int)floor($dex * self::HYPOTHERMIA_REDUCTION);
+            }
+
+            // World boss has 0 dexterity, so hit chance is essentially 100%
+            // But we still roll for some variance
+            $hit_chance = 0.9; // 90% base hit rate against world boss
+
+            if (rand(0, 100) / 100 <= $hit_chance) {
+                $damage = $str;
+                $damage_type = '';
+
+                // Check for Flaming Blades buff
+                if (isset($status_effects['party'][$position]['FlamingBlades']) &&
+                    $status_effects['party'][$position]['FlamingBlades'] > 0) {
+                    $damage_type = ' fire';
+                    // Bonus fire damage (world boss is always scorched from firestorms)
+                    $damage = (int)floor($damage * self::SCORCHED_DAMAGE_BONUS);
+                }
+
+                // Check for Frost Blades buff
+                if (isset($status_effects['party'][$position]['FrostBlades']) &&
+                    $status_effects['party'][$position]['FrostBlades'] > 0) {
+                    $damage_type = ' cold';
+                }
+
+                // Apply damage bonus from gear
+                $damage = $this->applyDamageBonus($damage, $damage_type, $gear_bonuses);
+
+                return max($damage, self::MINIMUM_DAMAGE);
+            }
+
+            return 0;
+        }
+
+        /**
+         * Calculates ability damage against the world boss
+         *
+         * @param array<string, mixed> $party_config Party configuration
+         * @param array<string, array<string, array<string, int>>> $status_effects Status effects tracker
+         * @param array<string, array<string, array<string, int>>> $gear_bonuses Gear bonuses
+         * @return int Total ability damage dealt
+         */
+        private function calculateWorldBossAbilityDamage(
+            array &$party_config,
+            array &$status_effects,
+            array $gear_bonuses
+        ): int {
+            $total_ability_damage = 0;
+
+            foreach (['frontline', 'backline'] as $position) {
+                if ($party_config['members'][$position]['current_health'] <= 0) {
+                    continue;
+                }
+
+                $wis = (int)$party_config['members'][$position]['wisdom'];
+
+                // Apply Antimagic debuff
+                if (isset($status_effects['party'][$position]['Antimagic']) &&
+                    $status_effects['party'][$position]['Antimagic'] > 0) {
+                    $wis = (int)floor($wis * self::ANTIMAGIC_REDUCTION);
+                }
+
+                // 70% ability success rate against world boss (low wisdom)
+                $ability_chance = 0.7;
+
+                if (rand(0, 100) / 100 <= $ability_chance) {
+                    $skills = $party_config['members'][$position]['skills'] ?? [];
+
+                    // Firestorm damage
+                    if (in_array('Firestorm', $skills)) {
+                        $damage = (int)floor($wis * self::AOE_SPELL_PERCENT);
+                        $damage = (int)floor($damage * self::SCORCHED_DAMAGE_BONUS);
+                        $damage = $this->applyDamageBonus($damage, ' fire', $gear_bonuses['party'][$position]);
+                        // Double damage for hitting both frontline and backline of boss
+                        $total_ability_damage += $damage * 2;
+                    }
+
+                    // Blizzard damage
+                    if (in_array('Blizzard', $skills)) {
+                        $damage = (int)floor($wis * self::AOE_SPELL_PERCENT);
+                        $damage = $this->applyDamageBonus($damage, ' cold', $gear_bonuses['party'][$position]);
+                        // Double damage for hitting both frontline and backline of boss
+                        $total_ability_damage += $damage * 2;
+                    }
+
+                    // Activate buff abilities
+                    if (in_array('Flaming Blades', $skills)) {
+                        $status_effects['party'][$position]['FlamingBlades'] = self::STATUS_EFFECT_DURATION;
+                    }
+                    if (in_array('Frost Blades', $skills)) {
+                        $status_effects['party'][$position]['FrostBlades'] = self::STATUS_EFFECT_DURATION;
+                    }
+                    if (in_array('Antimage', $skills)) {
+                        $status_effects['party'][$position]['Antimage'] = self::STATUS_EFFECT_DURATION;
+                    }
+                }
+            }
+
+            return $total_ability_damage;
+        }
     }

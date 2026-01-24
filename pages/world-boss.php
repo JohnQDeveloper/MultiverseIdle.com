@@ -12,8 +12,15 @@
                 Calculating...
             </div>
         </div>
-
-        <hr>
+        <?php if (!empty($Character->Data['world_boss_log'])): ?>
+        <BR />
+        <div class="boss-log">
+            <h3>Your World Boss History</h3>
+            <div class="log-entries">
+                <p class="success"><?php echo htmlspecialchars(trim($Character->Data['world_boss_log'])); ?></p>
+            </div>
+        </div>
+        <?php endif; ?>
 
         <div class="queue-status">
             <h3>Queue Status</h3>

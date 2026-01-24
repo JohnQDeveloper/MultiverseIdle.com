@@ -218,6 +218,11 @@ class Character
         return true;
     }
 
+    public function Save(): bool
+    {
+        return $this->SaveByUserId((int)$this->Data['user_id']);
+    }
+
     public function SaveByUserId(int $user_id = 0): bool
     {
         $user_id = $this->getUserId($user_id);
@@ -238,6 +243,7 @@ class Character
             `worker_json` = :worker_json,
             `rift_queued` = :rift_queued,
             `world_boss_queued` = :world_boss_queued,
+            `world_boss_log` = :world_boss_log,
             `last_save` = NOW(),
             `last_arena_time` = :last_arena_time,
             `last_arena_log` = :last_arena_log,
@@ -256,6 +262,7 @@ class Character
             'worker_json' => json_encode($this->Data['worker_json']),
             'rift_queued' => $this->Data['rift_queued'],
             'world_boss_queued' => $this->Data['world_boss_queued'],
+            'world_boss_log' => $this->Data['world_boss_log'] ?? '',
             'last_arena_time' => $this->Data['last_arena_time'],
             'last_arena_log' => $this->Data['last_arena_log'],
             'user_id' => $user_id,

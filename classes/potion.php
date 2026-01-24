@@ -70,7 +70,7 @@ class Potion
             'arena_stat_gains' => ['per_level' => 1],
             'rift_xp' => ['per_level' => 1],
             'rift_stat_gains' => ['per_level' => 1],
-            'world_boss_xp' => ['per_level' => 100],
+            'world_boss_xp' => ['per_level' => 25],
         ];
     }
 

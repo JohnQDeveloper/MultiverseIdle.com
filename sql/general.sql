@@ -21,6 +21,7 @@ CREATE TABLE
     `active_potion_id` int DEFAULT NULL,
     `potion_expire_time` datetime DEFAULT NULL,
     `last_seen` datetime DEFAULT NULL,
+    `world_boss_log` text,
     PRIMARY KEY (`id`)
   ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci
 

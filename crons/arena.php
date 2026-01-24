@@ -43,7 +43,7 @@
             [
                 "members" => [
                     "frontline" => [
-                        "class" => "warrior",
+                        "class" => "strength",
                         "level" => $arena_floor,
                         "strength" => $monster_strength,
                         "dexterity" => $monster_dexterity,
@@ -53,7 +53,7 @@
                         "skills" => [$monster_ability, $monster_ability],
                     ],
                     "backline" => [
-                        "class" => "warrior",
+                        "class" => "strength",
                         "level" => $arena_floor,
                         "strength" => $monster_strength,
                         "dexterity" => $monster_dexterity,

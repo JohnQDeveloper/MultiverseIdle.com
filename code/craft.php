@@ -41,7 +41,7 @@
         'arena_stat_gains' => ['name' => 'Arena Stat Gains', 'per_level' => 1],
         'rift_xp' => ['name' => 'Rift XP', 'per_level' => 1],
         'rift_stat_gains' => ['name' => 'Rift Stat Gains', 'per_level' => 1],
-        'world_boss_xp' => ['name' => 'World Boss XP', 'per_level' => 100],
+        'world_boss_xp' => ['name' => 'World Boss XP', 'per_level' => 25],
     ];
 
     $valid_potion_prefixes = array_keys($potion_prefix_definitions);

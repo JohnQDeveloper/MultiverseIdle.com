@@ -112,7 +112,7 @@
                 <optgroup label="Experience Gains">
                     <option value="arena_xp">Arena XP (+1% per level)</option>
                     <option value="rift_xp">Rift XP (+1% per level)</option>
-                    <option value="world_boss_xp">World Boss XP (+100% per level)</option>
+                    <option value="world_boss_xp">World Boss XP (+25% per level)</option>
                 </optgroup>
                 <optgroup label="Stat Gains">
                     <option value="arena_stat_gains">Arena Stat Gains (+1% per level)</option>
