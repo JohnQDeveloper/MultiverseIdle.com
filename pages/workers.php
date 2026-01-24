@@ -28,7 +28,7 @@
             echo human_num($total) . ' ' . htmlspecialchars(ucfirst($resource)) . ' every minute.';
 
             if ($potion_bonus > 0) {
-                echo ' <span style="color: #28a745; font-weight: bold;">(+' . $potion_bonus . '% from potion)</span>';
+                echo ' <span class="text--success">(+' . $potion_bonus . '% from potion)</span>';
             }
         ?>
         <br />
@@ -36,9 +36,9 @@
         <br /><br />
 
         <?php if ($active_potion): ?>
-            <div style="border: 2px solid #28a745; padding: 10px; margin-bottom: 15px; border-radius: 5px; background-color: rgba(40, 167, 69, 0.1);">
-                <b style="color: #28a745;">Active Potion Effects:</b>
-                <ul style="margin: 5px 0;">
+            <div class="potion-effect-box">
+                <b class="potion-effect-box__title">Active Potion Effects:</b>
+                <ul class="potion-effect-box__list">
                     <?php
                         # Potion definitions for display
                         $potion_prefix_definitions = [

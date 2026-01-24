@@ -14,10 +14,10 @@
         ?>
 
         <!-- Tab Navigation -->
-        <div style="margin-bottom: 20px; border-bottom: 2px solid #ccc;">
-            <a href="/inventory?tab=gear" style="display: inline-block; padding: 10px 20px; margin-right: 5px; text-decoration: none; <?php echo $active_tab === 'gear' ? 'border-bottom: 3px solid #007bff; font-weight: bold;' : ''; ?>">Gear</a>
-            <a href="/inventory?tab=potions" style="display: inline-block; padding: 10px 20px; margin-right: 5px; text-decoration: none; <?php echo $active_tab === 'potions' ? 'border-bottom: 3px solid #007bff; font-weight: bold;' : ''; ?>">Potions</a>
-            <a href="/inventory?tab=rift_stones" style="display: inline-block; padding: 10px 20px; text-decoration: none; <?php echo $active_tab === 'rift_stones' ? 'border-bottom: 3px solid #007bff; font-weight: bold;' : ''; ?>">Rift Stones</a>
+        <div class="tab-nav">
+            <a href="/inventory?tab=gear" class="tab-nav-item <?php echo $active_tab === 'gear' ? 'active' : ''; ?>">Gear</a>
+            <a href="/inventory?tab=potions" class="tab-nav-item <?php echo $active_tab === 'potions' ? 'active' : ''; ?>">Potions</a>
+            <a href="/inventory?tab=rift_stones" class="tab-nav-item <?php echo $active_tab === 'rift_stones' ? 'active' : ''; ?>">Rift Stones</a>
         </div>
 
         <?php if ($active_tab === 'gear'): ?>
@@ -33,22 +33,22 @@
             <?php foreach ($player_items as $item): ?>
                 <?php
                     $is_equipped = in_array($item['id'], $equipped_gear_ids);
-                    $border_style = '';
+                    $card_class = 'card';
                     if ($is_equipped) {
-                        $border_style = 'border-color: #007bff; border-width: 2px; background-color: rgba(0, 123, 255, 0.05);';
+                        $card_class .= ' card--equipped';
                     } elseif ($item['favorite']) {
-                        $border_style = 'border-color: gold; background-color: rgba(255, 215, 0, 0.1);';
+                        $card_class .= ' card--favorite';
                     }
                 ?>
-                <div class="inventory-item" style="border: 1px solid #ccc; padding: 15px; margin-bottom: 15px; border-radius: 5px; <?php echo $border_style; ?>">
+                <div class="<?php echo $card_class; ?>">
                     <div class="grid">
                         <div>
                             <h3>
                                 <?php if ($item['favorite']): ?>
-                                    <span style="color: gold;">&#9733;</span>
+                                    <span class="text--gold">&#9733;</span>
                                 <?php endif; ?>
                                 <?php if (in_array($item['id'], $equipped_gear_ids)): ?>
-                                    <span style="background-color: #007bff; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; margin-right: 8px;">EQUIPPED</span>
+                                    <span class="badge">EQUIPPED</span>
                                 <?php endif; ?>
                                 <?php echo htmlspecialchars($item['name']); ?>
                             </h3>
@@ -68,7 +68,7 @@
                                             $equipped_by[] = 'Backline';
                                         }
                                     ?>
-                                    | <b style="color: #007bff;">Equipped by:</b> <?php echo implode(', ', $equipped_by); ?>
+                                    | <b class="text--primary">Equipped by:</b> <?php echo implode(', ', $equipped_by); ?>
                                 <?php endif; ?>
                             </p>
 
@@ -100,12 +100,12 @@
                             <p><small>Crafted at Party Level: <?php echo $item['party_level_at_craft'] ?? 'N/A'; ?></small></p>
                         </div>
                         <div>
-                            <form method="POST" action="/inventory?tab=gear" style="display: inline;">
+                            <form method="POST" action="/inventory?tab=gear" class="form--inline">
                                 <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
                                 <input type="hidden" name="gear_id" value="<?php echo $item['id']; ?>">
                                 <input type="submit" role="button" name="toggle_favorite" value="<?php echo $item['favorite'] ? 'Unfavorite' : 'Favorite'; ?>" class="<?php echo $item['favorite'] ? 'secondary' : ''; ?>">
                             </form>
-                            <form method="POST" action="/inventory?tab=gear" style="display: inline;" onsubmit="return confirm('Are you sure you want to destroy this item? This cannot be undone.');">
+                            <form method="POST" action="/inventory?tab=gear" class="form--inline" onsubmit="return confirm('Are you sure you want to destroy this item? This cannot be undone.');">
                                 <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
                                 <input type="hidden" name="gear_id" value="<?php echo $item['id']; ?>">
                                 <input type="submit" role="button" name="destroy_item" value="Destroy" class="contrast">
@@ -153,12 +153,12 @@
                         $minutes_remaining = floor(($time_remaining % 3600) / 60);
                     }
                 ?>
-                <div class="inventory-item" style="border: <?php echo $is_active ? '3px solid #28a745' : '1px solid #ccc'; ?>; padding: 15px; margin-bottom: 15px; border-radius: 5px; <?php echo $is_active ? 'background-color: rgba(40, 167, 69, 0.1);' : ''; ?>">
+                <div class="card <?php echo $is_active ? 'potion-effect-box' : ''; ?>">
                     <div class="grid">
                         <div>
                             <h3>
                                 <?php if ($is_active): ?>
-                                    <span style="color: #28a745; font-weight: bold;">[ACTIVE]</span>
+                                    <span class="text--success">[ACTIVE]</span>
                                 <?php endif; ?>
                                 <?php echo htmlspecialchars($potion['name']); ?>
                             </h3>
@@ -177,25 +177,25 @@
                             </ul>
 
                             <?php if ($is_active): ?>
-                                <p><small><b style="color: #28a745;">Expires in: <?php echo $hours_remaining; ?>h <?php echo $minutes_remaining; ?>m</b></small></p>
+                                <p><small><b class="text--success">Expires in: <?php echo $hours_remaining; ?>h <?php echo $minutes_remaining; ?>m</b></small></p>
                             <?php else: ?>
                                 <p><small>Created: <?php echo $potion['created_at']; ?></small></p>
                             <?php endif; ?>
                         </div>
                         <div>
                             <?php if (!$is_active): ?>
-                                <form method="POST" action="/inventory?tab=potions" style="display: inline;">
+                                <form method="POST" action="/inventory?tab=potions" class="form--inline">
                                     <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
                                     <input type="hidden" name="potion_id" value="<?php echo $potion['id']; ?>">
                                     <input type="submit" role="button" name="use_potion" value="Use" <?php echo $active_potion ? 'disabled' : ''; ?>>
                                 </form>
-                                <form method="POST" action="/inventory?tab=potions" style="display: inline;" onsubmit="return confirm('Are you sure you want to destroy this potion? This cannot be undone.');">
+                                <form method="POST" action="/inventory?tab=potions" class="form--inline" onsubmit="return confirm('Are you sure you want to destroy this potion? This cannot be undone.');">
                                     <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
                                     <input type="hidden" name="potion_id" value="<?php echo $potion['id']; ?>">
                                     <input type="submit" role="button" name="destroy_potion" value="Destroy" class="contrast">
                                 </form>
                             <?php else: ?>
-                                <form method="POST" action="/inventory?tab=potions" style="display: inline;" onsubmit="return confirm('Are you sure you want to cancel this active potion? The potion will be deleted and effects will end immediately.');">
+                                <form method="POST" action="/inventory?tab=potions" class="form--inline" onsubmit="return confirm('Are you sure you want to cancel this active potion? The potion will be deleted and effects will end immediately.');">
                                     <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
                                     <input type="submit" role="button" name="cancel_potion" value="Cancel Potion" class="contrast">
                                 </form>
@@ -217,7 +217,7 @@
             <p><b>Total Rift Stones:</b> <?php echo count($player_rift_stones); ?></p>
 
             <?php foreach ($player_rift_stones as $rift_stone): ?>
-                <div class="inventory-item" style="border: 1px solid #ccc; padding: 15px; margin-bottom: 15px; border-radius: 5px;">
+                <div class="card">
                     <div class="grid">
                         <div>
                             <h3><?php echo htmlspecialchars($rift_stone['name']); ?></h3>
@@ -225,7 +225,7 @@
 
                             <p><b>Reward Implicit:</b></p>
                             <ul>
-                                <li style="color: #007bff; font-weight: bold;">
+                                <li class="list-item--positive">
                                     <?php echo htmlspecialchars($rift_stone_implicit_definitions[$rift_stone['implicit']]['description']); ?>
                                 </li>
                             </ul>
@@ -233,7 +233,7 @@
                             <p><b>Difficulty Affixes:</b></p>
                             <ul>
                                 <?php foreach ($rift_stone['affixes'] as $affix_key): ?>
-                                    <li style="color: #dc3545;">
+                                    <li class="list-item--negative">
                                         <?php echo htmlspecialchars($rift_stone_affix_definitions[$affix_key]['description']); ?>
                                     </li>
                                 <?php endforeach; ?>
@@ -243,7 +243,7 @@
                             <p><small>Created: <?php echo $rift_stone['created_at']; ?></small></p>
                         </div>
                         <div>
-                            <form method="POST" action="/inventory?tab=rift_stones" style="display: inline;" onsubmit="return confirm('Are you sure you want to destroy this rift stone? This cannot be undone.');">
+                            <form method="POST" action="/inventory?tab=rift_stones" class="form--inline" onsubmit="return confirm('Are you sure you want to destroy this rift stone? This cannot be undone.');">
                                 <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
                                 <input type="hidden" name="rift_stone_id" value="<?php echo $rift_stone['id']; ?>">
                                 <input type="submit" role="button" name="destroy_rift_stone" value="Destroy" class="contrast">

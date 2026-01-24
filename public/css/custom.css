@@ -169,3 +169,136 @@ input.danger-button {
     position: static;
   }
 }
+
+/* Tab Navigation */
+.tab-nav {
+    margin-bottom: 20px;
+    border-bottom: 2px solid #ccc;
+}
+
+.tab-nav-item {
+    display: inline-block;
+    padding: 10px 20px;
+    margin-right: 5px;
+    text-decoration: none;
+}
+
+.tab-nav-item.active {
+    border-bottom: 3px solid #007bff;
+    font-weight: bold;
+}
+
+/* Card System */
+.card {
+    border: 1px solid #ccc;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+}
+
+.card--active {
+    border: 2px solid #007bff;
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
+.card--equipped {
+    border-color: #007bff;
+    border-width: 2px;
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
+.card--favorite {
+    border-color: gold;
+    background-color: rgba(255, 215, 0, 0.1);
+}
+
+/* Badge/Label */
+.badge {
+    background-color: #007bff;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    margin-right: 8px;
+}
+
+/* Text Utilities */
+.text--primary {
+    color: #007bff;
+    font-weight: bold;
+}
+
+.text--success {
+    color: #28a745;
+    font-weight: bold;
+}
+
+.text--danger {
+    color: #dc3545;
+}
+
+.text--warning {
+    color: #ffc107;
+    font-weight: bold;
+}
+
+.text--gold {
+    color: gold;
+}
+
+/* Potion Effect Box */
+.potion-effect-box {
+    border: 2px solid #28a745;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    background-color: rgba(40, 167, 69, 0.1);
+}
+
+.potion-effect-box__title {
+    color: #28a745;
+}
+
+.potion-effect-box__list {
+    margin: 5px 0;
+}
+
+/* Info Box */
+.info-box {
+    border: 1px solid #dee2e6;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+}
+
+/* Form Utilities */
+.form--inline {
+    display: inline;
+}
+
+/* List Utilities */
+.list--compact {
+    margin: 5px 0;
+}
+
+.list-item--positive {
+    color: #007bff;
+    font-weight: bold;
+}
+
+.list-item--negative {
+    color: #dc3545;
+}
+
+/* Typography */
+.heading--no-top-margin {
+    margin-top: 0;
+}
+
+/* Countdown */
+.countdown {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #ff6b6b;
+}

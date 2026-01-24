@@ -19,10 +19,10 @@
         ?>
 
         <!-- Tab Navigation -->
-        <div style="margin-bottom: 20px; border-bottom: 2px solid #ccc;">
-            <a href="/craft?tab=gear" style="display: inline-block; padding: 10px 20px; margin-right: 5px; text-decoration: none; <?php echo $active_tab === 'gear' ? 'border-bottom: 3px solid #007bff; font-weight: bold;' : ''; ?>">Gear Crafting</a>
-            <a href="/craft?tab=potions" style="display: inline-block; padding: 10px 20px; margin-right: 5px; text-decoration: none; <?php echo $active_tab === 'potions' ? 'border-bottom: 3px solid #007bff; font-weight: bold;' : ''; ?>">Potion Crafting</a>
-            <a href="/craft?tab=rift_stones" style="display: inline-block; padding: 10px 20px; text-decoration: none; <?php echo $active_tab === 'rift_stones' ? 'border-bottom: 3px solid #007bff; font-weight: bold;' : ''; ?>">Rift Stones</a>
+        <div class="tab-nav">
+            <a href="/craft?tab=gear" class="tab-nav-item <?php echo $active_tab === 'gear' ? 'active' : ''; ?>">Gear Crafting</a>
+            <a href="/craft?tab=potions" class="tab-nav-item <?php echo $active_tab === 'potions' ? 'active' : ''; ?>">Potion Crafting</a>
+            <a href="/craft?tab=rift_stones" class="tab-nav-item <?php echo $active_tab === 'rift_stones' ? 'active' : ''; ?>">Rift Stones</a>
         </div>
 
         <?php if ($active_tab === 'gear'): ?>
@@ -171,7 +171,7 @@
         <p>Craft Rift Stones to unlock challenging 10-battle Rift Delves. Choose one implicit modifier that defines your rewards, and receive 3 random difficulty affixes.</p>
 
         <div>
-            <h3 style="margin-top: 0;">What are Rift Delves?</h3>
+            <h3 class="heading--no-top-margin">What are Rift Delves?</h3>
             <ul>
                 <li><b>10 consecutive battles</b> against random monsters</li>
                 <li><b>Heal to full</b> before each battle</li>

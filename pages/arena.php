@@ -37,9 +37,9 @@
                 }
             ?>
             <?php if ($has_arena_bonus): ?>
-                <div style="border: 2px solid #28a745; padding: 10px; margin-bottom: 15px; border-radius: 5px; background-color: rgba(40, 167, 69, 0.1);">
-                    <b style="color: #28a745;">Active Potion Effects:</b>
-                    <ul style="margin: 5px 0;">
+                <div class="potion-effect-box">
+                    <b class="potion-effect-box__title">Active Potion Effects:</b>
+                    <ul class="potion-effect-box__list">
                         <?php foreach ($arena_bonuses as $bonus): ?>
                             <li><?php echo $bonus; ?></li>
                         <?php endforeach; ?>

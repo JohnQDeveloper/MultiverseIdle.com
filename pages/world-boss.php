@@ -8,7 +8,7 @@
 
         <div class="boss-timer">
             <h3>Next Boss Reset:</h3>
-            <div id="countdown" style="font-size: 1.5em; font-weight: bold; color: #ff6b6b;">
+            <div id="countdown" class="countdown">
                 Calculating...
             </div>
         </div>
@@ -27,7 +27,7 @@
             <p>Players in Queue: <strong><?php echo number_format($total_in_queue); ?></strong></p>
 
             <?php if($Character->Data['world_boss_queued'] == 1): ?>
-                <p style="color: green; font-weight: bold;">✓ You are currently in the queue!</p>
+                <p class="text--success">✓ You are currently in the queue!</p>
 
                 <form method="POST">
                     <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
