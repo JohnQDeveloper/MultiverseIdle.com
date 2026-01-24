@@ -20,8 +20,6 @@
     $next_intelligence_upgrade_cost = calculate_worker_cost(500, 1.4, $current_intelligence);
     $next_speed_upgrade_cost = calculate_worker_cost(500, 1.4, $current_speed);
 
-    #print_r($_POST);
-
     # INCREASE INTELLIGENCE
     if(isset($_POST['upgrade_intelligence'])) {
         $increased_intelligence = 0;
@@ -37,6 +35,10 @@
             $Character->Data['gold'] -= $next_intelligence_upgrade_cost;
             $Character->Data['worker_json']['intelligence_upgrade_percent'] += 1;
             $total_cost += $next_intelligence_upgrade_cost;
+
+            # Recalculate cost for next upgrade
+            $current_intelligence = $Character->Data['worker_json']['intelligence_upgrade_percent'];
+            $next_intelligence_upgrade_cost = calculate_worker_cost(500, 1.4, $current_intelligence);
 
             $alert_success = 'You have upgraded worker intelligence by ' . $increased_intelligence . '% for ' .
             human_num($total_cost) . ' gold!';
@@ -63,6 +65,10 @@
             $Character->Data['gold'] -= $next_speed_upgrade_cost;
             $Character->Data['worker_json']['speed_upgrade_percent'] += 1;
             $total_cost += $next_speed_upgrade_cost;
+
+            # Recalculate cost for next upgrade
+            $current_speed = $Character->Data['worker_json']['speed_upgrade_percent'];
+            $next_speed_upgrade_cost = calculate_worker_cost(500, 1.4, $current_speed);
 
             $alert_success = 'You have upgraded worker speed by ' . $increased_speed . '% for ' .
             human_num($total_cost) . ' gold!';

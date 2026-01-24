@@ -50,11 +50,11 @@ function calculate_monster_attribute(int $monster_level): float
  * costs more than the previous: cost = base_cost * (multiplier ^ current_level)
  *
  * @param int $base_cost The initial cost at level 0
- * @param int $multiplier The cost multiplier per level
+ * @param float $multiplier The cost multiplier per level
  * @param int $current_level The current level (0-indexed)
  * @return float The calculated cost for the next upgrade/hire
  */
-function calculate_worker_cost(int $base_cost, int $multiplier, int $current_level): float
+function calculate_worker_cost(int $base_cost, float $multiplier, int $current_level): float
 {
     return round($base_cost * pow($multiplier, $current_level));
 }
