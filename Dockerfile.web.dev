@@ -28,5 +28,5 @@ RUN install-php-extensions \
 
 RUN apt-get update && apt-get install -y git libnss3-tools
 
-COPY "configs/Caddyfile" "/etc/frankenphp/Caddyfile"
-COPY "configs/php.ini-development" "/usr/local/etc/php/php.ini"
+COPY "web_container_files/Caddyfile" "/etc/frankenphp/Caddyfile"
+COPY "web_container_files/php.ini-development" "/usr/local/etc/php/php.ini"

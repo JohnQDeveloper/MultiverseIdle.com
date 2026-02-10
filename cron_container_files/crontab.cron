@@ -1,0 +1,9 @@
+# MultiverseIdle Cron Jobs
+# Runs the main cron aggregator every minute
+#
+# Note: Environment variables (DB_USER, DB_PASSWORD, etc.) are inherited from the container
+# The working directory is /app
+
+* * * * * cd /app && /usr/local/bin/php /app/crons/run_all.php >> /var/log/cron.log 2>&1
+
+# Required empty line at end of file

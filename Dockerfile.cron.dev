@@ -1,0 +1,57 @@
+FROM php:8.3-cli
+
+ARG DB_USER
+ARG DB_PASSWORD
+ARG DB_HOST
+ARG RESEND_API_KEY
+ARG REDIS_HOST
+ARG REDIS_PORT
+
+ENV DB_USER=${DB_USER}
+ENV DB_PASSWORD=${DB_PASSWORD}
+ENV DB_HOST=${DB_HOST}
+ENV RESEND_API_KEY=${RESEND_API_KEY}
+ENV REDIS_HOST=${REDIS_HOST}
+ENV REDIS_PORT=${REDIS_PORT}
+
+LABEL maintainer="JohnQDeveloper <public@JohnQDeveloper.com>"
+
+# Install PHP extensions (same as main container)
+RUN apt-get update && apt-get install -y \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    libzip-dev \
+    libicu-dev \
+    cron \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) \
+        pdo_mysql \
+        gd \
+        intl \
+        zip \
+        opcache \
+    && pecl install redis \
+    && docker-php-ext-enable redis \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy PHP configuration
+COPY "web_container_files/php.ini-development" "/usr/local/etc/php/php.ini"
+
+# Set working directory
+WORKDIR /app
+
+# Copy application files
+COPY . /app
+
+# Copy crontab file
+COPY "cron_container_files/crontab.cron" "/etc/cron.d/app-cron"
+RUN chmod 0644 /etc/cron.d/app-cron \
+    && crontab /etc/cron.d/app-cron \
+    && touch /var/log/cron.log
+
+# Copy entrypoint script
+COPY "cron_container_files/docker-entrypoint-cron.sh" "/usr/local/bin/docker-entrypoint.sh"
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
