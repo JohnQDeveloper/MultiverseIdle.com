@@ -35,6 +35,9 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-enable redis \
     && rm -rf /var/lib/apt/lists/*
 
+# Fix cron not executing jobs in Docker: pam_loginuid.so fails without CAP_AUDIT_WRITE
+RUN sed -i 's/session\s*required\s*pam_loginuid.so/session optional pam_loginuid.so/' /etc/pam.d/cron
+
 # Copy PHP configuration
 COPY "web_container_files/php.ini-development" "/usr/local/etc/php/php.ini"
 
@@ -43,12 +46,6 @@ WORKDIR /app
 
 # Copy application files
 COPY . /app
-
-# Copy crontab file
-COPY "cron_container_files/crontab.cron" "/etc/cron.d/app-cron"
-RUN chmod 0644 /etc/cron.d/app-cron \
-    && crontab /etc/cron.d/app-cron \
-    && touch /var/log/cron.log
 
 # Copy entrypoint script
 COPY "cron_container_files/docker-entrypoint-cron.sh" "/usr/local/bin/docker-entrypoint.sh"

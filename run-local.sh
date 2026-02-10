@@ -1,30 +1,30 @@
 #!/bin/bash
 source env.sh
 
-echo "REMOVING EXSISTING CONTAINERS...\n" && \
+echo "REMOVING EXSISTING CONTAINERS..." && \
 docker stop valkey && docker rm -f valkey 2>/dev/null || true && \
 docker stop multiverse-idle-web && docker rm -f multiverse-idle-web 2>/dev/null || true && \
 docker stop multiverse-idle-cron && docker rm -f multiverse-idle-cron 2>/dev/null || true && \
-echo "REMOVED EXISTING CONTAINERS\n"
+echo "REMOVED EXISTING CONTAINERS"
 
-echo "CREATING DOCKER NETWORK...\n" && \
+echo "CREATING DOCKER NETWORK..." && \
 docker network create multiverse-idle-network 2>/dev/null || true && \
-echo "NETWORK CREATED\n"
+echo "NETWORK CREATED"
 
-echo "BUILDING CONTAINERS...\n" && \
-echo "BUILDING WEB CONTAINER...\n" && \
+echo "BUILDING CONTAINERS..." && \
+echo "BUILDING WEB CONTAINER..." && \
 docker build -t multiverse-idle-web:local -f Dockerfile.web.dev .  && \
-echo "\tWEB CONTAINER BUILT\n"  && \
-echo "\tBUILDING CRON CONTAINER\n" && \
+echo "WEB CONTAINER BUILT"  && \
+echo "BUILDING CRON CONTAINER" && \
 docker build -t multiverse-idle-cron:local -f Dockerfile.cron.dev .  && \
-echo "\tCRON CONTAINER BUILT\n"  && \
+echo "CRON CONTAINER BUILT"  && \
 
-echo "LAUNCHING CONTAINERS...\n" && \
-echo "\tRUNNING VALKEY\n"  && \
+echo "LAUNCHING CONTAINERS..." && \
+echo "RUNNING VALKEY"  && \
 
 docker run --rm -d -p 6379:6379 --network multiverse-idle-network --name valkey valkey/valkey:8.1.3  && \
-echo "\tVALKEY IS RUNNING\n" && \
-echo "\tRUNNING WEB CONTAINER\n"  && \
+echo "VALKEY IS RUNNING" && \
+echo "RUNNING WEB CONTAINER"  && \
 docker run --rm -d -v $PWD:/app -p 80:80 -p 443:443 --network multiverse-idle-network --tty -it \
 --env DB_USER=$DB_USER \
 --env DB_PASSWORD=$DB_PASSWORD \
@@ -35,9 +35,9 @@ docker run --rm -d -v $PWD:/app -p 80:80 -p 443:443 --network multiverse-idle-ne
 --env DEBUG=true \
 --env ENVIRONMENT=Dev \
 --env HOSTNAME=localhost \
---name multiverse-idle-web multiverse-idle-web:local
-echo "\tWEB CONTAINER IS RUNNING\n" && \
-echo "\tRUNNING CRON CONTAINER\n"  && \
+--name multiverse-idle-web multiverse-idle-web:local && \
+echo "WEB CONTAINER IS RUNNING" && \
+echo "RUNNING CRON CONTAINER"  && \
 docker run --rm -d -v $PWD:/app --network multiverse-idle-network --tty -it \
 --env DB_USER=$DB_USER \
 --env DB_PASSWORD=$DB_PASSWORD \
@@ -48,9 +48,9 @@ docker run --rm -d -v $PWD:/app --network multiverse-idle-network --tty -it \
 --env DEBUG=true \
 --env ENVIRONMENT=Dev \
 --env HOSTNAME=localhost \
---name multiverse-idle-cron multiverse-idle-cron:local
-echo "\tCRON CONTAINER IS RUNNING\n" && \
-echo "CONTAINERS LAUNCHED SUCCESSFULLY\n" && \
-echo "ACCESS THE WEB APP AT http://localhost\n" && \
-echo "TO VIEW LOGS, USE 'docker logs <container_name>'\n" && \
-echo "TO RESTART CONTAINERS, RE-RUN THIS SCRIPT \n"
+--name multiverse-idle-cron multiverse-idle-cron:local && \
+echo "CRON CONTAINER IS RUNNING" && \
+echo "CONTAINERS LAUNCHED SUCCESSFULLY" && \
+echo "ACCESS THE WEB APP AT http://localhost" && \
+echo "TO VIEW LOGS, USE 'docker logs <container_name>'" && \
+echo "TO RESTART CONTAINERS, RE-RUN THIS SCRIPT "
