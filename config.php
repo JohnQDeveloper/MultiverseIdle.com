@@ -6,10 +6,15 @@
     define('BASE_URL', 'https://'.getenv('HOSTNAME'));
     define('NUMBER_OF_MINUTES_PER_RUN', 480); // 8 hours of normal gameplay per run
 
-    # Harden Sessions
-    ini_set('session.cookie_httponly', 1);
-    ini_set('session.cookie_secure', 1); # once its HTTPS
-    ini_set('session.cookie_samesite', 'Strict');
+    # Determine if running in web context (not CLI/cron)
+    define('IS_WEB_CONTEXT', php_sapi_name() !== 'cli');
+
+    # Harden Sessions (web container only)
+    if (IS_WEB_CONTEXT) {
+        ini_set('session.cookie_httponly', 1);
+        ini_set('session.cookie_secure', 1); # once its HTTPS
+        ini_set('session.cookie_samesite', 'Strict');
+    }
 
     # Connect to Redis
     $redis = new Redis();
@@ -37,13 +42,6 @@
 
     $DAL = new DAL($db); // modified to work off the same basis as Delight so 1 connect / 1 request
 
-    # authentication
-    if(isset($_SESSION['auth_logged_in']) && $_SESSION['auth_logged_in'] === 1) {
-        $_SESSION['user_id'] = $_SESSION['auth_user_id'];
-        $_SESSION['email'] = $_SESSION['auth_email'];
-        $_SESSION['username'] = $_SESSION['auth_username'];
-    }
-
     # RESEND
     define('RESEND_API_KEY', getenv('RESEND_API_KEY'));
 
@@ -57,14 +55,24 @@
     require_once(__DIR__ . '/data/skillgems.php');
     require_once(__DIR__ . '/data/gearnames.php');
 
-    # Minimal CSRF Protection
-    if (empty($_SESSION['csrf-token'])) {
-        $_SESSION['csrf-token'] = bin2hex(random_bytes(32));
-    }
-    if ($_SERVER['REQUEST_METHOD'] === 'POST'
-    && 'register' != strtok(strtok($_SERVER["REQUEST_URI"], '?'), '/')
-    && 'login' != strtok(strtok($_SERVER["REQUEST_URI"], '?'), '/')) {
-        if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf-token']) {
-            die('CSRF token validation failed');
+    # Web container only - session and CSRF handling
+    if (IS_WEB_CONTEXT) {
+        # authentication
+        if(isset($_SESSION['auth_logged_in']) && $_SESSION['auth_logged_in'] === 1) {
+            $_SESSION['user_id'] = $_SESSION['auth_user_id'];
+            $_SESSION['email'] = $_SESSION['auth_email'];
+            $_SESSION['username'] = $_SESSION['auth_username'];
+        }
+
+        # Minimal CSRF Protection
+        if (empty($_SESSION['csrf-token'])) {
+            $_SESSION['csrf-token'] = bin2hex(random_bytes(32));
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'POST'
+        && 'register' != strtok(strtok($_SERVER["REQUEST_URI"], '?'), '/')
+        && 'login' != strtok(strtok($_SERVER["REQUEST_URI"], '?'), '/')) {
+            if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf-token']) {
+                die('CSRF token validation failed');
+            }
         }
     }

@@ -1,9 +1,17 @@
 # MultiverseIdle Cron Jobs
 # Runs the main cron aggregator every minute
 #
-# Note: Environment variables (DB_USER, DB_PASSWORD, etc.) are inherited from the container
-# The working directory is /app
+# Environment variables must be explicitly set for cron
+DB_USER=${DB_USER}
+DB_PASSWORD=${DB_PASSWORD}
+DB_HOST=${DB_HOST}
+RESEND_API_KEY=${RESEND_API_KEY}
+REDIS_HOST=${REDIS_HOST}
+REDIS_PORT=${REDIS_PORT}
+DEBUG=${DEBUG}
+ENVIRONMENT=${ENVIRONMENT}
+HOSTNAME=${HOSTNAME}
 
-* * * * * cd /app && /usr/local/bin/php /app/crons/run_all.php >> /var/log/cron.log 2>&1
+* * * * * cd /app/crons && /usr/local/bin/php run_all.php >> /var/log/cron.log 2>&1
 
 # Required empty line at end of file

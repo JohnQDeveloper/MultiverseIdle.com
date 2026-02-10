@@ -12,6 +12,13 @@ echo "=========================================="
 # Create log file
 touch /var/log/cron.log
 
+# Export environment variables to a file that cron can use
+printenv | grep -v "no_proxy" | sed 's/^\(.*\)$/export \1/g' > /etc/environment-vars.sh
+chmod +x /etc/environment-vars.sh
+
+# Update crontab to source environment variables
+echo "* * * * * . /etc/environment-vars.sh && cd /app/crons && /usr/local/bin/php run_all.php >> /var/log/cron.log 2>&1" | crontab -
+
 # Start cron in foreground
 echo "Starting cron daemon..."
 cron

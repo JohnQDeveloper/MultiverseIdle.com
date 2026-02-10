@@ -10,11 +10,11 @@
     # Worker Upgrades
     $current_workers = $Character->Data['worker_json']['workers'];
 
-    $current_speed = isset($Character->Data['worker_json']['speed_upgrade_percent'])
-    ? $Character->Data['worker_json']['speed_upgrade_percent'] : 0;
+    $current_speed = isset($Character->Data['worker_json']['speed_upgrades'])
+    ? $Character->Data['worker_json']['speed_upgrades'] : 0;
 
-    $current_intelligence = isset($Character->Data['worker_json']['intelligence_upgrade_percent'])
-    ? $Character->Data['worker_json']['intelligence_upgrade_percent'] : 0;
+    $current_intelligence = isset($Character->Data['worker_json']['intelligence_upgrades'])
+    ? $Character->Data['worker_json']['intelligence_upgrades'] : 0;
 
     $new_worker_cost = calculate_worker_cost(1000, 10, $current_workers);
     $next_intelligence_upgrade_cost = calculate_worker_cost(500, 1.4, $current_intelligence);
@@ -33,11 +33,11 @@
             $increased_intelligence += 1; # increment loop counter
 
             $Character->Data['gold'] -= $next_intelligence_upgrade_cost;
-            $Character->Data['worker_json']['intelligence_upgrade_percent'] += 1;
+            $Character->Data['worker_json']['intelligence_upgrades'] += 1;
             $total_cost += $next_intelligence_upgrade_cost;
 
             # Recalculate cost for next upgrade
-            $current_intelligence = $Character->Data['worker_json']['intelligence_upgrade_percent'];
+            $current_intelligence = $Character->Data['worker_json']['intelligence_upgrades'];
             $next_intelligence_upgrade_cost = calculate_worker_cost(500, 1.4, $current_intelligence);
 
             $alert_success = 'You have upgraded worker intelligence by ' . $increased_intelligence . '% for ' .
@@ -63,11 +63,11 @@
             $increased_speed += 1; # increment loop counter
 
             $Character->Data['gold'] -= $next_speed_upgrade_cost;
-            $Character->Data['worker_json']['speed_upgrade_percent'] += 1;
+            $Character->Data['worker_json']['speed_upgrades'] += 1;
             $total_cost += $next_speed_upgrade_cost;
 
             # Recalculate cost for next upgrade
-            $current_speed = $Character->Data['worker_json']['speed_upgrade_percent'];
+            $current_speed = $Character->Data['worker_json']['speed_upgrades'];
             $next_speed_upgrade_cost = calculate_worker_cost(500, 1.4, $current_speed);
 
             $alert_success = 'You have upgraded worker speed by ' . $increased_speed . '% for ' .
@@ -96,11 +96,11 @@
     # recalculate costs after potential upgrades/hiring
     $current_workers = $Character->Data['worker_json']['workers'];
 
-    $current_speed = isset($Character->Data['worker_json']['speed_upgrade_percent'])
-    ? $Character->Data['worker_json']['speed_upgrade_percent'] : 0;
+    $current_speed = isset($Character->Data['worker_json']['speed_upgrades'])
+    ? $Character->Data['worker_json']['speed_upgrades'] : 0;
 
-    $current_intelligence = isset($Character->Data['worker_json']['intelligence_upgrade_percent'])
-    ? $Character->Data['worker_json']['intelligence_upgrade_percent'] : 0;
+    $current_intelligence = isset($Character->Data['worker_json']['intelligence_upgrades'])
+    ? $Character->Data['worker_json']['intelligence_upgrades'] : 0;
 
     $new_worker_cost = calculate_worker_cost(1000, 10, $current_workers);
     $next_intelligence_upgrade_cost = calculate_worker_cost(500, 1.4, $current_intelligence);

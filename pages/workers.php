@@ -16,8 +16,8 @@
             $resource = $Character->Data['worker_json']['resource'];
             $skill_level = $Character->Data['worker_json']['skills'][$resource];
             $num_workers = $Character->Data['worker_json']['workers'];
-            $speed_upgrades = $Character->Data['worker_json']['speed_upgrade_percent'];
-            $intelligence_upgrades = $Character->Data['worker_json']['intelligence_upgrade_percent'];
+            $speed_upgrades = $Character->Data['worker_json']['speed_upgrades'] ?? 0;
+            $intelligence_upgrades = $Character->Data['worker_json']['intelligence_upgrades'] ?? 0;
 
             # Get the specific potion bonus for this resource type
             $potion_bonus_key = $resource . '_worker_yield';
@@ -77,9 +77,9 @@
         <?php echo $Character->Data['worker_json']['workers']; ?><br />  <br />
 
         <b>Worker Speed:</b>
-        <?php echo $Character->Data['worker_json']['speed_upgrade_percent']; ?>%<br />  <br />
+        <?php echo $Character->Data['worker_json']['speed_upgrades'] ?? 0; ?>%<br />  <br />
         <b>Worker Intelligence:</b>
-        <?php echo $Character->Data['worker_json']['intelligence_upgrade_percent']; ?>%<br />  <br />
+        <?php echo $Character->Data['worker_json']['intelligence_upgrades'] ?? 0; ?>%<br />  <br />
 
         <b>Worker Skill Level</b><br />
         <?php

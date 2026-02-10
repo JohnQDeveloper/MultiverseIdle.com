@@ -46,8 +46,8 @@
             $resource = $worker_config['resource'];
             $skill_level = $worker_config['skills'][$resource];
             $num_workers = $worker_config['workers'];
-            $speed_upgrades = $worker_config['speed_upgrade_percent'];
-            $intelligence_upgrades = $worker_config['intelligence_upgrade_percent'];
+            $speed_upgrades = $worker_config['speed_upgrades'] ?? 0;
+            $intelligence_upgrades = $worker_config['intelligence_upgrades'] ?? 0;
 
             # Get the specific potion bonus for this resource type
             $potion_bonus_key = $resource . '_worker_yield';
