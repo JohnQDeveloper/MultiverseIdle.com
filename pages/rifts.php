@@ -117,7 +117,7 @@
         <?php if (!empty($Character->Data['last_rift_log'])): ?>
             <h2>Last Rift Delve Result</h2>
             <p><small>Last completed: <?php echo $Character->Data['last_rift_time'] ?? 'Never'; ?></small></p>
-            <div style="background-color: #f8f9fa; border: 1px solid #dee2e6; padding: 15px; margin-bottom: 20px; border-radius: 5px;">
+            <div class="log-box">
                 <?php echo $Character->Data['last_rift_log']; ?>
             </div>
         <?php endif; ?>

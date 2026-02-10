@@ -167,14 +167,10 @@ foreach ($row as $r) {
             break; // Stop processing battles if one is lost
         }
 
-        // Add brief battle log (first and last few lines)
+        // Add complete battle log
         if (!empty($battle_result['log'])) {
             $rift_log .= "<details><summary>Battle Log</summary>\n";
-            $rift_log .= implode("<BR />\n", array_slice($battle_result['log'], 0, 5));
-            if (count($battle_result['log']) > 10) {
-                $rift_log .= "<BR />... (" . (count($battle_result['log']) - 10) . " lines omitted) ...<BR />\n";
-            }
-            $rift_log .= implode("<BR />\n", array_slice($battle_result['log'], -5));
+            $rift_log .= implode("<BR />\n", $battle_result['log']);
             $rift_log .= "</details>\n";
         }
         $rift_log .= "<hr />\n";

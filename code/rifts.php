@@ -1,5 +1,8 @@
 <?php
 
+    $Character = new Character();
+    $Character->LoadByUserId($_SESSION['auth_user_id']);
+
     $rift_stone = new RiftStone();
 
     # Queue Rift Stone

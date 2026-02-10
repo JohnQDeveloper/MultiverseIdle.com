@@ -247,6 +247,8 @@ class Character
             `last_save` = NOW(),
             `last_arena_time` = :last_arena_time,
             `last_arena_log` = :last_arena_log,
+            `last_rift_time` = :last_rift_time,
+            `last_rift_log` = :last_rift_log,
             `last_seen` = :last_seen
             WHERE `user_id` = :user_id";
 
@@ -265,6 +267,8 @@ class Character
             'world_boss_log' => $this->Data['world_boss_log'] ?? '',
             'last_arena_time' => $this->Data['last_arena_time'],
             'last_arena_log' => $this->Data['last_arena_log'],
+            'last_rift_time' => $this->Data['last_rift_time'] ?? null,
+            'last_rift_log' => $this->Data['last_rift_log'] ?? null,
             'user_id' => $user_id,
             'last_seen' => $this->Data['last_seen']
         ];

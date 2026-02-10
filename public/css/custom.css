@@ -272,6 +272,15 @@ input.danger-button {
     border-radius: 5px;
 }
 
+/* Log Box */
+.log-box {
+    border: 1px solid #555;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    background-color: rgba(0, 0, 0, 0.3);
+}
+
 /* Form Utilities */
 .form--inline {
     display: inline;

@@ -252,6 +252,10 @@ class Battle
 
                 // Apply damage
                 $target_config['members'][$target_position]['current_health'] -= $damage;
+                // Cap health at 0 minimum
+                if ($target_config['members'][$target_position]['current_health'] < 0) {
+                    $target_config['members'][$target_position]['current_health'] = 0;
+                }
 
                 $attacker_name = ucfirst($attacker_side) . " " . ucfirst($attacker_position);
                 return [
@@ -397,6 +401,10 @@ class Battle
                         $damage = $this->applyDamageBonus($damage, ' fire', $gear_bonuses[$caster_side][$caster_position]);
                         $damage = $this->applyResistance($damage, ' fire', $gear_bonuses[$enemy_side]['frontline']);
                         $enemy_config['members']['frontline']['current_health'] -= $damage;
+                        // Cap health at 0 minimum
+                        if ($enemy_config['members']['frontline']['current_health'] < 0) {
+                            $enemy_config['members']['frontline']['current_health'] = 0;
+                        }
                         $enemy_name = ucfirst($enemy_side) . " Frontline";
                         $logs[] = "$caster_name casts Firestorm, scorching and hitting $enemy_name for $damage fire damage.";
                     }
@@ -413,6 +421,10 @@ class Battle
                         $damage = $this->applyDamageBonus($damage, ' fire', $gear_bonuses[$caster_side][$caster_position]);
                         $damage = $this->applyResistance($damage, ' fire', $gear_bonuses[$enemy_side]['backline']);
                         $enemy_config['members']['backline']['current_health'] -= $damage;
+                        // Cap health at 0 minimum
+                        if ($enemy_config['members']['backline']['current_health'] < 0) {
+                            $enemy_config['members']['backline']['current_health'] = 0;
+                        }
                         $enemy_name = ucfirst($enemy_side) . " Backline";
                         $logs[] = "$caster_name casts Firestorm, scorching and hitting $enemy_name for $damage fire damage.";
                     }
@@ -430,6 +442,10 @@ class Battle
                         $damage = $this->applyDamageBonus($damage, ' cold', $gear_bonuses[$caster_side][$caster_position]);
                         $damage = $this->applyResistance($damage, ' cold', $gear_bonuses[$enemy_side]['frontline']);
                         $enemy_config['members']['frontline']['current_health'] -= $damage;
+                        // Cap health at 0 minimum
+                        if ($enemy_config['members']['frontline']['current_health'] < 0) {
+                            $enemy_config['members']['frontline']['current_health'] = 0;
+                        }
                         $enemy_name = ucfirst($enemy_side) . " Frontline";
                         $logs[] = "$caster_name casts Blizzard, chilling and hitting $enemy_name for $damage cold damage.";
                     }
@@ -442,6 +458,10 @@ class Battle
                         $damage = $this->applyDamageBonus($damage, ' cold', $gear_bonuses[$caster_side][$caster_position]);
                         $damage = $this->applyResistance($damage, ' cold', $gear_bonuses[$enemy_side]['backline']);
                         $enemy_config['members']['backline']['current_health'] -= $damage;
+                        // Cap health at 0 minimum
+                        if ($enemy_config['members']['backline']['current_health'] < 0) {
+                            $enemy_config['members']['backline']['current_health'] = 0;
+                        }
                         $enemy_name = ucfirst($enemy_side) . " Backline";
                         $logs[] = "$caster_name casts Blizzard, chilling and hitting $enemy_name for $damage cold damage.";
                     }
