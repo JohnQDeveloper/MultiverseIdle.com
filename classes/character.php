@@ -249,6 +249,7 @@ class Character
             `last_arena_log` = :last_arena_log,
             `last_rift_time` = :last_rift_time,
             `last_rift_log` = :last_rift_log,
+            `highest_rift_level` = :highest_rift_level,
             `last_seen` = :last_seen
             WHERE `user_id` = :user_id";
 
@@ -269,6 +270,7 @@ class Character
             'last_arena_log' => $this->Data['last_arena_log'],
             'last_rift_time' => $this->Data['last_rift_time'] ?? null,
             'last_rift_log' => $this->Data['last_rift_log'] ?? null,
+            'highest_rift_level' => $this->Data['highest_rift_level'] ?? 0,
             'user_id' => $user_id,
             'last_seen' => $this->Data['last_seen']
         ];

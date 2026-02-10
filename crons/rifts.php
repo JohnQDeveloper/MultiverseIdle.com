@@ -5,6 +5,30 @@ declare(strict_types=1);
 $time_start = microtime(true);
 require_once('../config.php');
 
+/**
+ * Rift Cron
+ *
+ * This cron runs once per hour to process queued rift delves.
+ * Players must win all 10 consecutive battles to earn rewards.
+ */
+
+// Check if we should run (only once per hour, at the top of the hour)
+$current_minute = (int) date('i');
+if ($current_minute >= 5) { // Allow 5 minute buffer for cron timing
+    echo "Rifts cron skipped - not top of hour (current minute: $current_minute)\n";
+    return;
+}
+
+// Check if already ran this hour using Redis to prevent duplicate runs
+$current_hour_key = 'rifts_ran_' . date('Y-m-d_H');
+if ($redis->exists($current_hour_key)) {
+    echo "Rifts cron already ran this hour, skipping.\n";
+    return;
+}
+
+// Mark this hour's rift processing as started
+$redis->setex($current_hour_key, 3600, '1'); // expires in 1 hour
+
 // Process rifts for active users
 $row = ActiveUsers();
 
@@ -154,17 +178,9 @@ foreach ($row as $r) {
             $battles_won++;
             $rift_log .= "<span class='success'>Victory! ($battles_won/$total_battles wins so far)</span><BR />\n";
             echo "  Battle $battle_num: VICTORY\n";
-
-            // Heal party to full for next battle
-            $Character->Data['party_json']['members']['frontline']['current_health'] =
-                $Character->Data['party_json']['members']['frontline']['health'] * 5;
-            $Character->Data['party_json']['members']['backline']['current_health'] =
-                $Character->Data['party_json']['members']['backline']['health'] * 5;
         } else {
             $rift_log .= "<span class='danger'>Defeat! Rift Delve failed at battle $battle_num.</span><BR />\n";
             echo "  Battle $battle_num: DEFEAT - Rift failed!\n";
-            $all_battles_won = false;
-            break; // Stop processing battles if one is lost
         }
 
         // Add complete battle log
@@ -174,6 +190,17 @@ foreach ($row as $r) {
             $rift_log .= "</details>\n";
         }
         $rift_log .= "<hr />\n";
+
+        if ($battle_result['player_won']) {
+            // Heal party to full for next battle
+            $Character->Data['party_json']['members']['frontline']['current_health'] =
+                $Character->Data['party_json']['members']['frontline']['health'] * 5;
+            $Character->Data['party_json']['members']['backline']['current_health'] =
+                $Character->Data['party_json']['members']['backline']['health'] * 5;
+        } else {
+            $all_battles_won = false;
+            break; // Stop processing battles if one is lost
+        }
     }
 
     // Award rewards if all battles were won
@@ -181,11 +208,18 @@ foreach ($row as $r) {
         echo "All 10 battles won! Awarding rewards.\n";
         $rift_log .= "<h3><span class='success'>RIFT DELVE COMPLETED! All 10 battles won!</span></h3>\n";
 
-        // Calculate base rewards (compare to arena floor)
-        $base_gold = $current_rift['level'];
-        $base_xp = $current_rift['level'] * 10;
-        $base_resource = $current_rift['level'];
-        $base_stat_gain = 1;
+        // Update highest rift level if this is a new record
+        $current_highest = $Character->Data['highest_rift_level'] ?? 0;
+        if ($current_rift['level'] > $current_highest) {
+            $Character->Data['highest_rift_level'] = $current_rift['level'];
+            echo "New highest rift level record: " . $current_rift['level'] . "\n";
+        }
+
+        // Calculate base rewards (equivalent to 30 arena floors)
+        $base_gold = $current_rift['level'] * 30;
+        $base_xp = $current_rift['level'] * 30 * 10; // 300 * level
+        $base_resource = $current_rift['level'] * 30;
+        $base_stat_gain = 30; // 30 stat points per character (60 total for both)
 
         // Apply implicit bonus (+60% for all)
         $implicit_multiplier = 1.6; // +60% = 1.6x
@@ -254,6 +288,8 @@ foreach ($row as $r) {
         }
     } else {
         echo "Rift failed - no rewards awarded.\n";
+        $rift_log .= "<h3><span class='danger'>RIFT DELVE FAILED</span></h3>\n";
+        $rift_log .= "<p>You won $battles_won out of $total_battles battles.</p>\n";
         $rift_log .= "<p><span class='danger'>No rewards - you must win all 10 battles to earn rewards.</span></p>\n";
     }
 

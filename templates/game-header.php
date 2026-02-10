@@ -21,6 +21,7 @@
               <li><a href="/craft">Craft</a></li>
               <li><a href="/inventory">Inventory</a></li>
               <li><a href="/market">Market</a></li>
+              <li><a href="/leaderboard">Leaderboard</a></li>
               <li><a href="/party">Party</a></li>
               <li><a href="/workers">Workers</a></li>
               <li><a href="/logout">Logout</a></li>
