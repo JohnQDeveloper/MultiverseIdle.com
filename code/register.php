@@ -1,6 +1,11 @@
 <?php
 
 if(isset($_POST['email'], $_POST['password'], $_POST['username'])) {
+    // Validate password length
+    if (strlen($_POST['password']) < 8) {
+        die('Password must be at least 8 characters long');
+    }
+
     try {
         $userId = $auth->register($_POST['email'], $_POST['password'], $_POST['username'], function ($selector, $token) {
             #echo 'Send ' . $selector . ' and ' . $token . ' to the user (e.g. via email)';

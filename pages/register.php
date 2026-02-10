@@ -10,7 +10,8 @@
                     <input type="email" id="email" name="email" required>
 
                     <label for="password">Password:</label>
-                    <input type="password" id="password" name="password" required>
+                    <input type="password" id="password" name="password" minlength="8" required>
+                    <small>Password must be at least 8 characters long</small>
 
                     <button type="submit">Register</button>
                 </form>
