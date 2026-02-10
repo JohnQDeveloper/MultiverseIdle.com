@@ -14,7 +14,7 @@ require_once('../config.php');
 
 // Check if we should run (only once per hour, at the top of the hour)
 $current_minute = (int) date('i');
-if ($current_minute >= 5) { // Allow 5 minute buffer for cron timing
+if ($current_minute >= 5 && $current_minute <= 8) { // Allow 5 minute buffer for cron timing
     echo "Rifts cron skipped - not top of hour (current minute: $current_minute)\n";
     return;
 }
