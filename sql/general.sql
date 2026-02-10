@@ -70,3 +70,39 @@ CREATE TABLE
 
 /* ADJ */
 ALTER TABLE characters ADD COLUMN highest_rift_level INT DEFAULT 0;
+
+-- Guilds table
+CREATE TABLE `guilds` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `name` varchar(100) NOT NULL,
+  `description` text DEFAULT NULL,
+  `guild_master_user_id` int NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Guild members table
+CREATE TABLE `guild_members` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `guild_id` int unsigned NOT NULL,
+  `user_id` int NOT NULL,
+  `role` enum('guild_master','officer','member') NOT NULL DEFAULT 'member',
+  `joined_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `guild_user` (`guild_id`, `user_id`),
+  KEY `user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Guild invites table
+CREATE TABLE `guild_invites` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `guild_id` int unsigned NOT NULL,
+  `inviter_user_id` int NOT NULL,
+  `invitee_user_id` int NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `expires_at` timestamp NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `guild_invitee` (`guild_id`, `invitee_user_id`),
+  KEY `invitee_user_id` (`invitee_user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
