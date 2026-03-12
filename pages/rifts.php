@@ -3,12 +3,12 @@
     <div class="wrapper">
     <article class="main">
         <h1>Rift Delves</h1>
-        <p>Queue up to 6 rift stones to run challenging 10-battle Rift Delves. Each rift runs automatically every 4 hours.</p>
+        <p>Queue up to <?php echo $rift_queue_max; ?> rift stones to run challenging 10-battle Rift Delves. Each rift runs automatically every 4 hours.</p>
 
         <div class="info-box">
             <h3 class="heading--no-top-margin">How Rift Delves Work</h3>
             <ul>
-                <li><b>Queue rifts:</b> Add rift stones to your queue (max 6)</li>
+                <li><b>Queue rifts:</b> Add rift stones to your queue (max <?php echo $rift_queue_max; ?><?php echo $has_active_sub ? '' : ' &mdash; <a href="/store">upgrade to QoL</a> for up to 8'; ?>)</li>
                 <li><b>Automatic processing:</b> Rifts run every 4 hours</li>
                 <li><b>10 consecutive battles:</b> Fight through all 10 to earn rewards</li>
                 <li><b>Full heal between battles:</b> You start each fight at full health</li>
@@ -17,7 +17,7 @@
         </div>
 
         <!-- Rift Queue Section -->
-        <h2>Rift Queue (<?php echo count($queued_rifts); ?>/6)</h2>
+        <h2>Rift Queue (<?php echo count($queued_rifts); ?>/<?php echo $rift_queue_max; ?>)</h2>
 
         <?php if (empty($queued_rifts)): ?>
             <p><em>No rifts currently queued. Add rift stones from your available rifts below.</em></p>
@@ -67,8 +67,8 @@
         <!-- Available Rift Stones Section -->
         <h2>Available Rift Stones</h2>
 
-        <?php if (count($queued_rifts) >= 6): ?>
-            <p class="text--warning"><em>Queue is full (6/6). Remove a rift from the queue to add more.</em></p>
+        <?php if (count($queued_rifts) >= $rift_queue_max): ?>
+            <p class="text--warning"><em>Queue is full (<?php echo $rift_queue_max; ?>/<?php echo $rift_queue_max; ?>). Remove a rift from the queue to add more.</em></p>
         <?php endif; ?>
 
         <?php if (empty($available_rift_stones)): ?>
@@ -105,7 +105,7 @@
                             <form method="POST" action="/rifts" class="form--inline">
                                 <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
                                 <input type="hidden" name="rift_stone_id" value="<?php echo $rift_stone['id']; ?>">
-                                <input type="submit" role="button" name="queue_rift" value="Add to Queue" <?php echo count($queued_rifts) >= 6 ? 'disabled' : ''; ?>>
+                                <input type="submit" role="button" name="queue_rift" value="Add to Queue" <?php echo count($queued_rifts) >= $rift_queue_max ? 'disabled' : ''; ?>>
                             </form>
                         </div>
                     </div>

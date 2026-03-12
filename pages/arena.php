@@ -62,7 +62,8 @@
                     min="1" max="1000000" />
                     <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
                     <input type="submit" value="Update Floor" name="update_floor" />
-                    <input type="submit" value="Simulate Floor" name="simulate_floor" />
+                    <input type="submit" value="Simulate Floor" name="simulate_floor"
+                        <?php echo $has_active_sub ? '' : 'disabled title="Requires QoL Subscription"'; ?> />
                 </div>
             </form>
             <div>

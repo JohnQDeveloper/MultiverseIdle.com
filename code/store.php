@@ -12,14 +12,16 @@ $subscription_plans = [
     12 => ['months' => 12, 'credits' => 800,  'label' => '12 Months'],
 ];
 
+$free_credits_enabled = in_array(ENVIRONMENT, ['Dev', 'QA'], true);
+
 // Determine free credits cooldown state
 $last_claim = $Character->Data['last_free_credits_claim'] ?? null;
 $next_claim_time = (!empty($last_claim)) ? strtotime($last_claim) + 86400 : 0;
-$can_claim = $next_claim_time <= time();
+$can_claim = $free_credits_enabled && $next_claim_time <= time();
 
 // Handle free credits claim
-if (isset($_POST['claim_free_credits'])) {
-    if (!$can_claim) {
+if ($free_credits_enabled && isset($_POST['claim_free_credits'])) {
+    if ($next_claim_time > time()) {
         $alert_danger = 'You already claimed your free credits today. Next claim available at ' . date('Y-m-d H:i:s', $next_claim_time) . '.';
     } else {
         $Character->Data['credits'] = ((int)($Character->Data['credits'] ?? 0)) + 100;
@@ -55,7 +57,7 @@ if (isset($_POST['buy_subscription'])) {
             $base->modify('+' . $plan['months'] . ' months');
             $Character->Data['subscription_expires'] = $base->format('Y-m-d H:i:s');
 
-            $alert_success = 'QoL subscription activated for ' . $plan['label'] . '! Expires: ' . $Character->Data['subscription_expires'];
+            $alert_success = 'QoL subscription activated for ' . $plan['label'] . '! Expires: ' . date('F j, Y', strtotime($Character->Data['subscription_expires']));
         }
     }
 }

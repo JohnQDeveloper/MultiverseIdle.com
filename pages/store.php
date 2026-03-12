@@ -16,11 +16,12 @@
             <?php if ($has_active_sub): ?>
                 &nbsp;&nbsp;|&nbsp;&nbsp;
                 <span class="text--success">QoL Subscription Active</span>
-                &mdash; expires <?php echo htmlspecialchars($Character->Data['subscription_expires']); ?>
+                &mdash; expires <?php echo date('F j, Y', strtotime($Character->Data['subscription_expires'])); ?>
             <?php endif; ?>
         </div>
 
-        <!-- Free Credits -->
+        <!-- Free Credits (Dev/QA only) -->
+        <?php if ($free_credits_enabled): ?>
         <h2>Free Credits</h2>
         <div class="card">
             <div class="grid">
@@ -40,6 +41,7 @@
                 </div>
             </div>
         </div>
+        <?php endif; ?>
 
         <!-- Buy Credits (Demo) -->
         <h2>Buy Credits</h2>
@@ -59,6 +61,11 @@
         <!-- QoL Subscription -->
         <h2>Quality of Life Subscription</h2>
         <p>Unlock quality of life improvements to enhance your experience.</p>
+        <ul>
+            <li>Increased Rift Queue from 2 to 8 slots</li>
+            <li>Ability to simulate Arena floors before battling</li>
+            <li>Additional QoL features coming soon!</li>
+        </ul>
 
         <div class="store-plans">
             <?php foreach ($subscription_plans as $months => $plan): ?>

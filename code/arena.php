@@ -7,6 +7,9 @@ $potion = new Potion();
 $potion_bonuses = $potion->GetActivePotionBonuses($Character->Data['id']);
 $active_potion = $potion->GetActivePotion($Character->Data['id']);
 
+$has_active_sub = !empty($Character->Data['subscription_expires'])
+    && strtotime($Character->Data['subscription_expires']) > time();
+
 if(isset($_POST['update_floor'])) {
     $new_floor = intval($_POST['new_floor']);
     if($new_floor >= 1 && $new_floor <= 1000000) {
@@ -14,7 +17,7 @@ if(isset($_POST['update_floor'])) {
     }
 }
 
-if(isset($_POST['simulate_floor'])) {
+if($has_active_sub && isset($_POST['simulate_floor'])) {
     $new_floor = intval($_POST['new_floor']);
 
     $Battle = new Battle();

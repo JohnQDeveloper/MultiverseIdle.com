@@ -5,6 +5,10 @@
 
     $rift_stone = new RiftStone();
 
+    $has_active_sub = !empty($Character->Data['subscription_expires'])
+        && strtotime($Character->Data['subscription_expires']) > time();
+    $rift_queue_max = $has_active_sub ? 8 : 2;
+
     # Queue Rift Stone
     if (isset($_POST['queue_rift'])) {
         $rift_stone_id = intval($_POST['rift_stone_id']);
@@ -17,17 +21,17 @@
             # Check how many rifts are currently queued
             $queued_rifts = $rift_stone->GetQueuedRiftsByOwner($owner_id);
 
-            if (count($queued_rifts) >= 6) {
-                $alert_danger = 'You can only queue up to 6 rifts at a time. Wait for some to complete.';
+            if (count($queued_rifts) >= $rift_queue_max) {
+                $alert_danger = 'You can only queue up to ' . $rift_queue_max . ' rifts at a time. Wait for some to complete.';
             } else {
                 # Load the rift stone to queue it
                 if ($rift_stone->LoadRiftStoneByID($rift_stone_id)) {
-                    # Determine next queue position (1-6)
+                    # Determine next queue position
                     $next_position = count($queued_rifts) + 1;
 
                     # Update rift stone with queue position
                     if ($rift_stone->QueueRift($rift_stone_id, $next_position, $owner_id)) {
-                        $alert_success = 'Rift stone queued successfully! Position: ' . $next_position . '/6';
+                        $alert_success = 'Rift stone queued successfully! Position: ' . $next_position . '/' . $rift_queue_max;
                     } else {
                         $alert_danger = 'Failed to queue rift stone.';
                     }
