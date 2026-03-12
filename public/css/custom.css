@@ -63,6 +63,12 @@ input.danger-button {
 
 
 /* navigation css */
+.nav-menu img {
+    height: 64px;
+    width: auto;
+    max-width: none;
+}
+
 .navbar {
     width: 100%;
     background-color: #333;

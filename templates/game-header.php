@@ -9,7 +9,7 @@
         <div class="container">
           <nav>
             <ul class="nav-menu">
-              <li><a href="#"><img src="./img/logo.png" height="64"></a></li>
+              <li><a href="#"><img src="/img/logo.png" height="64"></a></li>
               <li class="dropdown">
                 <a href="#">Actions</a>
                 <ul class="dropdown-content">
@@ -30,7 +30,7 @@
               <li> ::: </li>
               <li><a href="https://discord.gg/KrD7hGuDyb">Discord</a></li>
               <li><a href="https://github.com/JohnQDeveloper/MultiverseIdle.com/issues">Feedback</a></li>
-              <li><a href="/log">Game Log</a></li>
+              <li><a href="/log">Log</a></li>
               <li><a href="/settings">Settings</a></li>
             </ul>
           </nav>

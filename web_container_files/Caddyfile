@@ -13,9 +13,9 @@ localhost {
 	encode zstd br gzip
 
 	# Stop on css/js/img
-	rewrite /css/* /public/{uri}
-	rewrite /js/* /public/{uri}
-	rewrite /img/* /public/{uri}
+	rewrite /css/* /public{uri}
+	rewrite /js/* /public{uri}
+	rewrite /img/* /public{uri}
 
 	# Rewrite everything else
 	rewrite * /public/index.php
