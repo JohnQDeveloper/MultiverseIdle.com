@@ -52,11 +52,13 @@ input.success-button {
   padding: 1em;
   color:  #05714B; /* Text color */
   border: 1px solid  #05714B;
+  background-color: #8EFAD5;
 }
 
 input.danger-button {
   padding: 1em;
   border: 1px solid  #8B0000;
+  background-color: #FFB8B8;
 }
 
 
@@ -310,4 +312,36 @@ input.danger-button {
     font-size: 1.5em;
     font-weight: bold;
     color: #ff6b6b;
+}
+
+/* Store */
+.store-credits-balance {
+    font-size: 1.4em;
+    font-weight: bold;
+    color: gold;
+    margin-left: 6px;
+}
+
+.store-credits-cost {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: gold;
+}
+
+.store-plan-price {
+    margin: 4px 0;
+}
+
+.store-card--demo {
+    border-color: #555;
+    opacity: 0.85;
+}
+
+.store-btn--demo {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.store-plans .card {
+    margin-bottom: 12px;
 }

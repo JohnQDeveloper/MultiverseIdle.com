@@ -29,6 +29,12 @@ ALTER TABLE characters
 ADD COLUMN last_rift_time DATETIME DEFAULT NULL,
 ADD COLUMN last_rift_log TEXT DEFAULT NULL;
 
+ALTER TABLE characters ADD COLUMN credits BIGINT UNSIGNED DEFAULT 0;
+ALTER TABLE characters ADD COLUMN subscription_expires DATETIME DEFAULT NULL;
+
+ALTER TABLE characters ADD COLUMN last_free_credits_claim DATETIME DEFAULT NULL;
+
+
 /* RIFT QUEUE TABLE */
 CREATE TABLE
   `rifts` (

@@ -159,7 +159,9 @@ class Character
             `party_json`,
             `worker_json`,
             `rift_queued`,
-            `world_boss_queued`
+            `world_boss_queued`,
+            `credits`,
+            `subscription_expires`
         ) VALUES (
             :user_id,
             :name,
@@ -172,6 +174,8 @@ class Character
             :party_json,
             :worker_json,
             NULL,
+            NULL,
+            0,
             NULL
         )";
 
@@ -250,7 +254,10 @@ class Character
             `last_rift_time` = :last_rift_time,
             `last_rift_log` = :last_rift_log,
             `highest_rift_level` = :highest_rift_level,
-            `last_seen` = :last_seen
+            `last_seen` = :last_seen,
+            `credits` = :credits,
+            `subscription_expires` = :subscription_expires,
+            `last_free_credits_claim` = :last_free_credits_claim
             WHERE `user_id` = :user_id";
 
         $params = [
@@ -272,7 +279,10 @@ class Character
             'last_rift_log' => $this->Data['last_rift_log'] ?? null,
             'highest_rift_level' => $this->Data['highest_rift_level'] ?? 0,
             'user_id' => $user_id,
-            'last_seen' => $this->Data['last_seen']
+            'last_seen' => $this->Data['last_seen'],
+            'credits' => $this->Data['credits'] ?? 0,
+            'subscription_expires' => $this->Data['subscription_expires'] ?? null,
+            'last_free_credits_claim' => $this->Data['last_free_credits_claim'] ?? null,
         ];
 
         $this->DAL->w($query, $params);

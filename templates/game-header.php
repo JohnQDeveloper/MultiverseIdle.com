@@ -22,6 +22,7 @@
               <li><a href="/inventory">Inventory</a></li>
               <li><a href="/market">Market</a></li>
               <li><a href="/guilds">Guilds</a></li>
+              <li><a href="/store">Store</a></li>
               <li><a href="/leaderboard">Leaderboard</a></li>
               <li><a href="/party">Party</a></li>
               <li><a href="/workers">Workers</a></li>
@@ -51,6 +52,10 @@
         <div class="row">
             Herbs: <?php echo human_num($Character->Data['herbs']); ?> <BR />
             Gems: <?php echo human_num($Character->Data['gems']); ?> <BR />
+        </div>
+        <div class="row">
+            Credits: <?php echo human_num($Character->Data['credits'] ?? 0); ?> <BR />
+            QoL Sub: <?php echo (!empty($Character->Data['subscription_expires']) && strtotime($Character->Data['subscription_expires']) > time()) ? 'Active' : 'None'; ?> <BR />
         </div>
         <div class="row">
             Rift: Queued <BR />

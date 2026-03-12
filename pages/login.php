@@ -11,6 +11,7 @@
                     <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
 
                     <button type="submit">Login</button>
+                    <p><small><a href="/forgot-password">Forgot your password?</a></small></p>
                 </form>
             </article>
         </div>
