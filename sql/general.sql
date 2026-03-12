@@ -112,3 +112,19 @@ CREATE TABLE `guild_invites` (
   UNIQUE KEY `guild_invitee` (`guild_id`, `invitee_user_id`),
   KEY `invitee_user_id` (`invitee_user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Market Orders Table
+CREATE TABLE `market_orders` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `character_id` int unsigned NOT NULL,
+  `order_type` enum('buy','sell') NOT NULL,
+  `resource` enum('herbs','iron','gems','credits') NOT NULL,
+  `amount` bigint unsigned NOT NULL,
+  `amount_remaining` bigint unsigned NOT NULL,
+  `price_per_unit` bigint unsigned NOT NULL,
+  `status` enum('open','filled','cancelled') NOT NULL DEFAULT 'open',
+  PRIMARY KEY (`id`),
+  KEY `character_id` (`character_id`),
+  KEY `resource_status` (`resource`, `status`, `price_per_unit`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

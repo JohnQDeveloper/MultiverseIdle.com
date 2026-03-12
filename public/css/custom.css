@@ -320,6 +320,151 @@ input.danger-button {
     color: #ff6b6b;
 }
 
+/* Market */
+.market-resource-nav {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.market-resource-tab {
+    display: inline-block;
+    padding: 6px 18px;
+    border: 1px solid #555;
+    border-radius: 4px;
+    text-decoration: none;
+    color: #ccc;
+    transition: background 0.15s;
+}
+
+.market-resource-tab:hover {
+    background-color: #444;
+    color: #fff;
+}
+
+.market-resource-tab.active {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: #fff;
+    font-weight: bold;
+}
+
+.market-subtitle {
+    font-weight: normal;
+    color: #aaa;
+    font-size: 0.85em;
+}
+
+.market-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 24px;
+}
+
+.market-table th,
+.market-table td {
+    padding: 8px 12px;
+    border: 1px solid #444;
+    text-align: left;
+}
+
+.market-table th {
+    background-color: #2a2a2a;
+    font-weight: bold;
+}
+
+.market-table tr:hover td {
+    background-color: rgba(255, 255, 255, 0.04);
+}
+
+.market-of-total {
+    color: #888;
+    font-size: 0.85em;
+}
+
+.market-fill-form {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.market-fill-input {
+    width: 80px;
+    padding: 4px 8px;
+    margin: 0;
+}
+
+.market-fill-btn {
+    padding: 6px 12px;
+    margin: 0;
+}
+
+.market-badge--sell {
+    background-color: #dc3545;
+}
+
+.market-badge--buy {
+    background-color: #28a745;
+}
+
+.market-badge--sell-inline {
+    color: #FFB8B8;
+    font-weight: bold;
+    font-size: 0.85em;
+}
+
+.market-badge--buy-inline {
+    color: #8EFAD5;
+    font-weight: bold;
+    font-size: 0.85em;
+}
+
+.market-balance-hint {
+    margin-top: 8px;
+    margin-bottom: 16px;
+}
+
+.market-own-order {
+    color: #888;
+    font-size: 0.85em;
+}
+
+.market-order-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    align-items: start;
+}
+
+.market-order-col h3 {
+    margin-top: 0;
+}
+
+.market-table-scroll {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid #444;
+    border-radius: 4px;
+}
+
+.market-table-scroll .market-table {
+    margin-bottom: 0;
+}
+
+.market-table-scroll thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background-color: #2a2a2a;
+}
+
+@media (max-width: 768px) {
+    .market-order-columns {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* Store */
 .store-credits-balance {
     font-size: 1.4em;
