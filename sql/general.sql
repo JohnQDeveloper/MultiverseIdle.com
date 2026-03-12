@@ -33,7 +33,7 @@ ALTER TABLE characters ADD COLUMN credits BIGINT UNSIGNED DEFAULT 0;
 ALTER TABLE characters ADD COLUMN subscription_expires DATETIME DEFAULT NULL;
 
 ALTER TABLE characters ADD COLUMN last_free_credits_claim DATETIME DEFAULT NULL;
-
+ALTER TABLE characters ADD COLUMN highest_rift_level INT DEFAULT 0;
 
 /* RIFT QUEUE TABLE */
 CREATE TABLE
@@ -74,8 +74,7 @@ CREATE TABLE
     PRIMARY KEY (`id`)
   ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci
 
-/* ADJ */
-ALTER TABLE characters ADD COLUMN highest_rift_level INT DEFAULT 0;
+ALTER TABLE potions ADD COLUMN market_price BIGINT UNSIGNED DEFAULT NULL;
 
 -- Guilds table
 CREATE TABLE `guilds` (

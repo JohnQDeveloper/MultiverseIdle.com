@@ -496,3 +496,32 @@ input.danger-button {
 .store-plans .card {
     margin-bottom: 12px;
 }
+
+/* Item Market */
+.market-own-listing-card {
+    border-color: #555;
+    opacity: 0.75;
+}
+
+.market-item-price {
+    font-size: 1.1em;
+    margin-bottom: 8px;
+}
+
+.market-list-card {
+    padding: 10px 15px;
+    margin-bottom: 8px;
+}
+
+.market-list-form {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.market-list-affixes {
+    color: #aaa;
+    font-size: 0.85em;
+    margin: 2px 0 0;
+}

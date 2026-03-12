@@ -110,6 +110,17 @@
                                 <input type="hidden" name="gear_id" value="<?php echo $item['id']; ?>">
                                 <input type="submit" role="button" name="destroy_item" value="Destroy" class="contrast">
                             </form>
+                            <?php if (!$is_equipped && ($item['market_price'] ?? 0) == 0): ?>
+                                <form method="POST" action="/market?tab=my_orders" class="market-list-form" style="margin-top:6px;">
+                                    <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
+                                    <input type="hidden" name="item_type" value="gear">
+                                    <input type="hidden" name="item_id" value="<?php echo $item['id']; ?>">
+                                    <input type="number" name="list_price" min="1" placeholder="List price" required class="market-fill-input" style="width:100px;">
+                                    <input type="submit" name="list_item" value="Sell">
+                                </form>
+                            <?php elseif (($item['market_price'] ?? 0) > 0): ?>
+                                <p><small class="text--warning">Listed on market</small></p>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -194,6 +205,13 @@
                                     <input type="hidden" name="potion_id" value="<?php echo $potion['id']; ?>">
                                     <input type="submit" role="button" name="destroy_potion" value="Destroy" class="contrast">
                                 </form>
+                                <form method="POST" action="/market?tab=my_orders" class="market-list-form" style="margin-top:6px;">
+                                    <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
+                                    <input type="hidden" name="item_type" value="potion">
+                                    <input type="hidden" name="item_id" value="<?php echo $potion['id']; ?>">
+                                    <input type="number" name="list_price" min="1" placeholder="List price" required class="market-fill-input" style="width:100px;">
+                                    <input type="submit" name="list_item" value="Sell">
+                                </form>
                             <?php else: ?>
                                 <form method="POST" action="/inventory?tab=potions" class="form--inline" onsubmit="return confirm('Are you sure you want to cancel this active potion? The potion will be deleted and effects will end immediately.');">
                                     <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
@@ -248,6 +266,17 @@
                                 <input type="hidden" name="rift_stone_id" value="<?php echo $rift_stone['id']; ?>">
                                 <input type="submit" role="button" name="destroy_rift_stone" value="Destroy" class="contrast">
                             </form>
+                            <?php if ($rift_stone['queue_position'] === null && ($rift_stone['market_price'] ?? 0) == 0): ?>
+                                <form method="POST" action="/market?tab=my_orders" class="market-list-form" style="margin-top:6px;">
+                                    <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
+                                    <input type="hidden" name="item_type" value="rift_stone">
+                                    <input type="hidden" name="item_id" value="<?php echo $rift_stone['id']; ?>">
+                                    <input type="number" name="list_price" min="1" placeholder="List price" required class="market-fill-input" style="width:100px;">
+                                    <input type="submit" name="list_item" value="Sell">
+                                </form>
+                            <?php elseif (($rift_stone['market_price'] ?? 0) > 0): ?>
+                                <p><small class="text--warning">Listed on market</small></p>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
