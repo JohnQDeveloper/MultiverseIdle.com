@@ -32,7 +32,11 @@
 - All views, api calls, code paths, and so forth that are not in the crons directory should return in less than 200ms.
 - Lists over 50 items must always be paginated
 - Images MUST use next/image with explicit dimensions. Cumulative Layout Shift kills us.
+- Keep performance in mind when performing tasks
 
 ### Security
 - ALWAYS check that the system adheres to the OWASP Top 10
 - ALWAYS Filter all user input for correctness and safety
+
+### General
+- Write code for production with an eye for performance, optimization, reusability, and reliability.
