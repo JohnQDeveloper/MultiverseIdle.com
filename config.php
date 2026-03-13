@@ -4,7 +4,7 @@
     define('ENVIRONMENT', getenv('ENVIRONMENT')); # Dev / QA / Prod
     define('URL', 'https://'.getenv('HOSTNAME').'/');
     define('BASE_URL', 'https://'.getenv('HOSTNAME'));
-    define('NUMBER_OF_MINUTES_PER_RUN', 480); // 8 hours of normal gameplay per run
+    define('NUMBER_OF_MINUTES_PER_RUN', 1); // 1 minute normal gameplay per run
 
     # Determine if running in web context (not CLI/cron)
     define('IS_WEB_CONTEXT', php_sapi_name() !== 'cli');
@@ -49,6 +49,7 @@
     require_once(__DIR__ . '/func/format_functions.php');
     require_once(__DIR__ . '/func/formula_functions.php');
     require_once(__DIR__ . '/func/common_functions.php');
+    require_once(__DIR__ . '/func/guest_processing.php');
 
     # Require data files
     require_once(__DIR__ . '/data/resources.php');
@@ -63,6 +64,10 @@
             $_SESSION['email'] = $_SESSION['auth_email'];
             $_SESSION['username'] = $_SESSION['auth_username'];
         }
+
+        # Ensure auth_user_id is always a safe int (0 for guests/unauthenticated)
+        # This prevents TypeError in code files that read $_SESSION['auth_user_id'] directly
+        $_SESSION['auth_user_id'] = (int)($_SESSION['auth_user_id'] ?? 0);
 
         # Minimal CSRF Protection
         if (empty($_SESSION['csrf-token'])) {

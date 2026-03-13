@@ -16,16 +16,21 @@
                   <li><a href="/arena">2v2 Arena</a></li>
                   <li><a href="/rifts">Rifts</a></li>
                   <li><a href="/world-boss">World Boss</a></li>
+                  <li><a href="/workers">Workers</a></li>
                 </ul>
               </li>
-              <li><a href="/craft">Craft</a></li>
-              <li><a href="/inventory">Inventory</a></li>
+              <li class="dropdown">
+                <a href="#">Items</a>
+                <ul class="dropdown-content">
+                  <li><a href="/craft">Craft</a></li>
+                  <li><a href="/inventory">Inventory</a></li>
+                  <li><a href="/party">Party</a></li>
+                </ul>
+              </li>
               <li><a href="/market">Market</a></li>
               <li><a href="/guilds">Guilds</a></li>
               <li><a href="/store">Store</a></li>
               <li><a href="/leaderboard">Leaderboard</a></li>
-              <li><a href="/party">Party</a></li>
-              <li><a href="/workers">Workers</a></li>
               <li><a href="/logout">Logout</a></li>
               <li> ::: </li>
               <li><a href="https://discord.gg/KrD7hGuDyb">Discord</a></li>
@@ -64,6 +69,11 @@
         </div>
     </div>
     <?php
+    # Guest mode banner
+    if (isset($_SESSION['guest_mode']) && $_SESSION['guest_mode'] === true) {
+        echo '<div class="alert alert-warning">You are playing as a guest. Your progress is only saved in this browser session. <a href="/register"><strong>Register now</strong></a> to keep your progress permanently, or <a href="/login">login</a> to an existing account.</div>';
+    }
+
     # generic alerts for top of page
       if(isset($alert_success) && $alert_success != '') {
           echo '<div class="alert alert-success">' . htmlspecialchars($alert_success) . '</div>';

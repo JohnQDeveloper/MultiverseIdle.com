@@ -11,6 +11,7 @@ class Character
     private const XP_MULTIPLIER = 50;
 
     private object $DAL;
+    private bool $isGuest = false;
 
     /**
      * @var array<string, mixed> Character data including party_json and worker_json
@@ -21,6 +22,11 @@ class Character
     {
         global $DAL;
         $this->DAL = $DAL;
+    }
+
+    public function IsGuest(): bool
+    {
+        return $this->isGuest;
     }
 
     /**
@@ -34,8 +40,182 @@ class Character
         return $user_id;
     }
 
+    private function isGuestSession(): bool
+    {
+        return isset($_SESSION['guest_mode']) && $_SESSION['guest_mode'] === true;
+    }
+
+    private function buildDefaultCharacterData(string $name): array
+    {
+        $party_json = [
+            "members" => [
+                "frontline" => [
+                    "class" => "strength",
+                    "xp" => 0,
+                    "level" => self::DEFAULT_LEVEL,
+                    "strength" => self::DEFAULT_STAT_VALUE,
+                    "dexterity" => self::DEFAULT_STAT_VALUE,
+                    "health" => self::DEFAULT_STAT_VALUE,
+                    "wisdom" => self::DEFAULT_STAT_VALUE,
+                    "gear" => [],
+                    "skills" => ["Flaming Blades", "Antimage"],
+                ],
+                "backline" => [
+                    "class" => "wisdom",
+                    "xp" => 0,
+                    "level" => self::DEFAULT_LEVEL,
+                    "strength" => self::DEFAULT_STAT_VALUE,
+                    "dexterity" => self::DEFAULT_STAT_VALUE,
+                    "health" => self::DEFAULT_STAT_VALUE,
+                    "wisdom" => self::DEFAULT_STAT_VALUE,
+                    "gear" => [],
+                    "skills" => ["Healing Rain", "Firestorm"],
+                ]
+            ]
+        ];
+
+        $worker_json = [
+            "resource" => "gold",
+            "workers" => self::DEFAULT_LEVEL,
+            "intelligence_upgrades" => self::DEFAULT_LEVEL,
+            "speed_upgrades" => self::DEFAULT_LEVEL,
+            "skills" => [
+                "gold" => self::DEFAULT_LEVEL,
+                "iron" => self::DEFAULT_LEVEL,
+                "herbs" => self::DEFAULT_LEVEL,
+                "gems" => self::DEFAULT_LEVEL
+            ]
+        ];
+
+        return [
+            'id' => 0,
+            'user_id' => 0,
+            'name' => $name,
+            'level' => self::DEFAULT_LEVEL,
+            'arena_floor' => self::DEFAULT_LEVEL,
+            'gold' => self::DEFAULT_RESOURCE_AMOUNT,
+            'iron' => self::DEFAULT_RESOURCE_AMOUNT,
+            'herbs' => self::DEFAULT_RESOURCE_AMOUNT,
+            'gems' => self::DEFAULT_RESOURCE_AMOUNT,
+            'party_json' => $party_json,
+            'worker_json' => $worker_json,
+            'rift_queued' => null,
+            'world_boss_queued' => null,
+            'world_boss_log' => null,
+            'credits' => 0,
+            'subscription_expires' => null,
+            'last_seen' => date('Y-m-d H:i:s'),
+            'last_save' => date('Y-m-d H:i:s'),
+            'last_arena_time' => null,
+            'last_arena_log' => null,
+            'last_rift_time' => null,
+            'last_rift_log' => null,
+            'highest_rift_level' => 0,
+            'last_free_credits_claim' => null,
+            'active_potion_id' => null,
+            'potion_expire_time' => null,
+        ];
+    }
+
+    private function initGuestCharacter(string $name = 'Guest'): bool
+    {
+        $this->Data = $this->buildDefaultCharacterData($name);
+        $_SESSION['guest_character'] = $this->Data;
+        $this->isGuest = true;
+        return true;
+    }
+
+    private function loadFromGuestSession(): bool
+    {
+        if (empty($_SESSION['guest_character'])) {
+            return false;
+        }
+        $this->Data = $_SESSION['guest_character'];
+        $this->Data['id'] = $this->Data['id'] ?? 0;
+        $this->isGuest = true;
+        return true;
+    }
+
+    private function saveToGuestSession(): bool
+    {
+        if (empty($this->Data)) {
+            return false;
+        }
+        $_SESSION['guest_character'] = $this->Data;
+        return true;
+    }
+
+    /**
+     * Migrate guest session character data into a newly registered user's DB record.
+     * Should be called immediately after $auth->register() succeeds.
+     */
+    public function MigrateGuestToUser(int $user_id, string $name): bool
+    {
+        if (empty($_SESSION['guest_character'])) {
+            return false;
+        }
+
+        $guestData = $_SESSION['guest_character'];
+
+        $query = "INSERT INTO `characters` (
+            `user_id`,
+            `name`,
+            `level`,
+            `arena_floor`,
+            `gold`,
+            `iron`,
+            `herbs`,
+            `gems`,
+            `party_json`,
+            `worker_json`,
+            `rift_queued`,
+            `world_boss_queued`,
+            `credits`,
+            `subscription_expires`
+        ) VALUES (
+            :user_id,
+            :name,
+            :level,
+            :arena_floor,
+            :gold,
+            :iron,
+            :herbs,
+            :gems,
+            :party_json,
+            :worker_json,
+            NULL,
+            NULL,
+            0,
+            NULL
+        )";
+
+        $params = [
+            'user_id' => $user_id,
+            'name' => $name,
+            'level' => $guestData['level'],
+            'arena_floor' => $guestData['arena_floor'],
+            'gold' => $guestData['gold'],
+            'iron' => $guestData['iron'],
+            'herbs' => $guestData['herbs'],
+            'gems' => $guestData['gems'],
+            'party_json' => json_encode($guestData['party_json']),
+            'worker_json' => json_encode($guestData['worker_json']),
+        ];
+
+        $this->DAL->w($query, $params);
+
+        unset($_SESSION['guest_mode'], $_SESSION['guest_character']);
+        $this->isGuest = false;
+
+        return true;
+    }
+
     public function CharacterExists(int $user_id = 0): bool
     {
+        if ($this->isGuestSession()) {
+            return isset($_SESSION['guest_character']) && !empty($_SESSION['guest_character']);
+        }
+
         $user_id = $this->getUserId($user_id);
 
         if ($user_id <= 0) {
@@ -51,6 +231,10 @@ class Character
 
     public function ActivityCheck(int $user_id = 0): bool
     {
+        if ($this->isGuestSession()) {
+            return true;
+        }
+
         $user_id = $this->getUserId($user_id);
 
         if ($user_id <= 0) {
@@ -93,6 +277,10 @@ class Character
 
     public function CreateCharacter(int $user_id = 0, string $name = ""): bool
     {
+        if ($this->isGuestSession()) {
+            return $this->initGuestCharacter($name ?: 'Guest');
+        }
+
         $user_id = $this->getUserId($user_id);
 
         if ($user_id <= 0) {
@@ -107,45 +295,9 @@ class Character
             return false;
         }
 
-        $party_json = json_encode([
-            "members" => [
-                "frontline" => [
-                    "class" => "strength",
-                    "xp" => 0,
-                    "level" => self::DEFAULT_LEVEL,
-                    "strength" => self::DEFAULT_STAT_VALUE,
-                    "dexterity" => self::DEFAULT_STAT_VALUE,
-                    "health" => self::DEFAULT_STAT_VALUE,
-                    "wisdom" => self::DEFAULT_STAT_VALUE,
-                    "gear" => [],
-                    "skills" => ["Flaming Blades", "Antimage"],
-                ],
-                "backline" => [
-                    "class" => "wisdom",
-                    "xp" => 0,
-                    "level" => self::DEFAULT_LEVEL,
-                    "strength" => self::DEFAULT_STAT_VALUE,
-                    "dexterity" => self::DEFAULT_STAT_VALUE,
-                    "health" => self::DEFAULT_STAT_VALUE,
-                    "wisdom" => self::DEFAULT_STAT_VALUE,
-                    "gear" => [],
-                    "skills" => ["Healing Rain", "Firestorm"],
-                ]
-            ]
-        ]);
-
-        $worker_json = json_encode([
-            "resource" => "gold",
-            "workers" => self::DEFAULT_LEVEL,
-            "intelligence_upgrades" => self::DEFAULT_LEVEL,
-            "speed_upgrades" => self::DEFAULT_LEVEL,
-            "skills" => [
-                "gold" => self::DEFAULT_LEVEL,
-                "iron" => self::DEFAULT_LEVEL,
-                "herbs" => self::DEFAULT_LEVEL,
-                "gems" => self::DEFAULT_LEVEL
-            ]
-        ]);
+        $defaults = $this->buildDefaultCharacterData($name);
+        $party_json = json_encode($defaults['party_json']);
+        $worker_json = json_encode($defaults['worker_json']);
 
         $query = "INSERT INTO `characters` (
             `user_id`,
@@ -201,6 +353,10 @@ class Character
 
     public function LoadByUserId(int $user_id = 0): bool
     {
+        if ($this->isGuestSession()) {
+            return $this->loadFromGuestSession();
+        }
+
         $user_id = $this->getUserId($user_id);
 
         if ($user_id <= 0) {
@@ -229,6 +385,10 @@ class Character
 
     public function SaveByUserId(int $user_id = 0): bool
     {
+        if ($this->isGuestSession()) {
+            return $this->saveToGuestSession();
+        }
+
         $user_id = $this->getUserId($user_id);
 
         if ($user_id <= 0) {

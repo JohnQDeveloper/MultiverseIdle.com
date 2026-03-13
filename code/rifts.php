@@ -1,9 +1,7 @@
 <?php
 
-    $Character = new Character();
-    $Character->LoadByUserId($_SESSION['auth_user_id']);
-
     $rift_stone = new RiftStone();
+    $owner_id = isset($_SESSION['auth_user_id']) ? (int)$_SESSION['auth_user_id'] : 0;
 
     $has_active_sub = !empty($Character->Data['subscription_expires'])
         && strtotime($Character->Data['subscription_expires']) > time();
@@ -12,7 +10,6 @@
     # Queue Rift Stone
     if (isset($_POST['queue_rift'])) {
         $rift_stone_id = intval($_POST['rift_stone_id']);
-        $owner_id = $_SESSION['auth_user_id'];
 
         # Verify ownership
         if (!$rift_stone->VerifyOwnership($rift_stone_id, $owner_id)) {
@@ -45,7 +42,6 @@
     # Remove Rift from Queue
     if (isset($_POST['remove_rift'])) {
         $rift_stone_id = intval($_POST['rift_stone_id']);
-        $owner_id = $_SESSION['auth_user_id'];
 
         # Verify ownership
         if (!$rift_stone->VerifyOwnership($rift_stone_id, $owner_id)) {
@@ -60,10 +56,10 @@
     }
 
     # Load available rift stones (not queued)
-    $available_rift_stones = $rift_stone->GetAvailableRiftStonesByOwner($_SESSION['auth_user_id']);
+    $available_rift_stones = $rift_stone->GetAvailableRiftStonesByOwner($owner_id);
 
     # Load queued rifts
-    $queued_rifts = $rift_stone->GetQueuedRiftsByOwner($_SESSION['auth_user_id']);
+    $queued_rifts = $rift_stone->GetQueuedRiftsByOwner($owner_id);
 
     # Load rift stone definitions for display
     $rift_stone_implicit_definitions = RiftStone::getImplicitDefinitions();

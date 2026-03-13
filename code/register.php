@@ -27,6 +27,12 @@ if(isset($_POST['email'], $_POST['password'], $_POST['username'])) {
 
         });
 
+        // Migrate guest progress to the new account if the user was playing as a guest
+        if (isset($_SESSION['guest_mode']) && $_SESSION['guest_mode'] === true
+            && isset($_SESSION['guest_character']) && !empty($_SESSION['guest_character'])) {
+            $Character->MigrateGuestToUser($userId, $_POST['username']);
+        }
+
         echo 'Please check your e-mail to complete the registration and click here to <a href="/">login</a>.';
     }
     catch (\Delight\Auth\InvalidEmailException $e) {

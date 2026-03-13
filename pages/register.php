@@ -1,6 +1,9 @@
     <main class="container">
         <div class="wrapper">
             <article class="main">
+                <?php if (isset($_SESSION['guest_mode']) && $_SESSION['guest_mode'] === true): ?>
+                <div class="alert alert-warning">You are converting your guest account. Your current progress will be saved to your new account.</div>
+                <?php endif; ?>
                 <form method="POST" action="/register">
                     <h2>Register</h2>
                     <label for="username">Username:</label>

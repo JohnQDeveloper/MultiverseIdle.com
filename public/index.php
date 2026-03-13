@@ -16,30 +16,38 @@
 
     // Load Character
     $Character = new Character();
-    if(isset($_SESSION['auth_logged_in']) && $_SESSION['auth_logged_in'] == 1 &&
-    isset($_SESSION['auth_user_id']) && $_SESSION['auth_user_id'] > 0) {
+    $isLoggedIn = isset($_SESSION['auth_logged_in']) && $_SESSION['auth_logged_in'] == 1
+               && isset($_SESSION['auth_user_id']) && $_SESSION['auth_user_id'] > 0;
+    $isGuest = isset($_SESSION['guest_mode']) && $_SESSION['guest_mode'] === true;
 
-        #echo "<h1>Testing</h1>";
+    if ($isLoggedIn) {
         if(!$Character->CharacterExists($_SESSION['auth_user_id'])) {
             $Character->CreateCharacter($_SESSION['auth_user_id'], $_SESSION['auth_username']);
-            #echo "<h1>TestingAfter</h1>";
         }
         else {
             $Character->LoadByUserId($_SESSION['auth_user_id']);
         }
     }
+    elseif ($isGuest) {
+        if (!$Character->CharacterExists()) {
+            $Character->CreateCharacter(0, 'Guest');
+        }
+        else {
+            $Character->LoadByUserId(0);
+        }
+    }
     $CharacterDataCache = $Character->Data;
-    /*echo "<h1> EH </h1>";
-    print_r($_SESSION);
-    echo "<BR />";
-    echo $_SESSION['auth_logged_in']."<BR />";
-    echo $_SESSION['auth_user_id']."<BR />";
-    echo $_SESSION['auth_username']."<BR />";
-    die();*/
+
+    // Run catch-up ticks for guest AFTER caching so diff detection triggers a session save
+    if ($isGuest && $Character->IsGuest()) {
+        ProcessGuestCatchUp($Character);
+    }
+
+    $isAuthenticated = $isLoggedIn || $isGuest;
+    $publicPages = ['login', 'register', 'index', 'verify-email', 'forgot-password', 'reset-password', 'guest'];
 
     if (in_array(ltrim(strtolower($unsafe_main_page).".php","/"), $pages)) {
-        if(!isset($_SESSION['auth_logged_in']) && $_SESSION['auth_logged_in'] !== 1 &&
-        !in_array(ltrim(strtolower($unsafe_main_page),"/"), ['login', 'register', 'index', 'verify-email', 'forgot-password', 'reset-password'])) {
+        if(!$isAuthenticated && !in_array(ltrim(strtolower($unsafe_main_page),"/"), $publicPages)) {
             require_once("../pages/login.php");
         }
         else {
@@ -52,7 +60,7 @@
         }
     }
     else {
-        if(!isset($_SESSION['auth_logged_in']) && $_SESSION['auth_logged_in'] !== 1) {
+        if(!$isAuthenticated) {
             require_once("../pages/index.php");
         }
         else {

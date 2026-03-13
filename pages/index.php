@@ -11,6 +11,9 @@
             <a href="/register" class="button">Create an Account</a>
             <BR />
             <a href="/login" class="button">Login to Play</a>
+            <BR />
+            <a href="/guest" class="button outline">Play as Guest</a>
+            <p><small>Guest progress is saved in your browser session. <a href="/register">Register</a> to keep your progress permanently.</small></p>
 
         </article>
         </div>

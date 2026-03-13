@@ -47,6 +47,10 @@
 
             # Consume potential by alternating between affixes
             while ($potential > 0) {
+                if ($Character->Data['iron'] < 100) {
+                    break;
+                }
+
                 # Random potential consumed per upgrade (1-5)
                 $consumed = rand(1, 5);
                 $consumed = min($consumed, $potential); # Don't consume more than available
