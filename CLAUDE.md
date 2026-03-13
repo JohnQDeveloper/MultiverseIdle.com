@@ -40,3 +40,6 @@
 
 ### General
 - Write code for production with an eye for performance, optimization, reusability, and reliability.
+
+### Periodic Actions
+The cron directory and func/guest_processing.php should cover the same functionality so that guest mode functions correctly. This is the one situation where DRY can be ignored.
