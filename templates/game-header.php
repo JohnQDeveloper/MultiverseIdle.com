@@ -27,9 +27,13 @@
                   <li><a href="/party">Party</a></li>
                 </ul>
               </li>
+              <?php if (!isset($_SESSION['guest_mode']) || $_SESSION['guest_mode'] !== true): ?>
               <li><a href="/market">Market</a></li>
+              <?php endif; ?>
               <li><a href="/guilds">Guilds</a></li>
+              <?php if (!isset($_SESSION['guest_mode']) || $_SESSION['guest_mode'] !== true): ?>
               <li><a href="/store">Store</a></li>
+              <?php endif; ?>
               <li><a href="/leaderboard">Leaderboard</a></li>
               <li><a href="/logout">Logout</a></li>
               <li> ::: </li>

@@ -45,10 +45,15 @@
 
     $isAuthenticated = $isLoggedIn || $isGuest;
     $publicPages = ['login', 'register', 'index', 'verify-email', 'forgot-password', 'reset-password', 'guest'];
+    $registeredOnlyPages = ['market', 'store'];
 
     if (in_array(ltrim(strtolower($unsafe_main_page).".php","/"), $pages)) {
         if(!$isAuthenticated && !in_array(ltrim(strtolower($unsafe_main_page),"/"), $publicPages)) {
             require_once("../pages/login.php");
+        }
+        elseif ($isGuest && in_array(ltrim(strtolower($unsafe_main_page), '/'), $registeredOnlyPages, true)) {
+            $alert_danger = 'This feature is not available in guest mode. Register or login to access it.';
+            require_once("../pages/play-now.php");
         }
         else {
             if(file_exists("../code/" . ltrim($unsafe_main_page, "/") . ".php")) {
