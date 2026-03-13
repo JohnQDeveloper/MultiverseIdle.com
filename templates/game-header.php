@@ -35,6 +35,7 @@
               <li><a href="/store">Store</a></li>
               <?php endif; ?>
               <li><a href="/leaderboard">Leaderboard</a></li>
+              <li><a href="/season-select"><?php echo (isset($_SESSION['active_season_id'])) ? 'Season' : 'Perpetual'; ?></a></li>
               <li><a href="/logout">Logout</a></li>
               <li> ::: </li>
               <li><a href="https://discord.gg/KrD7hGuDyb">Discord</a></li>
@@ -76,6 +77,16 @@
     # Guest mode banner
     if (isset($_SESSION['guest_mode']) && $_SESSION['guest_mode'] === true) {
         echo '<div class="alert alert-warning">You are playing as a guest. Your progress is only saved in this browser session. <a href="/register"><strong>Register now</strong></a> to keep your progress permanently, or <a href="/login">login</a> to an existing account.</div>';
+    }
+
+    # Season mode banner
+    if (isset($_SESSION['active_season_id'])) {
+        $SeasonBanner = new Season();
+        $SeasonBannerData = $SeasonBanner->GetSeasonById((int)$_SESSION['active_season_id']);
+        if ($SeasonBannerData) {
+            $days_left = max(0, (int)ceil((strtotime($SeasonBannerData['end_date']) - time()) / 86400));
+            echo '<div class="alert alert-warning">&#9733; Season mode: <strong>' . htmlspecialchars($SeasonBannerData['name']) . '</strong> &mdash; ' . $days_left . ' days remaining. <a href="/season-select">Switch mode</a></div>';
+        }
     }
 
     # generic alerts for top of page

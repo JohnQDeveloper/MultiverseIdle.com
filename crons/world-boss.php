@@ -49,7 +49,7 @@ foreach ($queued_characters as $queued_char) {
 
     // Load character and run battle
     $Character = new Character();
-    $Character->LoadByUserId((int)$queued_char['user_id']);
+    $Character->LoadById((int)$queued_char['id']);
 
 
     // Decode party_json if it's a string
@@ -98,7 +98,7 @@ if ($total_world_boss_damage > 0) {
 
         // Load character to award rewards
         $RewardCharacter = new Character();
-        $RewardCharacter->LoadByUserId($participant['user_id']);
+        $RewardCharacter->LoadById($participant['character_id']);
 
         // Award gold
         $RewardCharacter->Data['gold'] += $gold_reward;

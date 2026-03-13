@@ -16,7 +16,7 @@
             echo "$number_of_ticks ticks remaining for user_id: ".$r['user_id']."\n";
 
             $Character = new Character();
-            $Character->LoadByUserId($r['user_id']);
+            $Character->LoadById($r['id']);
             $worker_config = $Character->Data['worker_json'];
             echo "Loaded & running workers for user_id: ".$r['user_id']."\n";
 

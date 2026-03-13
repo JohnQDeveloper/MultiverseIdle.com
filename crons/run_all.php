@@ -23,6 +23,10 @@
     require_once('rifts.php');
     echo "Rifts Cron Completed.\n";
 
+    echo "Starting Season-End Cron...\n";
+    require_once('season-end.php');
+    echo "Season-End Cron Completed.\n";
+
     echo "All Crons Completed.\n";
 
     $run_all_time_end = microtime(true);

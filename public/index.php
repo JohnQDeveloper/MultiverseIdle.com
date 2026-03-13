@@ -20,12 +20,21 @@
                && isset($_SESSION['auth_user_id']) && $_SESSION['auth_user_id'] > 0;
     $isGuest = isset($_SESSION['guest_mode']) && $_SESSION['guest_mode'] === true;
 
+    // Determine which mode the player is in: null = perpetual, int = season id
+    $active_season_id = isset($_SESSION['active_season_id']) ? (int)$_SESSION['active_season_id'] : null;
+
     if ($isLoggedIn) {
-        if(!$Character->CharacterExists($_SESSION['auth_user_id'])) {
-            $Character->CreateCharacter($_SESSION['auth_user_id'], $_SESSION['auth_username']);
+        if ($active_season_id !== null && !$Character->CharacterExists($_SESSION['auth_user_id'], $active_season_id)) {
+            // Season character no longer exists (season may have ended) — fall back to perpetual
+            unset($_SESSION['active_season_id']);
+            $active_season_id = null;
         }
-        else {
-            $Character->LoadByUserId($_SESSION['auth_user_id']);
+
+        if (!$Character->CharacterExists($_SESSION['auth_user_id'], $active_season_id)) {
+            // Auto-create perpetual characters only; season characters are created via /season-select
+            $Character->CreateCharacter($_SESSION['auth_user_id'], $_SESSION['auth_username'], null);
+        } else {
+            $Character->LoadByUserId($_SESSION['auth_user_id'], $active_season_id);
         }
     }
     elseif ($isGuest) {

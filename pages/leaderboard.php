@@ -5,15 +5,27 @@
         <h1>Leaderboards</h1>
         <p>Compete with other players across multiple categories and climb to the top!</p>
 
+        <!-- Mode Toggle (shown when a season is active) -->
+        <?php if ($active_season): ?>
+        <div class="tab-nav" style="margin-bottom:0.5rem;">
+            <a href="?mode=perpetual&tab=<?php echo htmlspecialchars($_GET['tab'] ?? 'combined'); ?>"
+               class="tab-nav-item <?php echo $lb_mode !== 'season' ? 'active' : ''; ?>">Perpetual</a>
+            <a href="?mode=season&tab=<?php echo htmlspecialchars($_GET['tab'] ?? 'combined'); ?>"
+               class="tab-nav-item <?php echo $lb_mode === 'season' ? 'active' : ''; ?>">
+                &#9733; <?php echo htmlspecialchars($active_season['name']); ?>
+            </a>
+        </div>
+        <?php endif; ?>
+
         <!-- Tab Navigation -->
         <div class="tab-nav">
-            <a href="?tab=combined" class="tab-nav-item <?php echo (!isset($_GET['tab']) || $_GET['tab'] === 'combined') ? 'active' : ''; ?>">Combined Stats</a>
-            <a href="?tab=strength" class="tab-nav-item <?php echo (isset($_GET['tab']) && $_GET['tab'] === 'strength') ? 'active' : ''; ?>">Strength</a>
-            <a href="?tab=dexterity" class="tab-nav-item <?php echo (isset($_GET['tab']) && $_GET['tab'] === 'dexterity') ? 'active' : ''; ?>">Dexterity</a>
-            <a href="?tab=health" class="tab-nav-item <?php echo (isset($_GET['tab']) && $_GET['tab'] === 'health') ? 'active' : ''; ?>">Health</a>
-            <a href="?tab=wisdom" class="tab-nav-item <?php echo (isset($_GET['tab']) && $_GET['tab'] === 'wisdom') ? 'active' : ''; ?>">Wisdom</a>
-            <a href="?tab=arena" class="tab-nav-item <?php echo (isset($_GET['tab']) && $_GET['tab'] === 'arena') ? 'active' : ''; ?>">Arena Floor</a>
-            <a href="?tab=rift" class="tab-nav-item <?php echo (isset($_GET['tab']) && $_GET['tab'] === 'rift') ? 'active' : ''; ?>">Highest Rift</a>
+            <a href="?mode=<?php echo $lb_mode; ?>&tab=combined" class="tab-nav-item <?php echo (!isset($_GET['tab']) || $_GET['tab'] === 'combined') ? 'active' : ''; ?>">Combined Stats</a>
+            <a href="?mode=<?php echo $lb_mode; ?>&tab=strength" class="tab-nav-item <?php echo (isset($_GET['tab']) && $_GET['tab'] === 'strength') ? 'active' : ''; ?>">Strength</a>
+            <a href="?mode=<?php echo $lb_mode; ?>&tab=dexterity" class="tab-nav-item <?php echo (isset($_GET['tab']) && $_GET['tab'] === 'dexterity') ? 'active' : ''; ?>">Dexterity</a>
+            <a href="?mode=<?php echo $lb_mode; ?>&tab=health" class="tab-nav-item <?php echo (isset($_GET['tab']) && $_GET['tab'] === 'health') ? 'active' : ''; ?>">Health</a>
+            <a href="?mode=<?php echo $lb_mode; ?>&tab=wisdom" class="tab-nav-item <?php echo (isset($_GET['tab']) && $_GET['tab'] === 'wisdom') ? 'active' : ''; ?>">Wisdom</a>
+            <a href="?mode=<?php echo $lb_mode; ?>&tab=arena" class="tab-nav-item <?php echo (isset($_GET['tab']) && $_GET['tab'] === 'arena') ? 'active' : ''; ?>">Arena Floor</a>
+            <a href="?mode=<?php echo $lb_mode; ?>&tab=rift" class="tab-nav-item <?php echo (isset($_GET['tab']) && $_GET['tab'] === 'rift') ? 'active' : ''; ?>">Highest Rift</a>
         </div>
 
         <?php

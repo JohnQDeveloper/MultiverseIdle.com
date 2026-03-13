@@ -127,3 +127,31 @@ CREATE TABLE `market_orders` (
   KEY `character_id` (`character_id`),
   KEY `resource_status` (`resource`, `status`, `price_per_unit`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Season Changes
+CREATE TABLE seasons (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,           -- e.g. "Season 1: The Iron Age"
+    start_date DATETIME NOT NULL,
+    end_date DATETIME NOT NULL,           -- 6 months after start
+    status ENUM('upcoming','active','ended') DEFAULT 'upcoming',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Characters get a season_id column
+-- NULL = perpetual, integer = belongs to that season
+ALTER TABLE characters ADD COLUMN season_id INT UNSIGNED NULL DEFAULT NULL REFERENCES seasons(id);
+ALTER TABLE characters ADD INDEX idx_season (season_id);
+
+-- Season isolation for item market listings
+ALTER TABLE gear     ADD COLUMN season_id INT UNSIGNED NULL DEFAULT NULL;
+ALTER TABLE rifts    ADD COLUMN season_id INT UNSIGNED NULL DEFAULT NULL;
+ALTER TABLE potions  ADD COLUMN season_id INT UNSIGNED NULL DEFAULT NULL;
+
+-- Season isolation for resource orders (+ performance index)
+ALTER TABLE market_orders ADD COLUMN season_id INT UNSIGNED NULL DEFAULT NULL;
+ALTER TABLE market_orders ADD INDEX idx_season_resource_status (season_id, resource, status);
+
+-- Manually adding a season for testing purposes
+-- INSERT INTO seasons (name, start_date, end_date, status)
+-- VALUES ('Season 1', NOW(), DATE_ADD(NOW(), INTERVAL 6 MONTH), 'active');

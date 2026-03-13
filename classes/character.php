@@ -90,6 +90,7 @@ class Character
         return [
             'id' => 0,
             'user_id' => 0,
+            'season_id' => null,
             'name' => $name,
             'level' => self::DEFAULT_LEVEL,
             'arena_floor' => self::DEFAULT_LEVEL,
@@ -151,11 +152,9 @@ class Character
      */
     public function MigrateGuestToUser(int $user_id, string $name): bool
     {
-        if (empty($_SESSION['guest_character'])) {
+        if (empty($this->Data)) {
             return false;
         }
-
-        $guestData = $_SESSION['guest_character'];
 
         $query = "INSERT INTO `characters` (
             `user_id`,
@@ -192,14 +191,14 @@ class Character
         $params = [
             'user_id' => $user_id,
             'name' => $name,
-            'level' => $guestData['level'],
-            'arena_floor' => $guestData['arena_floor'],
-            'gold' => $guestData['gold'],
-            'iron' => $guestData['iron'],
-            'herbs' => $guestData['herbs'],
-            'gems' => $guestData['gems'],
-            'party_json' => json_encode($guestData['party_json']),
-            'worker_json' => json_encode($guestData['worker_json']),
+            'level' => max(1, (int)$this->Data['level']),
+            'arena_floor' => max(1, (int)$this->Data['arena_floor']),
+            'gold' => max(0, (int)$this->Data['gold']),
+            'iron' => max(0, (int)$this->Data['iron']),
+            'herbs' => max(0, (int)$this->Data['herbs']),
+            'gems' => max(0, (int)$this->Data['gems']),
+            'party_json' => json_encode($this->Data['party_json']),
+            'worker_json' => json_encode($this->Data['worker_json']),
         ];
 
         $this->DAL->w($query, $params);
@@ -210,7 +209,7 @@ class Character
         return true;
     }
 
-    public function CharacterExists(int $user_id = 0): bool
+    public function CharacterExists(int $user_id = 0, ?int $season_id = null): bool
     {
         if ($this->isGuestSession()) {
             return isset($_SESSION['guest_character']) && !empty($_SESSION['guest_character']);
@@ -222,9 +221,8 @@ class Character
             return false;
         }
 
-        $query = "SELECT COUNT(*) as `count` FROM `characters` WHERE `user_id` = :user_id";
-        $params = ['user_id' => $user_id];
-        $result = $this->DAL->r($query, $params);
+        $query = "SELECT COUNT(*) as `count` FROM `characters` WHERE `user_id` = :user_id AND `season_id` <=> :season_id";
+        $result = $this->DAL->r($query, ['user_id' => $user_id, 'season_id' => $season_id]);
 
         return ($result[0]['count'] > 0);
     }
@@ -235,15 +233,14 @@ class Character
             return true;
         }
 
-        $user_id = $this->getUserId($user_id);
-
-        if ($user_id <= 0) {
+        if (empty($this->Data['id'])) {
             return false;
         }
 
-        $this->DAL->w("UPDATE `characters` SET `last_seen` = NOW() WHERE `user_id` = :user_id", [
-            'user_id' => $user_id
-        ]);
+        $this->DAL->w(
+            "UPDATE `characters` SET `last_seen` = NOW() WHERE `id` = :id",
+            ['id' => (int)$this->Data['id']]
+        );
 
         return true;
     }
@@ -275,7 +272,7 @@ class Character
         return true;
     }
 
-    public function CreateCharacter(int $user_id = 0, string $name = ""): bool
+    public function CreateCharacter(int $user_id = 0, string $name = "", ?int $season_id = null): bool
     {
         if ($this->isGuestSession()) {
             return $this->initGuestCharacter($name ?: 'Guest');
@@ -301,6 +298,7 @@ class Character
 
         $query = "INSERT INTO `characters` (
             `user_id`,
+            `season_id`,
             `name`,
             `level`,
             `arena_floor`,
@@ -316,6 +314,7 @@ class Character
             `subscription_expires`
         ) VALUES (
             :user_id,
+            :season_id,
             :name,
             :level,
             :arena_floor,
@@ -333,6 +332,7 @@ class Character
 
         $params = [
             'user_id' => $user_id,
+            'season_id' => $season_id,
             'name' => $name,
             'level' => self::DEFAULT_LEVEL,
             'arena_floor' => self::DEFAULT_LEVEL,
@@ -346,12 +346,12 @@ class Character
 
         $this->DAL->w($query, $params);
 
-        $this->LoadByUserId($user_id); // Load after creation to avoid empty class data
+        $this->LoadByUserId($user_id, $season_id); // Load after creation to avoid empty class data
 
         return true;
     }
 
-    public function LoadByUserId(int $user_id = 0): bool
+    public function LoadByUserId(int $user_id = 0, ?int $season_id = null): bool
     {
         if ($this->isGuestSession()) {
             return $this->loadFromGuestSession();
@@ -363,9 +363,24 @@ class Character
             return false;
         }
 
-        $query = "SELECT * FROM `characters` WHERE `user_id` = :user_id LIMIT 1";
-        $params = ['user_id' => $user_id];
-        $result = $this->DAL->r($query, $params);
+        $query = "SELECT * FROM `characters` WHERE `user_id` = :user_id AND `season_id` <=> :season_id LIMIT 1";
+        $result = $this->DAL->r($query, ['user_id' => $user_id, 'season_id' => $season_id]);
+
+        if (empty($result)) {
+            return false;
+        }
+
+        $this->Data = $result[0];
+        $this->Data['party_json'] = json_decode($this->Data['party_json'], true);
+        $this->Data['worker_json'] = json_decode($this->Data['worker_json'], true);
+
+        return true;
+    }
+
+    public function LoadById(int $character_id): bool
+    {
+        $query = "SELECT * FROM `characters` WHERE `id` = :id LIMIT 1";
+        $result = $this->DAL->r($query, ['id' => $character_id]);
 
         if (empty($result)) {
             return false;
@@ -383,15 +398,18 @@ class Character
         return $this->SaveByUserId((int)$this->Data['user_id']);
     }
 
+    /**
+     * Saves the currently loaded character by its database ID.
+     * The $user_id parameter is retained for API compatibility but the save
+     * targets the specific character record via its primary key.
+     */
     public function SaveByUserId(int $user_id = 0): bool
     {
         if ($this->isGuestSession()) {
             return $this->saveToGuestSession();
         }
 
-        $user_id = $this->getUserId($user_id);
-
-        if ($user_id <= 0) {
+        if (empty($this->Data['id'])) {
             return false;
         }
 
@@ -418,7 +436,7 @@ class Character
             `credits` = :credits,
             `subscription_expires` = :subscription_expires,
             `last_free_credits_claim` = :last_free_credits_claim
-            WHERE `user_id` = :user_id";
+            WHERE `id` = :id";
 
         $params = [
             'name' => $this->Data['name'],
@@ -438,15 +456,49 @@ class Character
             'last_rift_time' => $this->Data['last_rift_time'] ?? null,
             'last_rift_log' => $this->Data['last_rift_log'] ?? null,
             'highest_rift_level' => $this->Data['highest_rift_level'] ?? 0,
-            'user_id' => $user_id,
             'last_seen' => $this->Data['last_seen'],
             'credits' => $this->Data['credits'] ?? 0,
             'subscription_expires' => $this->Data['subscription_expires'] ?? null,
             'last_free_credits_claim' => $this->Data['last_free_credits_claim'] ?? null,
+            'id' => (int)$this->Data['id'],
         ];
 
         $this->DAL->w($query, $params);
 
         return true;
+    }
+
+    /**
+     * Merges a season character's stats and commodity resources into the user's
+     * perpetual character. Called by the season-end cron when a season closes.
+     */
+    public function MergeSeasonToPerpetual(int $user_id): bool
+    {
+        if (empty($this->Data) || $this->Data['season_id'] === null) {
+            return false;
+        }
+
+        $Perpetual = new Character();
+        if (!$Perpetual->LoadByUserId($user_id, null)) {
+            return false;
+        }
+
+        // Add party member stats
+        foreach (['frontline', 'backline'] as $slot) {
+            foreach (['strength', 'dexterity', 'health', 'wisdom'] as $stat) {
+                $gain = (int)($this->Data['party_json']['members'][$slot][$stat] ?? 0);
+                if ($gain > 0) {
+                    $Perpetual->Data['party_json']['members'][$slot][$stat] += $gain;
+                }
+            }
+        }
+
+        // Add commodity resources
+        foreach (['gold', 'iron', 'herbs', 'gems'] as $resource) {
+            $Perpetual->Data[$resource] = ((int)$Perpetual->Data[$resource]) + ((int)($this->Data[$resource] ?? 0));
+        }
+
+        $Perpetual->Data['last_seen'] = date('Y-m-d H:i:s');
+        return $Perpetual->SaveByUserId($user_id);
     }
 }

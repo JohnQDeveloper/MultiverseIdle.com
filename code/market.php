@@ -7,6 +7,7 @@ $alert_danger = '';
 
 $character_id     = (int)$Character->Data['id'];
 $user_id          = (int)$_SESSION['auth_user_id'];
+$market_season_id = isset($Character->Data['season_id']) ? (int)$Character->Data['season_id'] : null;
 $valid_resources  = ['herbs', 'iron', 'gems', 'credits'];
 $valid_item_types = ['gear', 'rift_stone', 'potion'];
 $item_table_map   = ['gear' => 'gear', 'rift_stone' => 'rifts', 'potion' => 'potions'];
@@ -51,9 +52,9 @@ if (isset($_POST['post_order'])) {
         } else {
             $Character->Data[$resource] = $player_resource - $amount;
             $inserted = $DAL->w(
-                "INSERT INTO market_orders (character_id, order_type, resource, amount, amount_remaining, price_per_unit)
-                 VALUES (:cid, 'sell', :resource, :amount, :amount2, :ppu)",
-                ['cid' => $character_id, 'resource' => $resource, 'amount' => $amount, 'amount2' => $amount, 'ppu' => $price_per_unit]
+                "INSERT INTO market_orders (character_id, season_id, order_type, resource, amount, amount_remaining, price_per_unit)
+                 VALUES (:cid, :season_id, 'sell', :resource, :amount, :amount2, :ppu)",
+                ['cid' => $character_id, 'season_id' => $market_season_id, 'resource' => $resource, 'amount' => $amount, 'amount2' => $amount, 'ppu' => $price_per_unit]
             );
             if ($inserted) {
                 $alert_success = 'Sell order posted: ' . human_num($amount) . ' ' . ucfirst($resource) . ' at ' . human_num($price_per_unit) . ' Gold each.';
@@ -72,9 +73,9 @@ if (isset($_POST['post_order'])) {
         } else {
             $Character->Data['gold'] = $player_gold - $total_gold;
             $inserted = $DAL->w(
-                "INSERT INTO market_orders (character_id, order_type, resource, amount, amount_remaining, price_per_unit)
-                 VALUES (:cid, 'buy', :resource, :amount, :amount2, :ppu)",
-                ['cid' => $character_id, 'resource' => $resource, 'amount' => $amount, 'amount2' => $amount, 'ppu' => $price_per_unit]
+                "INSERT INTO market_orders (character_id, season_id, order_type, resource, amount, amount_remaining, price_per_unit)
+                 VALUES (:cid, :season_id, 'buy', :resource, :amount, :amount2, :ppu)",
+                ['cid' => $character_id, 'season_id' => $market_season_id, 'resource' => $resource, 'amount' => $amount, 'amount2' => $amount, 'ppu' => $price_per_unit]
             );
             if ($inserted) {
                 $alert_success = 'Buy order posted: ' . human_num($amount) . ' ' . ucfirst($resource) . ' at ' . human_num($price_per_unit) . ' Gold each.';
@@ -101,13 +102,13 @@ if (isset($_POST['fill_order'])) {
     } elseif (!in_array($fill_resource, $valid_resources, true)) {
         $alert_danger = 'Invalid resource.';
     } else {
-        // Fetch all open orders at this price point, oldest first (FIFO), excluding own
+        // Fetch all open orders at this price point, oldest first (FIFO), excluding own, same market pool
         $orders_at_price = $DAL->r(
             "SELECT * FROM market_orders
              WHERE resource = :res AND order_type = :otype AND price_per_unit = :price
-               AND status = 'open' AND character_id != :cid
+               AND status = 'open' AND character_id != :cid AND season_id <=> :season_id
              ORDER BY created_at ASC",
-            ['res' => $fill_resource, 'otype' => $fill_order_type, 'price' => $fill_price, 'cid' => $character_id]
+            ['res' => $fill_resource, 'otype' => $fill_order_type, 'price' => $fill_price, 'cid' => $character_id, 'season_id' => $market_season_id]
         ) ?: [];
 
         if (empty($orders_at_price)) {
@@ -269,9 +270,10 @@ if (isset($_POST['list_item'])) {
         $alert_danger = 'Cannot list equipped gear. Unequip it first.';
     } else {
         $table = $item_table_map[$item_type];
+        // Set season_id on the item when listing so it remains in the correct market pool
         $DAL->w(
-            "UPDATE {$table} SET market_price = :price WHERE id = :id AND owner_id = :uid AND (market_price = 0 OR market_price IS NULL)",
-            ['price' => $list_price, 'id' => $item_id, 'uid' => $user_id]
+            "UPDATE {$table} SET market_price = :price, season_id = :season_id WHERE id = :id AND owner_id = :uid AND (market_price = 0 OR market_price IS NULL)",
+            ['price' => $list_price, 'season_id' => $market_season_id, 'id' => $item_id, 'uid' => $user_id]
         );
         if ($DAL->rows_affected() > 0) {
             $alert_success = 'Item listed for ' . human_num($list_price) . ' Gold.';
@@ -319,8 +321,8 @@ if (isset($_POST['buy_item'])) {
     } else {
         $table    = $item_table_map[$item_type];
         $item_row = $DAL->r(
-            "SELECT * FROM {$table} WHERE id = :id AND market_price = :price AND owner_id != :uid",
-            ['id' => $item_id, 'price' => $expected_price, 'uid' => $user_id]
+            "SELECT * FROM {$table} WHERE id = :id AND market_price = :price AND owner_id != :uid AND season_id <=> :season_id",
+            ['id' => $item_id, 'price' => $expected_price, 'uid' => $user_id, 'season_id' => $market_season_id]
         );
 
         if (!$item_row) {
@@ -343,9 +345,10 @@ if (isset($_POST['buy_item'])) {
                     $alert_danger = 'Item no longer available. Refresh and try again.';
                 } else {
                     $Character->Data['gold'] -= $price;
+                    // Credit the seller's character in the same market pool (season or perpetual)
                     $DAL->w(
-                        "UPDATE characters SET gold = gold + :gold WHERE user_id = :uid",
-                        ['gold' => $price, 'uid' => $seller_uid]
+                        "UPDATE characters SET gold = gold + :gold WHERE user_id = :uid AND season_id <=> :season_id",
+                        ['gold' => $price, 'uid' => $seller_uid, 'season_id' => $market_season_id]
                     );
                     // Resolve display name
                     if ($item_type === 'gear') {
@@ -363,25 +366,27 @@ if (isset($_POST['buy_item'])) {
     }
 }
 
-// --- Load aggregated orders (other players, grouped by price point) ---
+// --- Load aggregated orders (other players, grouped by price point, same market pool) ---
 $sell_orders_agg = $DAL->r(
     "SELECT price_per_unit, SUM(amount_remaining) AS total_remaining
      FROM market_orders
-     WHERE resource = :res AND order_type = 'sell' AND status = 'open' AND character_id != :cid
+     WHERE resource = :res AND order_type = 'sell' AND status = 'open'
+       AND character_id != :cid AND season_id <=> :season_id
      GROUP BY price_per_unit
      ORDER BY price_per_unit ASC
      LIMIT 50",
-    ['res' => $resource_filter, 'cid' => $character_id]
+    ['res' => $resource_filter, 'cid' => $character_id, 'season_id' => $market_season_id]
 ) ?: [];
 
 $buy_orders_agg = $DAL->r(
     "SELECT price_per_unit, SUM(amount_remaining) AS total_remaining
      FROM market_orders
-     WHERE resource = :res AND order_type = 'buy' AND status = 'open' AND character_id != :cid
+     WHERE resource = :res AND order_type = 'buy' AND status = 'open'
+       AND character_id != :cid AND season_id <=> :season_id
      GROUP BY price_per_unit
      ORDER BY price_per_unit DESC
      LIMIT 50",
-    ['res' => $resource_filter, 'cid' => $character_id]
+    ['res' => $resource_filter, 'cid' => $character_id, 'season_id' => $market_season_id]
 ) ?: [];
 
 // --- Load own orders for the current resource (aggregated by price point) ---
@@ -456,7 +461,7 @@ if (in_array($active_tab, ['items', 'my_orders', 'list_item'])) {
 $listed_items = [];
 if ($active_tab === 'items') {
     if ($item_type_filter === 'gear') {
-        $raw = $DAL->r("SELECT * FROM gear WHERE market_price > 0 ORDER BY market_price ASC LIMIT 50") ?: [];
+        $raw = $DAL->r("SELECT * FROM gear WHERE market_price > 0 AND season_id <=> :season_id ORDER BY market_price ASC LIMIT 50", ['season_id' => $market_season_id]) ?: [];
         foreach ($raw as $r) {
             $item                = json_decode($r['details'], true) ?? [];
             $item['id']          = (int)$r['id'];
@@ -467,7 +472,7 @@ if ($active_tab === 'items') {
             $listed_items[]      = $item;
         }
     } elseif ($item_type_filter === 'rift_stone') {
-        $raw = $DAL->r("SELECT * FROM rifts WHERE market_price > 0 ORDER BY market_price ASC LIMIT 50") ?: [];
+        $raw = $DAL->r("SELECT * FROM rifts WHERE market_price > 0 AND season_id <=> :season_id ORDER BY market_price ASC LIMIT 50", ['season_id' => $market_season_id]) ?: [];
         foreach ($raw as $r) {
             $item                = json_decode($r['details'], true) ?? [];
             $item['id']          = (int)$r['id'];
@@ -477,7 +482,7 @@ if ($active_tab === 'items') {
             $listed_items[]      = $item;
         }
     } else {
-        $raw = $DAL->r("SELECT * FROM potions WHERE market_price > 0 ORDER BY market_price ASC LIMIT 50") ?: [];
+        $raw = $DAL->r("SELECT * FROM potions WHERE market_price > 0 AND season_id <=> :season_id ORDER BY market_price ASC LIMIT 50", ['season_id' => $market_season_id]) ?: [];
         foreach ($raw as $r) {
             $listed_items[] = [
                 'id'           => (int)$r['id'],

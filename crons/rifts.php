@@ -36,7 +36,7 @@ foreach ($row as $r) {
     echo "Processing rifts for user_id: " . $r['user_id'] . "\n";
 
     $Character = new Character();
-    $Character->LoadByUserId($r['user_id']);
+    $Character->LoadById($r['id']);
 
     $RiftStone = new RiftStone();
     $queued_rifts = $RiftStone->GetQueuedRiftsByOwner($r['user_id']);
