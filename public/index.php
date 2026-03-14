@@ -1,6 +1,21 @@
 <?php
     require_once('../config.php');
 
+    // Route API requests before any HTML output
+    $rawUri = strtok($_SERVER['REQUEST_URI'], '?');
+    if (str_starts_with(ltrim($rawUri, '/'), 'api/')) {
+        $endpoint = substr(ltrim($rawUri, '/'), 4); // strip 'api/'
+        $apiFile  = __DIR__ . '/../api/' . basename($endpoint) . '.php';
+        if (file_exists($apiFile)) {
+            require_once $apiFile;
+        } else {
+            http_response_code(404);
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'error' => 'Not found']);
+        }
+        exit;
+    }
+
     require_once('../templates/header.php');
 
     // Sanitize user input

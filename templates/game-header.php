@@ -48,6 +48,104 @@
         </div>
       </div>
 
+<?php
+// Compute chat widget data (Redis-first, minimal overhead)
+$_chatUserId   = (int)($_SESSION['auth_user_id'] ?? 0);
+$_chatIsGuest  = isset($_SESSION['guest_mode']) && $_SESSION['guest_mode'] === true;
+$_chatIsLoggedIn = isset($_SESSION['auth_logged_in']) && $_SESSION['auth_logged_in'] == 1 && $_chatUserId > 0;
+$_chatIsMod    = false;
+$_chatGuildId  = '';
+if ($_chatIsLoggedIn) {
+    $_ChatObj    = new Chat();
+    $_chatIsMod  = $_ChatObj->isModerator($_chatUserId);
+    $_GuildObj   = new Guild();
+    $_guildIdInt = $_GuildObj->GetUserGuildId($_chatUserId);
+    $_chatGuildId = $_guildIdInt !== null ? (string)$_guildIdInt : '';
+}
+?>
+
+<!-- Floating Chat Widget -->
+<div id="chat-widget"
+     class="chat-widget"
+     data-csrf="<?php echo htmlspecialchars($_SESSION['csrf-token'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+     data-user-id="<?php echo $_chatUserId; ?>"
+     data-is-mod="<?php echo $_chatIsMod ? '1' : '0'; ?>"
+     data-is-guest="<?php echo $_chatIsGuest ? '1' : '0'; ?>"
+     data-guild-id="<?php echo htmlspecialchars($_chatGuildId, ENT_QUOTES, 'UTF-8'); ?>">
+
+    <!-- Always-visible toggle bar -->
+    <button id="chat-toggle" class="chat-toggle" aria-expanded="false" aria-controls="chat-widget-body">
+        <span class="chat-toggle-label">&#128172; Chat</span>
+        <span id="chat-unread" class="chat-unread" style="display:none"></span>
+        <span class="chat-toggle-arrow">&#9650;</span>
+    </button>
+
+    <!-- Collapsible body -->
+    <div id="chat-widget-body" class="chat-widget-body" hidden>
+
+        <!-- Channel tabs -->
+        <div class="chat-tabs" role="tablist">
+            <button class="chat-tab active" data-channel="global" role="tab">Global</button>
+            <button class="chat-tab" data-channel="help" role="tab">Help</button>
+            <?php if ($_chatGuildId !== ''): ?>
+            <button class="chat-tab" data-channel="guild:<?php echo htmlspecialchars($_chatGuildId, ENT_QUOTES, 'UTF-8'); ?>" role="tab">Guild</button>
+            <?php else: ?>
+            <button class="chat-tab chat-tab--disabled" disabled title="Join a guild to use guild chat">Guild</button>
+            <?php endif; ?>
+        </div>
+
+        <!-- Messages -->
+        <div id="chat-messages" class="chat-messages" aria-live="polite">
+            <div class="chat-loading">Loading&hellip;</div>
+        </div>
+
+        <!-- Mute notice -->
+        <div id="chat-muted-banner" class="chat-muted-banner" style="display:none;">
+            Muted: <span id="chat-muted-reason"></span>
+        </div>
+
+        <!-- Input -->
+        <?php if (!$_chatIsGuest): ?>
+        <form id="chat-form" class="chat-input-row" autocomplete="off">
+            <input type="text" id="chat-input" class="chat-input"
+                   placeholder="Message&hellip;" maxlength="500" aria-label="Chat message">
+            <button type="submit" class="chat-send-btn">Send</button>
+        </form>
+        <?php else: ?>
+        <p class="chat-guest-notice"><a href="/register">Register</a> or <a href="/login">login</a> to chat.</p>
+        <?php endif; ?>
+
+        <!-- Mod panel -->
+        <?php if ($_chatIsMod): ?>
+        <div id="chat-mod-panel" class="chat-mod-panel">
+            <details>
+                <summary class="chat-mod-summary">Moderation</summary>
+                <form id="mod-form" class="chat-mod-form">
+                    <input type="text" id="mod-user-id" placeholder="User ID" class="mod-input" style="width:80px;" required>
+                    <select id="mod-action" class="mod-input">
+                        <option value="promote">Promote</option>
+                        <option value="demote">Demote</option>
+                        <option value="mute">Mute</option>
+                        <option value="unmute">Unmute</option>
+                    </select>
+                    <select id="mod-duration" class="mod-input">
+                        <option value="3600">1 hour</option>
+                        <option value="86400">24 hours</option>
+                        <option value="604800">7 days</option>
+                        <option value="-1">Permanent</option>
+                    </select>
+                    <input type="text" id="mod-reason" placeholder="Reason" class="mod-input" style="width:120px;">
+                    <button type="submit" class="chat-send-btn chat-send-btn--danger">Apply</button>
+                </form>
+                <div id="mod-result" class="mod-result" style="display:none;"></div>
+            </details>
+        </div>
+        <?php endif; ?>
+    </div>
+</div>
+
+<script src="/js/chat.js"></script>
+
 <main class="container">
     <div class="wrapper">
     <div class="resources">

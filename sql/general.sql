@@ -1,3 +1,5 @@
+-- setting the users role_mask > 1 gives them chat moderator priviledges
+
 /* MAIN CHARACTERS TABLE */
 CREATE TABLE
   `characters` (

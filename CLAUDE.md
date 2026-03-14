@@ -6,6 +6,7 @@
 - Use early returns to keep the code structure clean and easy to read (happy path).
 - Document with PHPDoc only for generics or complex array shapes that native type hints cannot cover.
 - DRY (Do Not Repeat Yourself) coding practices
+- API handlers go into api/
 - Views go into pages/
 - Code for views (i.e. controllers) go into code/ with the same file name as the matching view
 - classes/ are a mixture of models and tooling and should always be lower case
