@@ -148,7 +148,7 @@
                 $xp_multiplier = 1 + ($arena_xp_bonus / 100);
                 $xp_award = round($base_xp * $xp_multiplier);
 
-                $Character->IncrementPartyXP($xp_award);
+                $Character->IncrementPartyXP($xp_award, $r['user_id']);
                 if ($arena_xp_bonus > 0) {
                     $ArenaLog = "<span class='success'>Both party members gained $xp_award XP (base: $base_xp, +".$arena_xp_bonus."% potion bonus: +".($xp_award - $base_xp).")!</span><BR />\n$ArenaLog";
                 } else {

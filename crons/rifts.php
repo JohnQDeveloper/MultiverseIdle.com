@@ -242,7 +242,7 @@ foreach ($row as $r) {
             case 'xp':
                 // Award XP
                 $xp_award = (int)round($base_xp * $implicit_multiplier * (1 + $rift_xp_bonus / 100));
-                $Character->IncrementPartyXP($xp_award);
+                $Character->IncrementPartyXP($xp_award, $r['user_id']);
                 $rift_log .= "<span class='success'>Both party members gained $xp_award XP!</span><BR />\n";
                 break;
 
