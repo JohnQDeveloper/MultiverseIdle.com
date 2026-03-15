@@ -839,3 +839,78 @@ input.danger-button {
 
 #chat-widget .mod-result--ok { color: #8EFAD5; }
 #chat-widget .mod-result--err { color: #FFB8B8; }
+
+/* ---- DM: conversation list ---- */
+#chat-widget #dm-conversations {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-height: 0;
+}
+
+#chat-widget .dm-conversation-list {
+    flex: 1;
+    overflow-y: auto;
+    background: #141414;
+    padding: 4px 0;
+}
+
+#chat-widget .dm-conv-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 16px;
+    cursor: pointer;
+    border-bottom: 1px solid #2a2a2a;
+}
+
+#chat-widget .dm-conv-item:hover { background: #1e1e1e; }
+
+#chat-widget .dm-conv-username {
+    color: #8EFAD5;
+    font-weight: bold;
+}
+
+#chat-widget .dm-conv-time {
+    color: #555;
+    font-size: 0.78em;
+}
+
+#chat-widget .dm-new-row {
+    display: flex;
+    flex-shrink: 0;
+    border-top: 1px solid #333;
+    background: #1e1e1e;
+}
+
+/* ---- DM: chat header ---- */
+#chat-widget #dm-chat-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+    padding: 4px 8px;
+    background: #2a2a2a;
+    border-bottom: 1px solid #333;
+}
+
+#chat-widget .dm-back-btn {
+    display: inline !important;
+    background: none;
+    border: none;
+    box-shadow: none;
+    color: #8EFAD5;
+    cursor: pointer;
+    padding: 2px 6px;
+    font-size: 0.85em;
+    margin: 0;
+}
+
+#chat-widget .dm-back-btn:hover { color: #fff; }
+
+#chat-widget .dm-partner-name {
+    color: #ccc;
+    font-weight: bold;
+    font-size: 0.9em;
+}

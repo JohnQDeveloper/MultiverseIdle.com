@@ -105,7 +105,15 @@ class Chat
         if (in_array($channel, self::PUBLIC_CHANNELS, true)) {
             return true;
         }
-        return (bool)preg_match('/^guild:\d+$/', $channel);
+        if ((bool)preg_match('/^guild:\d+$/', $channel)) {
+            return true;
+        }
+        return $this->isDMChannel($channel);
+    }
+
+    public function isDMChannel(string $channel): bool
+    {
+        return (bool)preg_match('/^dm:\d+:\d+$/', $channel);
     }
 
     /**
@@ -227,6 +235,141 @@ class Chat
             return false;
         }
         return (int)$rows[0]['roles_mask'] > 0;
+    }
+
+    // -------------------------------------------------------------------------
+    // Direct messages
+    // -------------------------------------------------------------------------
+
+    /**
+     * Returns the normalised DM channel string for two users.
+     * Uses min/max so both directions share the same key.
+     */
+    public static function getDMChannelId(int $userId1, int $userId2): string
+    {
+        $a = min($userId1, $userId2);
+        $b = max($userId1, $userId2);
+        return "dm:{$a}:{$b}";
+    }
+
+    /**
+     * Verify the requesting user is one of the two participants.
+     */
+    public function validateDMAccess(string $channel, int $userId): bool
+    {
+        if (!preg_match('/^dm:(\d+):(\d+)$/', $channel, $m)) {
+            return false;
+        }
+        return (int)$m[1] === $userId || (int)$m[2] === $userId;
+    }
+
+    /**
+     * Send a direct message. Bypasses mute checks; uses shared rate limit.
+     *
+     * @return array<string, mixed>|false
+     */
+    public function sendDM(string $channel, int $fromUserId, string $fromUsername, int $toUserId, string $message): array|false
+    {
+        if (!$this->isDMChannel($channel) || !$this->validateDMAccess($channel, $fromUserId)) {
+            return false;
+        }
+
+        if ($this->isMuted($fromUserId)) {
+            return false;
+        }
+
+        if ($this->isRateLimited($fromUserId)) {
+            return false;
+        }
+
+        $message = trim($message);
+        $len = mb_strlen($message);
+        if ($len < 1 || $len > self::MAX_MSG_LENGTH) {
+            return false;
+        }
+
+        $messageId = (int)$this->redis->incr("chat:seq:{$channel}");
+        $isMod     = $this->isModerator($fromUserId);
+
+        $payload = [
+            'id'        => $messageId,
+            'user_id'   => $fromUserId,
+            'username'  => $fromUsername,
+            'message'   => $message,
+            'timestamp' => time(),
+            'is_mod'    => $isMod,
+        ];
+
+        $key = "chat:messages:{$channel}";
+        $this->redis->zAdd($key, [], $messageId, json_encode($payload));
+        $this->redis->zRemRangeByRank($key, 0, -(self::MAX_MESSAGES + 1));
+
+        // Update conversation indexes so both parties see the thread
+        $ts = time();
+        $this->redis->zAdd("dm:conversations:{$fromUserId}", [], $ts, (string)$toUserId);
+        $this->redis->zAdd("dm:conversations:{$toUserId}", [], $ts, (string)$fromUserId);
+
+        $this->incrementRateLimit($fromUserId);
+
+        return $payload;
+    }
+
+    /**
+     * Return up to 20 recent DM conversation partners for a user.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function getDMConversations(int $userId): array
+    {
+        global $DAL;
+
+        $partners = $this->redis->zRevRangeByScore(
+            "dm:conversations:{$userId}",
+            '+inf',
+            '-inf',
+            ['limit' => [0, 20]]
+        );
+
+        if (empty($partners)) {
+            return [];
+        }
+
+        $result = [];
+        foreach ($partners as $partnerId) {
+            $pid  = (int)$partnerId;
+            $ts   = (int)$this->redis->zScore("dm:conversations:{$userId}", $partnerId);
+            $rows = $DAL->r('SELECT username FROM users WHERE id = :id LIMIT 1', [':id' => $pid]);
+            $username = !empty($rows) ? $rows[0]['username'] : "User #{$pid}";
+
+            $result[] = [
+                'user_id'  => $pid,
+                'username' => $username,
+                'last_ts'  => $ts,
+            ];
+        }
+
+        return $result;
+    }
+
+    /**
+     * Find a user by exact username (case-sensitive).
+     *
+     * @return array{id: int, username: string}|null
+     */
+    public function findUserByUsername(string $username): ?array
+    {
+        global $DAL;
+
+        $rows = $DAL->r(
+            'SELECT id, username FROM users WHERE username = :username LIMIT 1',
+            [':username' => $username]
+        );
+
+        if (empty($rows)) {
+            return null;
+        }
+
+        return ['id' => (int)$rows[0]['id'], 'username' => $rows[0]['username']];
     }
 
     // -------------------------------------------------------------------------

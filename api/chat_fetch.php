@@ -37,6 +37,15 @@ if (str_starts_with($channel, 'guild:') && ($userId <= 0 || !$Chat->validateGuil
     exit;
 }
 
+// DM channel requires the requesting user to be a participant
+if ($Chat->isDMChannel($channel)) {
+    if ($userId <= 0 || !$Chat->validateDMAccess($channel, $userId)) {
+        http_response_code(403);
+        echo json_encode(['success' => false, 'error' => 'Not a participant in this DM']);
+        exit;
+    }
+}
+
 $messages = $Chat->getMessages($channel, $sinceId, $limit);
 $lastId   = 0;
 if (!empty($messages)) {

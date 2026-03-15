@@ -14,16 +14,25 @@
     const isMod     = widget.dataset.isMod === '1';
     const isGuest   = widget.dataset.isGuest === '1';
 
-    const toggleBtn  = document.getElementById('chat-toggle');
-    const body       = document.getElementById('chat-widget-body');
-    const msgArea    = document.getElementById('chat-messages');
-    const form       = document.getElementById('chat-form');
-    const input      = document.getElementById('chat-input');
-    const muteBanner = document.getElementById('chat-muted-banner');
-    const muteReason = document.getElementById('chat-muted-reason');
-    const unreadBadge = document.getElementById('chat-unread');
-    const modForm    = document.getElementById('mod-form');
-    const modResult  = document.getElementById('mod-result');
+    const toggleBtn      = document.getElementById('chat-toggle');
+    const body           = document.getElementById('chat-widget-body');
+    const msgArea        = document.getElementById('chat-messages');
+    const form           = document.getElementById('chat-form');
+    const input          = document.getElementById('chat-input');
+    const muteBanner     = document.getElementById('chat-muted-banner');
+    const muteReason     = document.getElementById('chat-muted-reason');
+    const unreadBadge    = document.getElementById('chat-unread');
+    const modForm        = document.getElementById('mod-form');
+    const modResult      = document.getElementById('mod-result');
+
+    // DM elements (null-safe — only present for logged-in non-guests)
+    const dmConversations = document.getElementById('dm-conversations');
+    const dmConvList      = document.getElementById('dm-conversation-list');
+    const dmNewUsername   = document.getElementById('dm-new-username');
+    const dmNewBtn        = document.getElementById('dm-new-btn');
+    const dmChatHeader    = document.getElementById('dm-chat-header');
+    const dmBackBtn       = document.getElementById('dm-back-btn');
+    const dmPartnerNameEl = document.getElementById('dm-partner-name');
 
     let currentChannel = 'global';
     let lastId         = 0;
@@ -31,6 +40,7 @@
     let isMuted        = false;
     let unreadCount    = 0;
     let isOpen         = sessionStorage.getItem(STORAGE_KEY) === '1';
+
 
     // -----------------------------------------------------------------------
     // Open / close
@@ -42,7 +52,7 @@
         toggleBtn.querySelector('.chat-toggle-arrow').textContent = '\u25BC'; // ▼
         sessionStorage.setItem(STORAGE_KEY, '1');
         clearUnread();
-        if (!pollTimer) {
+        if (!pollTimer && currentChannel !== 'dm') {
             fetchMessages();
             startPolling();
         }
@@ -82,6 +92,47 @@
     }
 
     // -----------------------------------------------------------------------
+    // Channel / DM view switching helpers
+    // -----------------------------------------------------------------------
+    function showChannelView() {
+        if (dmConversations) dmConversations.style.display = 'none';
+        if (dmChatHeader)    dmChatHeader.style.display    = 'none';
+        msgArea.style.display = '';
+        if (form) form.style.display = '';
+    }
+
+    function showDMListView() {
+        stopPolling();
+        currentChannel = 'dm';
+
+        if (dmConversations) dmConversations.style.display = 'flex';
+        if (dmChatHeader)    dmChatHeader.style.display    = 'none';
+        msgArea.style.display = 'none';
+        if (form) form.style.display = 'none';
+        if (muteBanner) muteBanner.style.display = 'none';
+    }
+
+    function openDMChat(partnerId, partnerName) {
+        const lo = Math.min(userId, partnerId);
+        const hi = Math.max(userId, partnerId);
+        currentChannel = 'dm:' + lo + ':' + hi;
+        lastId = 0;
+
+        if (dmConversations) dmConversations.style.display = 'none';
+        if (dmChatHeader) {
+            dmChatHeader.style.display = '';
+            if (dmPartnerNameEl) dmPartnerNameEl.textContent = partnerName;
+        }
+        msgArea.style.display = '';
+        if (form) form.style.display = '';
+
+        msgArea.innerHTML = '<div class="chat-loading">Loading\u2026</div>';
+        stopPolling();
+        fetchMessages();
+        startPolling();
+    }
+
+    // -----------------------------------------------------------------------
     // Channel tabs
     // -----------------------------------------------------------------------
     document.querySelectorAll('.chat-tab:not([disabled])').forEach(function (tab) {
@@ -90,14 +141,143 @@
                 t.classList.remove('active');
             });
             tab.classList.add('active');
-            currentChannel = tab.dataset.channel;
-            lastId = 0;
-            msgArea.innerHTML = '<div class="chat-loading">Loading\u2026</div>';
-            stopPolling();
-            fetchMessages();
-            startPolling();
+
+            const channel = tab.dataset.channel;
+
+            if (channel === 'dm') {
+                showDMListView();
+                fetchDMConversations();
+            } else {
+                showChannelView();
+                currentChannel = channel;
+                lastId = 0;
+                msgArea.innerHTML = '<div class="chat-loading">Loading\u2026</div>';
+                stopPolling();
+                fetchMessages();
+                startPolling();
+            }
         });
     });
+
+    // -----------------------------------------------------------------------
+    // DM: back button
+    // -----------------------------------------------------------------------
+    if (dmBackBtn) {
+        dmBackBtn.addEventListener('click', function () {
+            stopPolling();
+            showDMListView();
+            fetchDMConversations();
+
+            // Keep the DM tab highlighted
+            document.querySelectorAll('.chat-tab').forEach(function (t) { t.classList.remove('active'); });
+            const dmTab = document.querySelector('.chat-tab[data-channel="dm"]');
+            if (dmTab) dmTab.classList.add('active');
+        });
+    }
+
+    // -----------------------------------------------------------------------
+    // DM: fetch conversations list
+    // -----------------------------------------------------------------------
+    function fetchDMConversations() {
+        if (dmConvList) {
+            dmConvList.innerHTML = '<div class="chat-loading">Loading\u2026</div>';
+        }
+
+        fetch('/api/chat_dm_conversations', { credentials: 'same-origin' })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                if (!dmConvList) return;
+                if (!data.success) {
+                    dmConvList.innerHTML = '<div class="chat-error">Could not load conversations.</div>';
+                    return;
+                }
+                if (!data.conversations || data.conversations.length === 0) {
+                    dmConvList.innerHTML = '<div class="chat-empty">No DMs yet. Start one below!</div>';
+                    return;
+                }
+
+                dmConvList.innerHTML = '';
+                data.conversations.forEach(function (conv) {
+                    const item = document.createElement('div');
+                    item.className = 'dm-conv-item';
+                    item.dataset.uid      = conv.user_id;
+                    item.dataset.username = conv.username;
+
+                    const d = new Date(conv.last_ts * 1000);
+                    const timeStr = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                    item.innerHTML =
+                        '<span class="dm-conv-username">' + escHtml(conv.username) + '</span>' +
+                        '<span class="dm-conv-time">'     + escHtml(timeStr)       + '</span>';
+
+                    item.addEventListener('click', function () {
+                        openDMChat(conv.user_id, conv.username);
+                        document.querySelectorAll('.chat-tab').forEach(function (t) { t.classList.remove('active'); });
+                        const dmTab = document.querySelector('.chat-tab[data-channel="dm"]');
+                        if (dmTab) dmTab.classList.add('active');
+                    });
+
+                    dmConvList.appendChild(item);
+                });
+            })
+            .catch(function () {
+                if (dmConvList) {
+                    dmConvList.innerHTML = '<div class="chat-error">Network error.</div>';
+                }
+            });
+    }
+
+    // -----------------------------------------------------------------------
+    // DM: start new conversation by username
+    // -----------------------------------------------------------------------
+    function startNewDM() {
+        if (!dmNewUsername) return;
+        const username = dmNewUsername.value.trim();
+        if (!username) return;
+
+        if (dmNewBtn) dmNewBtn.disabled = true;
+
+        fetch('/api/chat_dm_user?username=' + encodeURIComponent(username), { credentials: 'same-origin' })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                if (dmNewBtn) dmNewBtn.disabled = false;
+                if (data.success && data.user) {
+                    dmNewUsername.value = '';
+                    openDMChat(data.user.id, data.user.username);
+                    document.querySelectorAll('.chat-tab').forEach(function (t) { t.classList.remove('active'); });
+                    const dmTab = document.querySelector('.chat-tab[data-channel="dm"]');
+                    if (dmTab) dmTab.classList.add('active');
+                } else {
+                    if (dmConvList) {
+                        const err = document.createElement('div');
+                        err.className = 'chat-error';
+                        err.textContent = data.error || 'User not found';
+                        dmConvList.appendChild(err);
+                        setTimeout(function () { err.remove(); }, 4000);
+                    }
+                }
+            })
+            .catch(function () {
+                if (dmNewBtn) dmNewBtn.disabled = false;
+                if (dmConvList) {
+                    const err = document.createElement('div');
+                    err.className = 'chat-error';
+                    err.textContent = 'Network error.';
+                    dmConvList.appendChild(err);
+                    setTimeout(function () { err.remove(); }, 4000);
+                }
+            });
+    }
+
+    if (dmNewBtn) {
+        dmNewBtn.addEventListener('click', startNewDM);
+    }
+
+    if (dmNewUsername) {
+        dmNewUsername.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') { e.preventDefault(); startNewDM(); }
+        });
+    }
 
     // -----------------------------------------------------------------------
     // Render a single message row
@@ -149,6 +329,7 @@
     // Fetch
     // -----------------------------------------------------------------------
     function fetchMessages() {
+        if (currentChannel === 'dm') return; // DM list view — nothing to fetch
         const url = '/api/chat_fetch?channel=' + encodeURIComponent(currentChannel) +
                     '&since_id=' + lastId + '&limit=50';
 
@@ -168,7 +349,7 @@
                     msgArea.innerHTML = '<div class="chat-empty">No messages yet.</div>';
                 }
 
-                // Mute status
+                // Mute status (not returned for DM channels)
                 if (data.muted) {
                     isMuted = true;
                     const until = data.muted.until;
@@ -199,7 +380,7 @@
             input.value = '';
             input.disabled = true;
 
-            const body = new URLSearchParams({
+            const payload = new URLSearchParams({
                 csrf_token: csrf,
                 channel:    currentChannel,
                 message:    text,
@@ -209,7 +390,7 @@
                 method:      'POST',
                 credentials: 'same-origin',
                 headers:     { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body:        body.toString(),
+                body:        payload.toString(),
             })
                 .then(function (r) { return r.json(); })
                 .then(function (data) {
@@ -273,7 +454,7 @@
 
             if (!targetId) return;
 
-            const payload = new URLSearchParams({
+            const modPayload = new URLSearchParams({
                 csrf_token: csrf,
                 action,
                 user_id:  targetId,
@@ -285,7 +466,7 @@
                 method:      'POST',
                 credentials: 'same-origin',
                 headers:     { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body:        payload.toString(),
+                body:        modPayload.toString(),
             })
                 .then(function (r) { return r.json(); })
                 .then(function (data) {
@@ -320,7 +501,7 @@
     document.addEventListener('visibilitychange', function () {
         if (document.hidden) {
             stopPolling();
-        } else if (isOpen) {
+        } else if (isOpen && currentChannel !== 'dm') {
             fetchMessages();
             startPolling();
         }

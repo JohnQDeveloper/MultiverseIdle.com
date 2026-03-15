@@ -92,6 +92,29 @@ if ($_chatIsLoggedIn) {
             <?php else: ?>
             <button class="chat-tab chat-tab--disabled" disabled title="Join a guild to use guild chat">Guild</button>
             <?php endif; ?>
+            <?php if ($_chatIsLoggedIn && !$_chatIsGuest): ?>
+            <button class="chat-tab" data-channel="dm" role="tab">DM</button>
+            <?php endif; ?>
+        </div>
+
+        <!-- DM: conversation list (shown when DM tab is active, no conversation open) -->
+        <?php if ($_chatIsLoggedIn && !$_chatIsGuest): ?>
+        <div id="dm-conversations" class="dm-conversations" style="display:none;">
+            <div id="dm-conversation-list" class="dm-conversation-list">
+                <div class="chat-loading">Loading&hellip;</div>
+            </div>
+            <div class="dm-new-row">
+                <input type="text" id="dm-new-username" class="chat-input"
+                       placeholder="Start new DM&hellip;" maxlength="50" autocomplete="off" aria-label="Username to DM">
+                <button type="button" id="dm-new-btn" class="chat-send-btn">Open</button>
+            </div>
+        </div>
+        <?php endif; ?>
+
+        <!-- DM: chat header with back button (shown when a DM conversation is open) -->
+        <div id="dm-chat-header" class="dm-chat-header" style="display:none;">
+            <button type="button" id="dm-back-btn" class="dm-back-btn">&#8592; Back</button>
+            <span id="dm-partner-name" class="dm-partner-name"></span>
         </div>
 
         <!-- Messages -->

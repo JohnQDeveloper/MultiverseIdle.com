@@ -47,6 +47,36 @@ if (!$Chat->isValidChannel($channel)) {
     exit;
 }
 
+// DM channel: verify the sender is a participant, then send
+if ($Chat->isDMChannel($channel)) {
+    if (!$Chat->validateDMAccess($channel, $userId)) {
+        http_response_code(403);
+        echo json_encode(['success' => false, 'error' => 'Not a participant in this DM']);
+        exit;
+    }
+
+    if ($Chat->isMuted($userId)) {
+        $info  = $Chat->getMuteInfo($userId);
+        $until = (int)($info['until'] ?? -1);
+        $label = $until === -1 ? 'permanently' : 'until ' . date('M j g:ia', $until);
+        echo json_encode(['success' => false, 'error' => "You are muted {$label}."]);
+        exit;
+    }
+
+    preg_match('/^dm:(\d+):(\d+)$/', $channel, $m);
+    $toUserId = ((int)$m[1] === $userId) ? (int)$m[2] : (int)$m[1];
+
+    $result = $Chat->sendDM($channel, $userId, $username, $toUserId, $message);
+
+    if ($result === false) {
+        echo json_encode(['success' => false, 'error' => 'Could not send DM. You may be rate-limited or the message is too long (max 500 chars).']);
+        exit;
+    }
+
+    echo json_encode(['success' => true, 'message' => $result]);
+    exit;
+}
+
 // Guild channel: verify membership
 if (str_starts_with($channel, 'guild:') && !$Chat->validateGuildAccess($channel, $userId)) {
     http_response_code(403);
