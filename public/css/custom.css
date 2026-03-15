@@ -597,6 +597,10 @@ input.danger-button {
     box-sizing: border-box;
 }
 
+#chat-widget #chat-widget-body[hidden] {
+    display: none !important;
+}
+
 /* ---- Channel tabs ---- */
 #chat-widget .chat-tabs {
     display: flex;
