@@ -2,9 +2,14 @@
 
     # Worker Resource Assignment
     if(isset($_POST['change_resource'])) {
-        $selected_resource = $_POST['resource'];
-        $Character->Data['worker_json']['resource'] = strtolower($selected_resource);
-        $alert_success = 'Workers have been assigned to gather ' . htmlspecialchars($selected_resource) . '.';
+        $selected_resource = strtolower($_POST['resource'] ?? '');
+        $valid_resources = array_map('strtolower', RESOURCES);
+        if (in_array($selected_resource, $valid_resources, true)) {
+            $Character->Data['worker_json']['resource'] = $selected_resource;
+            $alert_success = 'Workers have been assigned to gather ' . htmlspecialchars(ucfirst($selected_resource)) . '.';
+        } else {
+            $alert_danger = 'Invalid resource selected.';
+        }
     }
 
     # Worker Upgrades

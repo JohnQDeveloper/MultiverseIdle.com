@@ -20,7 +20,9 @@
             $intelligence_upgrades = $Character->Data['worker_json']['intelligence_upgrades'] ?? 0;
 
             # Get the specific potion bonus for this resource type
-            $potion_bonus_key = $resource . '_worker_yield';
+            # Note: the potion system uses 'herb' (singular) for the herbs resource
+            $potion_resource_key = ($resource === 'herbs') ? 'herb' : $resource;
+            $potion_bonus_key = $potion_resource_key . '_worker_yield';
             $potion_bonus = isset($potion_bonuses[$potion_bonus_key]) ? $potion_bonuses[$potion_bonus_key] : 0;
 
             $harvests = 10;
@@ -93,7 +95,7 @@
         <br />
 
         <b>Select Resource to Assign Workers:</b><br />
-        <?php echo Controls::ResourceSelectBox(); ?>
+        <?php echo Controls::ResourceSelectBox($Character->Data['worker_json']['resource']); ?>
         <input type="submit" role="button" class="contrast" name="change_resource" value="Change Resource"><br /><br />
 
         <div class="grid">

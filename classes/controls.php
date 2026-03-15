@@ -32,12 +32,15 @@ class Controls
 
     /**
      * Generate HTML select box for resources
+     *
+     * @param string $selected Currently selected resource (lowercase)
      */
-    public static function ResourceSelectBox(): string
+    public static function ResourceSelectBox(string $selected = ''): string
     {
         $output = '<select name="resource" class="resource-box">';
         foreach (RESOURCES as $resource) {
-            $output .= '<option value="' . htmlspecialchars($resource) . '">' . htmlspecialchars($resource) . '</option>';
+            $selected_attr = (strtolower($resource) === strtolower($selected)) ? ' selected' : '';
+            $output .= '<option' . $selected_attr . ' value="' . htmlspecialchars($resource) . '">' . htmlspecialchars($resource) . '</option>';
         }
         $output .= '</select>';
         return $output;

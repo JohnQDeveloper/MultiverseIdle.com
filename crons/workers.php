@@ -44,13 +44,25 @@
             */
 
             $resource = $worker_config['resource'];
-            $skill_level = $worker_config['skills'][$resource];
+            $skill_level = (int)($worker_config['skills'][$resource] ?? 1);
             $num_workers = $worker_config['workers'];
+
+            # Ensure skill_xp is initialized for all resources
+            if (!isset($Character->Data['worker_json']['skill_xp'])) {
+                $Character->Data['worker_json']['skill_xp'] = ['gold' => 0, 'iron' => 0, 'herbs' => 0, 'gems' => 0];
+            }
+            foreach (['gold', 'iron', 'herbs', 'gems'] as $r) {
+                if (!isset($Character->Data['worker_json']['skill_xp'][$r])) {
+                    $Character->Data['worker_json']['skill_xp'][$r] = 0;
+                }
+            }
             $speed_upgrades = $worker_config['speed_upgrades'] ?? 0;
             $intelligence_upgrades = $worker_config['intelligence_upgrades'] ?? 0;
 
             # Get the specific potion bonus for this resource type
-            $potion_bonus_key = $resource . '_worker_yield';
+            # Note: the potion system uses 'herb' (singular) for the herbs resource
+            $potion_resource_key = ($resource === 'herbs') ? 'herb' : $resource;
+            $potion_bonus_key = $potion_resource_key . '_worker_yield';
             $potion_bonus = isset($potion_bonuses[$potion_bonus_key]) ? $potion_bonuses[$potion_bonus_key] : 0;
 
             $harvests = 10; // 10 harvests per 1 minute tick basically
