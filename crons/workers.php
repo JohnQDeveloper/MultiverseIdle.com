@@ -51,9 +51,9 @@
             if (!isset($Character->Data['worker_json']['skill_xp'])) {
                 $Character->Data['worker_json']['skill_xp'] = ['gold' => 0, 'iron' => 0, 'herbs' => 0, 'gems' => 0];
             }
-            foreach (['gold', 'iron', 'herbs', 'gems'] as $r) {
-                if (!isset($Character->Data['worker_json']['skill_xp'][$r])) {
-                    $Character->Data['worker_json']['skill_xp'][$r] = 0;
+            foreach (['gold', 'iron', 'herbs', 'gems'] as $res) {
+                if (!isset($Character->Data['worker_json']['skill_xp'][$res])) {
+                    $Character->Data['worker_json']['skill_xp'][$res] = 0;
                 }
             }
             $speed_upgrades = $worker_config['speed_upgrades'] ?? 0;
