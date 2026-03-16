@@ -15,6 +15,7 @@ $item_table_map   = ['gear' => 'gear', 'rift_stone' => 'rifts', 'potion' => 'pot
 $active_tab       = $_GET['tab'] ?? 'orders';
 $resource_filter  = $_GET['resource'] ?? 'herbs';
 $item_type_filter = $_GET['item_type'] ?? 'gear';
+$affix_filter     = (array)($_GET['affix'] ?? []);
 
 if (!in_array($resource_filter, $valid_resources, true)) {
     $resource_filter = 'herbs';
@@ -22,6 +23,8 @@ if (!in_array($resource_filter, $valid_resources, true)) {
 if (!in_array($item_type_filter, $valid_item_types, true)) {
     $item_type_filter = 'gear';
 }
+$valid_affixes = array_keys(Gear::getAffixDefinitions());
+$affix_filter  = array_values(array_filter($affix_filter, fn($a) => in_array($a, $valid_affixes, true)));
 
 // CSRF validation for all POST actions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -461,7 +464,14 @@ if (in_array($active_tab, ['items', 'my_orders', 'list_item'])) {
 $listed_items = [];
 if ($active_tab === 'items') {
     if ($item_type_filter === 'gear') {
-        $raw = $DAL->r("SELECT * FROM gear WHERE market_price > 0 AND season_id <=> :season_id ORDER BY market_price ASC LIMIT 50", ['season_id' => $market_season_id]) ?: [];
+        $gear_params = ['season_id' => $market_season_id];
+        $gear_affix_clause = '';
+        foreach ($affix_filter as $i => $affix) {
+            $param_key = 'affix_' . $i;
+            $gear_affix_clause .= " AND JSON_CONTAINS(JSON_EXTRACT(details, '$.affixes[*].key'), JSON_QUOTE(:{$param_key}))";
+            $gear_params[$param_key] = $affix;
+        }
+        $raw = $DAL->r("SELECT * FROM gear WHERE market_price > 0 AND season_id <=> :season_id{$gear_affix_clause} ORDER BY market_price ASC LIMIT 50", $gear_params) ?: [];
         foreach ($raw as $r) {
             $item                = json_decode($r['details'], true) ?? [];
             $item['id']          = (int)$r['id'];

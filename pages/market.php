@@ -145,6 +145,24 @@
             <a href="/market?tab=items&item_type=potion" class="market-resource-tab <?php echo $item_type_filter === 'potion' ? 'active' : ''; ?>">Potions</a>
         </div>
 
+        <?php if ($item_type_filter === 'gear'): ?>
+        <!-- Affix Filter -->
+        <div class="market-resource-nav">
+            <a href="/market?tab=items&item_type=gear" class="market-resource-tab <?php echo empty($affix_filter) ? 'active' : ''; ?>">All</a>
+            <?php foreach ($gear_affix_defs as $affix_key => $affix_def):
+                $is_active = in_array($affix_key, $affix_filter, true);
+                if ($is_active) {
+                    $toggled = array_values(array_filter($affix_filter, fn($a) => $a !== $affix_key));
+                } else {
+                    $toggled = array_merge($affix_filter, [$affix_key]);
+                }
+                $affix_href = '/market?tab=items&item_type=gear' . (!empty($toggled) ? '&' . http_build_query(['affix' => $toggled]) : '');
+            ?>
+                <a href="<?php echo htmlspecialchars($affix_href); ?>" class="market-resource-tab <?php echo $is_active ? 'active' : ''; ?>"><?php echo htmlspecialchars($affix_def['name']); ?></a>
+            <?php endforeach; ?>
+        </div>
+        <?php endif; ?>
+
         <?php if (empty($listed_items)): ?>
             <p><em>No <?php echo $item_type_filter === 'rift_stone' ? 'Rift Stones' : ucfirst($item_type_filter) . 's'; ?> listed for sale.</em></p>
         <?php else: ?>
