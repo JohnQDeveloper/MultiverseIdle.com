@@ -207,4 +207,20 @@ class Gear
         ]);
         return !empty($gear_record);
     }
+
+    /**
+     * Get the party level required to equip a gear item
+     *
+     * @param int $gear_id Gear item ID
+     * @return int The party_level_at_craft value, or 0 if not found/not set
+     */
+    public function GetItemLevelByID(int $gear_id): int
+    {
+        $gear_record = $this->DAL->r("SELECT details FROM gear WHERE id=:id", [':id' => $gear_id]);
+        if (!$gear_record || empty($gear_record)) {
+            return 0;
+        }
+        $details = json_decode($gear_record[0]['details'], true);
+        return (int)($details['party_level_at_craft'] ?? 0);
+    }
 }
