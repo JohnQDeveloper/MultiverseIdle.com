@@ -16,6 +16,18 @@
             # Load rift stone definitions for dynamic dropdowns
             $rift_stone_implicit_definitions = RiftStone::getImplicitDefinitions();
             $rift_stone_affix_definitions = RiftStone::getAffixDefinitions();
+
+            # Get daily highest floor completed for rift stone crafting
+            $rift_owner_id = isset($_SESSION['auth_user_id']) ? (int)$_SESSION['auth_user_id'] : 0;
+            if ($rift_owner_id > 0) {
+                $daily_floor_key = 'daily_floor:' . $rift_owner_id . ':' . date('Y-m-d');
+                $daily_highest_floor = (int)($redis->get($daily_floor_key) ?? 0);
+            } else {
+                $guest_daily_date = $_SESSION['guest_daily_floor_date'] ?? '';
+                $daily_highest_floor = ($guest_daily_date === date('Y-m-d'))
+                    ? (int)($_SESSION['guest_daily_floor_value'] ?? 0)
+                    : 0;
+            }
         ?>
 
         <!-- Tab Navigation -->
@@ -176,7 +188,7 @@
                 <li><b>10 consecutive battles</b> against random monsters</li>
                 <li><b>Heal to full</b> before each battle</li>
                 <li><b>Rewards only if you win all 10 battles</b></li>
-                <li><b>Rift Level:</b> Rolls between 80-100% of your party level</li>
+                <li><b>Rift Level:</b> Rolls between 80-100% of your highest arena floor completed today</li>
                 <li><b>3 random affixes</b> make monsters stronger (can repeat)</li>
             </ul>
         </div>
@@ -193,16 +205,20 @@
             <br /><br />
 
             <b>Select Rift Level:</b><br />
+            <?php if ($daily_highest_floor <= 0): ?>
+                <p><i>You must win at least one arena battle today to craft a rift stone.</i></p>
+            <?php else: ?>
             <select name="rift_level">
                 <?php
-                    $min_rift_level = (int)floor($party_level * 0.8);
-                    for ($level = $party_level; $level >= $min_rift_level; $level--):
+                    $min_rift_level = (int)floor($daily_highest_floor * 0.8);
+                    for ($level = $daily_highest_floor; $level >= $min_rift_level; $level--):
                 ?>
                     <option value="<?php echo $level; ?>"><?php echo $level; ?></option>
                 <?php endfor; ?>
             </select>
             <br />
-            <small>Choose a rift level between <?php echo $min_rift_level; ?> and <?php echo $party_level; ?> (80-100% of Party Level <?php echo $party_level; ?>)</small>
+            <small>Choose a rift level between <?php echo $min_rift_level; ?> and <?php echo $daily_highest_floor; ?> (80-100% of today's highest floor: <?php echo $daily_highest_floor; ?>)</small>
+            <?php endif; ?>
             <br /><br />
 
             <div>
@@ -216,7 +232,7 @@
             </div>
             <br />
             <div>
-                <b>Crafting Cost:</b> <?php echo ($party_level * 50); ?> Gems
+                <b>Crafting Cost:</b> <?php echo ($daily_highest_floor * 50); ?> Gems
             </div>
             <br />
             <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">

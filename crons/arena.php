@@ -68,6 +68,13 @@
             if($battle_result['player_won']) {
                 $ArenaLog .= "<span class='success'>You won the arena battle on floor $arena_floor!</span><BR />\n";
 
+                // Track daily highest floor for rift stone crafting
+                $daily_floor_key = 'daily_floor:' . $r['user_id'] . ':' . date('Y-m-d');
+                $current_daily_high = (int)($redis->get($daily_floor_key) ?? 0);
+                if ($arena_floor > $current_daily_high) {
+                    $redis->setex($daily_floor_key, 172800, (string)$arena_floor); // 48-hour TTL
+                }
+
                 // Both characters gain 1 point in a random stat
                 $stats = ['strength', 'dexterity', 'health', 'wisdom'];
 

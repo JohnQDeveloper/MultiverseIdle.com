@@ -115,6 +115,17 @@ function processGuestArena(Character $Character, int $ticks): void
 
         $tick_log = '';
         if ($result['player_won']) {
+            // Track daily highest floor for rift stone crafting (guest uses session key)
+            $guest_daily_floor = (int)($_SESSION['guest_daily_floor_value'] ?? 0);
+            $guest_daily_date  = $_SESSION['guest_daily_floor_date'] ?? '';
+            $today = date('Y-m-d');
+            if ($guest_daily_date !== $today) {
+                $_SESSION['guest_daily_floor_value'] = $arena_floor;
+                $_SESSION['guest_daily_floor_date']  = $today;
+            } elseif ($arena_floor > $guest_daily_floor) {
+                $_SESSION['guest_daily_floor_value'] = $arena_floor;
+            }
+
             $fl_stat = $stats[array_rand($stats)];
             $bl_stat = $stats[array_rand($stats)];
 

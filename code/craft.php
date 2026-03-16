@@ -159,15 +159,28 @@
         $implicit = $_POST['implicit'] ?? '';
         $rift_level = intval($_POST['rift_level'] ?? 0);
 
-        # Get party level
-        $party_level = $Character->Data['party_json']['members']['frontline']['level'];
-        $min_rift_level = (int)floor($party_level * 0.8);
+        # Get daily highest floor completed
+        $owner_id = isset($_SESSION['auth_user_id']) ? (int)$_SESSION['auth_user_id'] : 0;
+        if ($owner_id > 0) {
+            $daily_floor_key = 'daily_floor:' . $owner_id . ':' . date('Y-m-d');
+            $max_rift_level = (int)($redis->get($daily_floor_key) ?? 0);
+        } else {
+            # Guest: use session tracking
+            $guest_daily_date = $_SESSION['guest_daily_floor_date'] ?? '';
+            $max_rift_level = ($guest_daily_date === date('Y-m-d'))
+                ? (int)($_SESSION['guest_daily_floor_value'] ?? 0)
+                : 0;
+        }
+        $max_rift_level = max(1, $max_rift_level);
+        $min_rift_level = (int)floor($max_rift_level * 0.8);
 
         # Validate inputs
         if (!in_array($implicit, $valid_rift_stone_implicits)) {
             $alert_danger = 'Invalid implicit selected.';
-        } elseif ($rift_level < $min_rift_level || $rift_level > $party_level) {
-            $alert_danger = 'Invalid rift level selected. Must be between ' . $min_rift_level . ' and ' . $party_level . '.';
+        } elseif ($max_rift_level <= 0) {
+            $alert_danger = 'You must complete at least one arena floor today before crafting a rift stone.';
+        } elseif ($rift_level < $min_rift_level || $rift_level > $max_rift_level) {
+            $alert_danger = 'Invalid rift level selected. Must be between ' . $min_rift_level . ' and ' . $max_rift_level . '.';
         } else {
 
             # Roll 3 random affixes (can repeat)
@@ -179,8 +192,8 @@
             # Generate rift stone name
             $rift_stone_name = 'Level ' . $rift_level . ' Rift Stone (' . $rift_stone_implicit_definitions[$implicit]['name'] . ')';
 
-            # Deduct crafting cost (gems based on party level)
-            $crafting_cost = $party_level * 50;
+            # Deduct crafting cost (gems based on daily highest floor)
+            $crafting_cost = $max_rift_level * 50;
             $Character->Data['gems'] -= $crafting_cost;
 
             # Create the rift stone details array
@@ -189,7 +202,7 @@
                 'implicit' => $implicit,
                 'affixes' => $affixes,
                 'level' => $rift_level,
-                'party_level_at_craft' => $party_level,
+                'daily_floor_at_craft' => $max_rift_level,
             ];
 
             # Format success message with affixes
