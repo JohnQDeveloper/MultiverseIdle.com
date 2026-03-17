@@ -127,6 +127,11 @@ if ($_chatIsLoggedIn) {
             Muted: <span id="chat-muted-reason"></span>
         </div>
 
+        <!-- Slash command hint -->
+        <?php if (!$_chatIsGuest): ?>
+        <div id="chat-slash-hint" class="chat-slash-hint" style="display:none;" role="listbox" aria-label="Slash command suggestions"></div>
+        <?php endif; ?>
+
         <!-- Input -->
         <?php if (!$_chatIsGuest): ?>
         <form id="chat-form" class="chat-input-row" autocomplete="off">

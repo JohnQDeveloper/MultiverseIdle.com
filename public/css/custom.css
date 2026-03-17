@@ -1,5 +1,23 @@
 /* general */
 
+.log-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9em;
+}
+
+.log-table th,
+.log-table td {
+    padding: 6px 12px;
+    text-align: left;
+    border-bottom: 1px solid #333;
+}
+
+.log-table th {
+    color: #8EFAD5;
+    font-weight: bold;
+}
+
 div.row {
     display: inline-flex;
     margin-right: 2em;
@@ -913,4 +931,37 @@ input.danger-button {
     color: #ccc;
     font-weight: bold;
     font-size: 0.9em;
+}
+
+/* ---- Slash command hint ---- */
+#chat-widget .chat-slash-hint {
+    flex-shrink: 0;
+    background: #1a1a1a;
+    border-top: 1px solid #333;
+    overflow-y: auto;
+    max-height: 100px;
+}
+
+#chat-widget .chat-slash-item {
+    padding: 5px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #222;
+}
+
+#chat-widget .chat-slash-item:last-child { border-bottom: none; }
+
+#chat-widget .chat-slash-item:hover,
+#chat-widget .chat-slash-item.selected { background: #2a2a2a; }
+
+#chat-widget .chat-slash-item-syntax {
+    display: block;
+    font-size: 0.85em;
+    font-weight: bold;
+    color: #8EFAD5;
+}
+
+#chat-widget .chat-slash-item-desc {
+    display: block;
+    font-size: 0.8em;
+    color: #999;
 }

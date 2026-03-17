@@ -157,3 +157,17 @@ ALTER TABLE market_orders ADD INDEX idx_season_resource_status (season_id, resou
 -- Manually adding a season for testing purposes
 -- INSERT INTO seasons (name, start_date, end_date, status)
 -- VALUES ('Season 1', NOW(), DATE_ADD(NOW(), INTERVAL 6 MONTH), 'active');
+
+-- Wire Log Table to track resource transfers between players (e.g. arena rewards, rift rewards, gifting)
+CREATE TABLE `wire_log` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `sender_user_id` int NOT NULL,
+  `recipient_user_id` int NOT NULL,
+  `amount` bigint unsigned NOT NULL,
+  `commodity` enum('gold','iron','herbs','gems') NOT NULL,
+  `season_id` int unsigned NULL DEFAULT NULL,
+  KEY `sender` (`sender_user_id`),
+  KEY `recipient` (`recipient_user_id`),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

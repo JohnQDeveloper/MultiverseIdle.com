@@ -6,6 +6,14 @@
     const MAX_DISPLAY_MSGS  = 150;
     const STORAGE_KEY       = 'chat_open';
 
+    const SLASH_COMMANDS = [
+        {
+            cmd:    '/wire',
+            syntax: '/wire <username> <amount> <commodity>',
+            desc:   'Wire resources to another player  (commodities: gold, iron, herbs, gems)',
+        },
+    ];
+
     const widget    = document.getElementById('chat-widget');
     if (!widget) return;
 
@@ -24,6 +32,7 @@
     const unreadBadge    = document.getElementById('chat-unread');
     const modForm        = document.getElementById('mod-form');
     const modResult      = document.getElementById('mod-result');
+    const slashHint      = document.getElementById('chat-slash-hint');
 
     // DM elements (null-safe — only present for logged-in non-guests)
     const dmConversations = document.getElementById('dm-conversations');
@@ -34,12 +43,13 @@
     const dmBackBtn       = document.getElementById('dm-back-btn');
     const dmPartnerNameEl = document.getElementById('dm-partner-name');
 
-    let currentChannel = 'global';
-    let lastId         = 0;
-    let pollTimer      = null;
-    let isMuted        = false;
-    let unreadCount    = 0;
-    let isOpen         = sessionStorage.getItem(STORAGE_KEY) === '1';
+    let currentChannel    = 'global';
+    let lastId            = 0;
+    let pollTimer         = null;
+    let isMuted           = false;
+    let unreadCount       = 0;
+    let isOpen            = sessionStorage.getItem(STORAGE_KEY) === '1';
+    let slashSelectIndex  = -1;
 
 
     // -----------------------------------------------------------------------
@@ -369,6 +379,91 @@
     }
 
     // -----------------------------------------------------------------------
+    // Slash command hint
+    // -----------------------------------------------------------------------
+    function slashHintMatches(val) {
+        const lower = val.toLowerCase();
+        return SLASH_COMMANDS.filter(function (sc) {
+            return sc.cmd.startsWith(lower) || lower.startsWith(sc.cmd + ' ') || lower === sc.cmd;
+        });
+    }
+
+    function updateSlashHint() {
+        if (!slashHint || !input) return;
+        const val = input.value;
+        if (!val.startsWith('/')) {
+            slashHint.style.display = 'none';
+            slashSelectIndex = -1;
+            return;
+        }
+        const matches = slashHintMatches(val);
+        if (matches.length === 0) {
+            slashHint.style.display = 'none';
+            slashSelectIndex = -1;
+            return;
+        }
+        slashHint.innerHTML = '';
+        matches.forEach(function (sc, idx) {
+            const item = document.createElement('div');
+            item.className = 'chat-slash-item' + (idx === slashSelectIndex ? ' selected' : '');
+            item.setAttribute('role', 'option');
+            item.innerHTML =
+                '<span class="chat-slash-item-syntax">' + escHtml(sc.syntax) + '</span>' +
+                '<span class="chat-slash-item-desc">'   + escHtml(sc.desc)   + '</span>';
+            item.addEventListener('mousedown', function (e) {
+                e.preventDefault(); // keep focus on input
+                if (!input.value.toLowerCase().startsWith(sc.cmd + ' ') && input.value.toLowerCase() !== sc.cmd) {
+                    input.value = sc.cmd + ' ';
+                }
+                slashHint.style.display = 'none';
+                slashSelectIndex = -1;
+                input.focus();
+            });
+            slashHint.appendChild(item);
+        });
+        slashHint.style.display = '';
+    }
+
+    function hideSlashHint() {
+        if (slashHint) slashHint.style.display = 'none';
+        slashSelectIndex = -1;
+    }
+
+    if (input) {
+        input.addEventListener('input', updateSlashHint);
+
+        input.addEventListener('blur', hideSlashHint);
+
+        input.addEventListener('keydown', function (e) {
+            if (!slashHint || slashHint.style.display === 'none') return;
+            const items = slashHint.querySelectorAll('.chat-slash-item');
+            if (items.length === 0) return;
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                slashSelectIndex = Math.min(slashSelectIndex + 1, items.length - 1);
+                items.forEach(function (el, i) { el.classList.toggle('selected', i === slashSelectIndex); });
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                slashSelectIndex = Math.max(slashSelectIndex - 1, -1);
+                items.forEach(function (el, i) { el.classList.toggle('selected', i === slashSelectIndex); });
+            } else if ((e.key === 'Tab' || e.key === 'Enter') && slashSelectIndex >= 0) {
+                e.preventDefault();
+                const matches = slashHintMatches(input.value);
+                const sc = matches[slashSelectIndex];
+                if (sc) {
+                    if (!input.value.toLowerCase().startsWith(sc.cmd + ' ') && input.value.toLowerCase() !== sc.cmd) {
+                        input.value = sc.cmd + ' ';
+                    }
+                    hideSlashHint();
+                    input.focus();
+                }
+            } else if (e.key === 'Escape') {
+                hideSlashHint();
+            }
+        });
+    }
+
+    // -----------------------------------------------------------------------
     // Send
     // -----------------------------------------------------------------------
     if (form) {
@@ -379,6 +474,55 @@
             const text = input.value.trim();
             input.value = '';
             input.disabled = true;
+            hideSlashHint();
+
+            // /wire <username> <amount> <commodity>
+            if (text.toLowerCase().startsWith('/wire ')) {
+                const parts = text.slice(6).trim().split(/\s+/);
+                if (parts.length < 3) {
+                    showError('Usage: /wire <username> <amount> <commodity>');
+                    input.disabled = false;
+                    input.focus();
+                    return;
+                }
+                const wireRecipient  = parts[0];
+                const wireAmount     = parseInt(parts[1], 10);
+                const wireCommodity  = parts[2].toLowerCase();
+
+                if (isNaN(wireAmount) || wireAmount <= 0) {
+                    showError('Wire amount must be a positive whole number');
+                    input.disabled = false;
+                    input.focus();
+                    return;
+                }
+
+                fetch('/api/wire', {
+                    method:      'POST',
+                    credentials: 'same-origin',
+                    headers:     { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body:        new URLSearchParams({
+                        csrf_token: csrf,
+                        recipient:  wireRecipient,
+                        amount:     wireAmount,
+                        commodity:  wireCommodity,
+                    }).toString(),
+                })
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        input.disabled = false;
+                        input.focus();
+                        if (data.success) {
+                            showError('Wired ' + wireAmount.toLocaleString() + ' ' + wireCommodity + ' to ' + wireRecipient + '. Check your log.');
+                        } else {
+                            showError(data.error || 'Wire failed');
+                        }
+                    })
+                    .catch(function () {
+                        input.disabled = false;
+                        showError('Network error.');
+                    });
+                return;
+            }
 
             const payload = new URLSearchParams({
                 csrf_token: csrf,

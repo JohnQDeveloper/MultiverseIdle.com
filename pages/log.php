@@ -1,25 +1,35 @@
 <?php require_once('../templates/game-header.php'); ?>
-    <!-- Page Details -->
     <div class="wrapper">
     <article class="main">
         <h1>Game Log</h1>
 
-        <form>
-        <h3>Search:</h3>
-        <input type="text" name="search" value="" />
-        <input type="submit" value="Search" />
-        </form>
-
-        <h3>Log Entries:</h3>
-        <div class="log-entry">
-            [2024-06-01 12:00:00] You have defeated the Goblin King in the Arena!
-        </div>
-        <div class="log-entry">
-            [2024-06-01 11:45:00] You have crafted a Legendary Sword.
-        </div>
-        <div class="log-entry">
-            [2024-06-01 11:30:00] You have gathered 100 Iron from the Mine.
-        </div>
+        <h3>Wire Transfers</h3>
+        <?php if (empty($wireLog)): ?>
+        <p>No wire transfers yet.</p>
+        <?php else: ?>
+        <table class="log-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>From</th>
+                    <th>To</th>
+                    <th>Amount</th>
+                    <th>Commodity</th>
+                </tr>
+            </thead>
+            <tbody>
+            <?php foreach ($wireLog as $entry): ?>
+                <tr>
+                    <td><?php echo htmlspecialchars($entry['created_at'], ENT_QUOTES, 'UTF-8'); ?></td>
+                    <td><?php echo htmlspecialchars($entry['sender_username'], ENT_QUOTES, 'UTF-8'); ?></td>
+                    <td><?php echo htmlspecialchars($entry['recipient_username'], ENT_QUOTES, 'UTF-8'); ?></td>
+                    <td><?php echo number_format((int)$entry['amount']); ?></td>
+                    <td><?php echo htmlspecialchars(ucfirst($entry['commodity']), ENT_QUOTES, 'UTF-8'); ?></td>
+                </tr>
+            <?php endforeach; ?>
+            </tbody>
+        </table>
+        <?php endif; ?>
 
     </article>
     </div>
