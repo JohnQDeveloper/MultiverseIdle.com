@@ -8,26 +8,28 @@ require_once('../config.php');
 /**
  * Rift Cron
  *
- * This cron runs once per hour to process queued rift delves.
+ * This cron runs once every 4 hours to process queued rift delves.
  * Players must win all 10 consecutive battles to earn rewards.
  */
 
-// Check if we should run (only once per hour, at the top of the hour)
+// Check if we should run (only once every 4 hours, at hours 0, 4, 8, 12, 16, 20)
+$current_hour = (int) date('G');
 $current_minute = (int) date('i');
-if ($current_minute >= 5 && $current_minute <= 8) { // Allow 5 minute buffer for cron timing
-    echo "Rifts cron skipped - not top of hour (current minute: $current_minute)\n";
+if ($current_hour % 4 !== 0 || $current_minute >= 5) { // Allow 5 minute buffer for cron timing
+    echo "Rifts cron skipped - not a 4-hour boundary (current time: " . date('H:i') . ")\n";
     return;
 }
 
-// Check if already ran this hour using Redis to prevent duplicate runs
-$current_hour_key = 'rifts_ran_' . date('Y-m-d_H');
-if ($redis->exists($current_hour_key)) {
-    echo "Rifts cron already ran this hour, skipping.\n";
+// Check if already ran this 4-hour window using Redis to prevent duplicate runs
+$four_hour_window = date('Y-m-d') . '_' . floor($current_hour / 4);
+$current_window_key = 'rifts_ran_' . $four_hour_window;
+if ($redis->exists($current_window_key)) {
+    echo "Rifts cron already ran this 4-hour window, skipping.\n";
     return;
 }
 
-// Mark this hour's rift processing as started
-$redis->setex($current_hour_key, 3600, '1'); // expires in 1 hour
+// Mark this 4-hour window's rift processing as started
+$redis->setex($current_window_key, 14400, '1'); // expires in 4 hours
 
 // Process rifts for active users
 $row = ActiveUsers();
