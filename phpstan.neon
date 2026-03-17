@@ -11,7 +11,6 @@ parameters:
         - config.php
     ignoreErrors:
         - identifier: variable.undefined
-        - identifier: if.alwaysTrue
-        - identifier: requireOnce.fileNotFound
         - identifier: constant.notFound
         - identifier: greater.alwaysTrue
+        - identifier: function.notFound

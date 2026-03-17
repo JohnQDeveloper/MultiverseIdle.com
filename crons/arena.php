@@ -153,7 +153,7 @@
                 $arena_xp_bonus = isset($potion_bonuses['arena_xp']) ? $potion_bonuses['arena_xp'] : 0;
                 $base_xp = $arena_floor * 10;
                 $xp_multiplier = 1 + ($arena_xp_bonus / 100);
-                $xp_award = round($base_xp * $xp_multiplier);
+                $xp_award = (int)round($base_xp * $xp_multiplier);
 
                 $Character->IncrementPartyXP($xp_award, $r['user_id']);
                 if ($arena_xp_bonus > 0) {

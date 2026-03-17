@@ -20,7 +20,7 @@ AND c.potion_expire_time < NOW()";
 
 $expired_records = $DAL->r($expired_potions_query);
 
-if ($expired_records && !empty($expired_records)) {
+if ($expired_records) {
     $expired_count = count($expired_records);
     echo "Found $expired_count expired potions to clean up.\n";
 

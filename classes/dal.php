@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 class DAL
 {
-    public object $dbh;
-    private object|false $statement;
+    public PDO $dbh;
+    private PDOStatement|false $statement;
 
     /**
-     * @param object $db PDO database connection object
+     * @param PDO $db PDO database connection object
      */
-    public function __construct(object $db)
+    public function __construct(PDO $db)
     {
         $this->dbh = $db;
         $this->statement = false;
@@ -67,12 +67,12 @@ class DAL
      */
     public function write(string $query, ?array $preparedArray = null): bool
     {
-        if ($this->dbh === false) {
-            return false;
-        }
-
         try {
             $this->statement = $this->dbh->prepare($query);
+
+            if ($this->statement === false) {
+                return false;
+            }
 
             if ($preparedArray === null) {
                 $this->statement->execute();
@@ -99,12 +99,12 @@ class DAL
      */
     public function read(string $query, ?array $preparedArray = null, int $fetchMode = PDO::FETCH_ASSOC): array|false
     {
-        if ($this->dbh === false) {
-            return false;
-        }
-
         try {
             $this->statement = $this->dbh->prepare($query);
+
+            if ($this->statement === false) {
+                return false;
+            }
 
             if ($preparedArray === null) {
                 $this->statement->execute();

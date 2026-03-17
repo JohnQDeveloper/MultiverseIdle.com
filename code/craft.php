@@ -171,7 +171,6 @@
                 ? (int)($_SESSION['guest_daily_floor_value'] ?? 0)
                 : 0;
         }
-        $max_rift_level = max(1, $max_rift_level);
         $min_rift_level = (int)floor($max_rift_level * 0.8);
 
         # Validate inputs

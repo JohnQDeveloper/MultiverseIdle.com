@@ -393,8 +393,7 @@ class Battle
                     if ($enemy_config['members']['frontline']['current_health'] > 0) {
                         $status_effects[$enemy_side]['frontline']['Scorched'] = self::STATUS_EFFECT_DURATION;
                         $damage = (int)$base_damage;
-                        if (isset($status_effects[$enemy_side]['frontline']['Scorched']) &&
-                            $status_effects[$enemy_side]['frontline']['Scorched'] > 0) {
+                        if ($status_effects[$enemy_side]['frontline']['Scorched'] > 0) {
                             $damage = (int)floor($damage * self::SCORCHED_DAMAGE_BONUS);
                         }
                         // Apply gear bonuses and resistances
@@ -413,8 +412,7 @@ class Battle
                     if ($enemy_config['members']['backline']['current_health'] > 0) {
                         $status_effects[$enemy_side]['backline']['Scorched'] = self::STATUS_EFFECT_DURATION;
                         $damage = (int)$base_damage;
-                        if (isset($status_effects[$enemy_side]['backline']['Scorched']) &&
-                            $status_effects[$enemy_side]['backline']['Scorched'] > 0) {
+                        if ($status_effects[$enemy_side]['backline']['Scorched'] > 0) {
                             $damage = (int)floor($damage * self::SCORCHED_DAMAGE_BONUS);
                         }
                         // Apply gear bonuses and resistances
