@@ -156,7 +156,7 @@ ALTER TABLE market_orders ADD INDEX idx_season_resource_status (season_id, resou
 
 -- Manually adding a season for testing purposes
 -- INSERT INTO seasons (name, start_date, end_date, status)
--- VALUES ('Season 1', NOW(), DATE_ADD(NOW(), INTERVAL 6 MONTH), 'active');
+-- VALUES ('Season 1', NOW(), DATE_ADD(NOW(), INTERVAL 4 MONTH), 'active');
 
 -- Wire Log Table to track resource transfers between players (e.g. arena rewards, rift rewards, gifting)
 CREATE TABLE `wire_log` (
