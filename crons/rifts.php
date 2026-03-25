@@ -68,6 +68,9 @@ foreach ($row as $r) {
     $Potion = new Potion();
     $potion_bonuses = $Potion->GetActivePotionBonuses($Character->Data['id']);
 
+    // Load guild building bonuses
+    $guild_building_bonuses = getGuildBuildingBonuses($r['user_id'], $Character->Data['season_id'] ?? null);
+
     // Load rift stone definitions
     $rift_stone_implicit_definitions = RiftStone::getImplicitDefinitions();
     $rift_stone_affix_definitions = RiftStone::getAffixDefinitions();
@@ -226,17 +229,17 @@ foreach ($row as $r) {
         // Apply implicit bonus (+60% for all)
         $implicit_multiplier = 1.6; // +60% = 1.6x
 
-        // Apply potion bonuses
-        $rift_xp_bonus = isset($potion_bonuses['rift_xp']) ? $potion_bonuses['rift_xp'] : 0;
+        // Apply potion bonuses (guild building bonuses stack additively)
+        $rift_xp_bonus = (isset($potion_bonuses['rift_xp']) ? $potion_bonuses['rift_xp'] : 0) + $guild_building_bonuses['tavern'];
         $rift_resource_bonus = isset($potion_bonuses['rift_drops']) ? $potion_bonuses['rift_drops'] : 0;
-        $rift_stat_bonus = isset($potion_bonuses['rift_stat_gains']) ? $potion_bonuses['rift_stat_gains'] : 0;
+        $rift_stat_bonus = (isset($potion_bonuses['rift_stat_gains']) ? $potion_bonuses['rift_stat_gains'] : 0) + $guild_building_bonuses['gym'];
 
         $stats = ['strength', 'dexterity', 'health', 'wisdom'];
 
         switch ($current_rift['implicit']) {
             case 'gold':
-                // Award gold
-                $gold_award = (int)round($base_gold * $implicit_multiplier * (1 + $rift_resource_bonus / 100));
+                // Award gold (with market building bonus)
+                $gold_award = (int)round($base_gold * $implicit_multiplier * (1 + ($rift_resource_bonus + $guild_building_bonuses['market']) / 100));
                 $Character->Data['gold'] += $gold_award;
                 $gold_tax = collectGuildTax($r['user_id'], $Character->Data['season_id'] ?? null, 'gold', $gold_award);
                 if ($gold_tax > 0) {
@@ -253,10 +256,12 @@ foreach ($row as $r) {
                 break;
 
             case 'resource_drop':
-                // Award random resource
+                // Award random resource (with per-resource building bonus)
                 $bonus_resources = ['iron', 'herbs', 'gems'];
                 $bonus_resource = $bonus_resources[array_rand($bonus_resources)];
-                $resource_award = (int)round($base_resource * $implicit_multiplier * (1 + $rift_resource_bonus / 100));
+                $resource_building_map = ['iron' => 'iron_mine', 'herbs' => 'farm', 'gems' => 'gem_mine'];
+                $resource_building_bonus = $guild_building_bonuses[$resource_building_map[$bonus_resource]];
+                $resource_award = (int)round($base_resource * $implicit_multiplier * (1 + ($rift_resource_bonus + $resource_building_bonus) / 100));
                 $Character->Data[$bonus_resource] += $resource_award;
                 $resource_tax = collectGuildTax($r['user_id'], $Character->Data['season_id'] ?? null, $bonus_resource, $resource_award);
                 if ($resource_tax > 0) {

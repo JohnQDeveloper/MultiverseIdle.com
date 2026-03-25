@@ -81,6 +81,12 @@ class Guild
             [':guild_id' => $guild_id]
         );
 
+        // Initialise the guild buildings row
+        $this->DAL->w(
+            "INSERT IGNORE INTO guild_buildings (guild_id) VALUES (:guild_id)",
+            [':guild_id' => $guild_id]
+        );
+
         // Add creator as guild master
         $member_query = "INSERT INTO guild_members (guild_id, user_id, role)
                         VALUES (:guild_id, :user_id, 'guild_master')";
@@ -713,6 +719,119 @@ class Guild
             "UPDATE guilds SET tax_rate = :rate WHERE id = :guild_id",
             [':rate' => $rate, ':guild_id' => $guild_id]
         );
+    }
+
+    /**
+     * Get member count for a guild
+     */
+    public function GetMemberCount(int $guild_id): int
+    {
+        $result = $this->DAL->r(
+            "SELECT COUNT(*) AS cnt FROM guild_members WHERE guild_id = :guild_id",
+            [':guild_id' => $guild_id]
+        );
+
+        if (!$result || empty($result)) {
+            return 0;
+        }
+
+        return (int)$result[0]['cnt'];
+    }
+
+    /**
+     * Get all building levels for a guild
+     *
+     * @return array<string, int>
+     */
+    public function GetBuildingLevels(int $guild_id): array
+    {
+        $defaults = ['farm' => 0, 'iron_mine' => 0, 'gem_mine' => 0, 'market' => 0, 'gym' => 0, 'tavern' => 0];
+
+        $result = $this->DAL->r(
+            "SELECT farm, iron_mine, gem_mine, market, gym, tavern
+             FROM guild_buildings WHERE guild_id = :guild_id",
+            [':guild_id' => $guild_id]
+        );
+
+        if (!$result || empty($result)) {
+            return $defaults;
+        }
+
+        return [
+            'farm'      => (int)$result[0]['farm'],
+            'iron_mine' => (int)$result[0]['iron_mine'],
+            'gem_mine'  => (int)$result[0]['gem_mine'],
+            'market'    => (int)$result[0]['market'],
+            'gym'       => (int)$result[0]['gym'],
+            'tavern'    => (int)$result[0]['tavern'],
+        ];
+    }
+
+    /**
+     * Upgrade a guild building, paying the cost from the guild bank in the specified resource.
+     * Only guild_master and officers may upgrade.
+     * Cost = 10000 * member_count * (current_level + 1)
+     */
+    public function UpgradeBuilding(string $building, string $resource, int $user_id = 0): bool
+    {
+        $user_id = $this->getUserId($user_id);
+
+        $valid_buildings = ['farm', 'iron_mine', 'gem_mine', 'market', 'gym', 'tavern'];
+        $valid_resources = ['gold', 'iron', 'herbs', 'gems'];
+        if (!in_array($building, $valid_buildings, true) || !in_array($resource, $valid_resources, true)) {
+            return false;
+        }
+
+        $role = $this->GetUserRole($user_id);
+        if (!in_array($role, ['guild_master', 'officer'], true)) {
+            return false;
+        }
+
+        $guild_id = $this->GetUserGuildId($user_id);
+        if ($guild_id === null) {
+            return false;
+        }
+
+        $levels       = $this->GetBuildingLevels($guild_id);
+        $current      = $levels[$building];
+        $member_count = $this->GetMemberCount($guild_id);
+        $cost         = 10000 * $member_count * ($current + 1);
+
+        // Check guild bank has enough of the chosen resource
+        $bank = $this->GetBankBalances($guild_id);
+        if ($bank[$resource] < $cost) {
+            return false;
+        }
+
+        // Deduct from guild bank
+        $deducted = $this->DAL->w(
+            "UPDATE guild_bank SET `{$resource}` = `{$resource}` - :cost
+             WHERE guild_id = :guild_id AND `{$resource}` >= :cost2",
+            [':cost' => $cost, ':guild_id' => $guild_id, ':cost2' => $cost]
+        );
+
+        if (!$deducted || $this->DAL->rows_affected() === 0) {
+            return false;
+        }
+
+        // Increment building level (upsert in case row was missing)
+        return $this->DAL->w(
+            "INSERT INTO guild_buildings (guild_id, `{$building}`) VALUES (:guild_id, 1)
+             ON DUPLICATE KEY UPDATE `{$building}` = `{$building}` + 1",
+            [':guild_id' => $guild_id]
+        );
+    }
+
+    /**
+     * Calculate the cost for the next upgrade of a building
+     */
+    public function GetUpgradeCost(string $building, int $guild_id): int
+    {
+        $levels       = $this->GetBuildingLevels($guild_id);
+        $current      = $levels[$building] ?? 0;
+        $member_count = $this->GetMemberCount($guild_id);
+
+        return 10000 * $member_count * ($current + 1);
     }
 
     /**

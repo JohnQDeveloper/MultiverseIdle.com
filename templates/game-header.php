@@ -35,6 +35,7 @@
                 <ul class="dropdown-content">
                   <li><a href="/guilds">Guild</a></li>
                   <li><a href="/guild-bank">Guild Bank</a></li>
+                  <li><a href="/guild-buildings">Guild Buildings</a></li>
                 </ul>
               </li>
               <?php if (!isset($_SESSION['guest_mode']) || $_SESSION['guest_mode'] !== true): ?>

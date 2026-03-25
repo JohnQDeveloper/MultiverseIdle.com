@@ -23,6 +23,9 @@
             $Potion = new Potion();
             $potion_bonuses = $Potion->GetActivePotionBonuses($Character->Data['id']);
 
+            # Load guild building bonuses
+            $guild_building_bonuses = getGuildBuildingBonuses($r['user_id'], $Character->Data['season_id'] ?? null);
+
             echo "Loaded & running party for user_id: ".$r['user_id']."\n";
 
             $monster_strength = calculate_monster_attribute($arena_floor);
@@ -80,6 +83,7 @@
 
                 # Get arena stat gain bonus (percentage chance for +1 additional stat)
                 $arena_stat_bonus = isset($potion_bonuses['arena_stat_gains']) ? $potion_bonuses['arena_stat_gains'] : 0;
+                $arena_stat_bonus += $guild_building_bonuses['gym'];
 
                 $frontline_stat = $stats[array_rand($stats)];
                 $frontline_stat_lucky = $stats[array_rand($stats)];
@@ -123,10 +127,10 @@
                     $ArenaLog = "<span class='success'>Backline gained +$backline_stat_gain $backline_stat!</span><BR />\n$ArenaLog";
                 }
 
-                // Award gold equal to arena floor (with potion bonus)
+                // Award gold equal to arena floor (with potion + guild market bonus)
                 $arena_resource_bonus = isset($potion_bonuses['arena_resource_drops']) ? $potion_bonuses['arena_resource_drops'] : 0;
                 $base_gold = $arena_floor;
-                $gold_multiplier = 1 + ($arena_resource_bonus / 100);
+                $gold_multiplier = 1 + (($arena_resource_bonus + $guild_building_bonuses['market']) / 100);
                 $gold_award = round($base_gold * $gold_multiplier);
 
                 $Character->Data['gold'] += $gold_award;
@@ -140,11 +144,14 @@
                     $ArenaLog = "<span class='success'>You gained " . ($gold_award - $gold_tax) . " gold" . ($gold_tax > 0 ? " (-$gold_tax guild tax)" : "") . "!</span><BR />\n$ArenaLog";
                 }
 
-                // Award bonus resource equal to arena floor (with potion bonus)
+                // Award bonus resource equal to arena floor (with potion + guild building bonus)
                 $bonus_resources = ['iron', 'herbs', 'gems'];
                 $bonus_resource = $bonus_resources[array_rand($bonus_resources)];
                 $base_resource = $arena_floor;
-                $resource_award = round($base_resource * $gold_multiplier); // Same multiplier as gold
+                $resource_building_map = ['iron' => 'iron_mine', 'herbs' => 'farm', 'gems' => 'gem_mine'];
+                $resource_building_bonus = $guild_building_bonuses[$resource_building_map[$bonus_resource]];
+                $resource_multiplier = 1 + (($arena_resource_bonus + $resource_building_bonus) / 100);
+                $resource_award = round($base_resource * $resource_multiplier);
 
                 $Character->Data[$bonus_resource] += $resource_award;
                 $resource_tax = collectGuildTax($r['user_id'], $Character->Data['season_id'] ?? null, $bonus_resource, (int)$resource_award);
@@ -157,10 +164,10 @@
                     $ArenaLog = "<span class='success'>You gained " . ((int)$resource_award - $resource_tax) . " $bonus_resource" . ($resource_tax > 0 ? " (-$resource_tax guild tax)" : "") . "!</span><BR />\n$ArenaLog";
                 }
 
-                // Award XP equal to arena floor * 10 (with potion bonus)
+                // Award XP equal to arena floor * 10 (with potion + guild tavern bonus)
                 $arena_xp_bonus = isset($potion_bonuses['arena_xp']) ? $potion_bonuses['arena_xp'] : 0;
                 $base_xp = $arena_floor * 10;
-                $xp_multiplier = 1 + ($arena_xp_bonus / 100);
+                $xp_multiplier = 1 + (($arena_xp_bonus + $guild_building_bonuses['tavern']) / 100);
                 $xp_award = (int)round($base_xp * $xp_multiplier);
 
                 $Character->IncrementPartyXP($xp_award, $r['user_id']);

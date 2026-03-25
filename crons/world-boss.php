@@ -100,6 +100,18 @@ if ($total_world_boss_damage > 0) {
         $RewardCharacter = new Character();
         $RewardCharacter->LoadById($participant['character_id']);
 
+        // Load potion bonuses
+        $Potion = new Potion();
+        $potion_bonuses = $Potion->GetActivePotionBonuses((int)$RewardCharacter->Data['user_id']);
+
+        // Load guild building bonuses
+        $guild_building_bonuses = getGuildBuildingBonuses($participant['user_id'], $RewardCharacter->Data['season_id'] ?? null);
+
+        // Apply market building bonus to gold reward before awarding
+        if ($guild_building_bonuses['market'] > 0) {
+            $gold_reward = (int)round($gold_reward * (1 + $guild_building_bonuses['market'] / 100));
+        }
+
         // Award gold (minus guild tax)
         $RewardCharacter->Data['gold'] += $gold_reward;
         $gold_tax = collectGuildTax($participant['user_id'], $RewardCharacter->Data['season_id'] ?? null, 'gold', $gold_reward);
@@ -107,12 +119,8 @@ if ($total_world_boss_damage > 0) {
             $RewardCharacter->Data['gold'] -= $gold_tax;
         }
 
-        // Load potion bonuses
-        $Potion = new Potion();
-        $potion_bonuses = $Potion->GetActivePotionBonuses((int)$RewardCharacter->Data['user_id']);
-
-        // Apply world boss XP potion bonus (percentage increase)
-        $world_boss_xp_bonus = $potion_bonuses['world_boss_xp'] ?? 0;
+        // Apply world boss XP potion bonus + tavern building bonus (percentage increase)
+        $world_boss_xp_bonus = ($potion_bonuses['world_boss_xp'] ?? 0) + $guild_building_bonuses['tavern'];
         if ($world_boss_xp_bonus > 0) {
             $xp_reward += (int) floor($xp_reward * ($world_boss_xp_bonus / 100));
         }

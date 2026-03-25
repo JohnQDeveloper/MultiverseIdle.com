@@ -23,6 +23,9 @@
             # Load potion bonuses
             $Potion = new Potion();
             $potion_bonuses = $Potion->GetActivePotionBonuses($Character->Data['id']);
+
+            # Load guild building bonuses
+            $guild_building_bonuses = getGuildBuildingBonuses($r['user_id'], $Character->Data['season_id'] ?? null);
             echo "Loaded potion bonuses for user_id: ".$r['user_id']."\n";
             #print_r($worker_config);
             /*
@@ -64,6 +67,10 @@
             $potion_resource_key = ($resource === 'herbs') ? 'herb' : $resource;
             $potion_bonus_key = $potion_resource_key . '_worker_yield';
             $potion_bonus = isset($potion_bonuses[$potion_bonus_key]) ? $potion_bonuses[$potion_bonus_key] : 0;
+
+            # Add guild building bonus for this resource
+            $worker_building_map = ['gold' => 'market', 'iron' => 'iron_mine', 'herbs' => 'farm', 'gems' => 'gem_mine'];
+            $potion_bonus += $guild_building_bonuses[$worker_building_map[$resource]] ?? 0;
 
             $harvests = 10; // 10 harvests per 1 minute tick basically
             $harvests_without_potion = worker_yield($harvests, $speed_upgrades, $skill_level, $num_workers, 0);

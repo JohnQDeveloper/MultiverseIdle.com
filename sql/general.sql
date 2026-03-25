@@ -117,6 +117,21 @@ CREATE TABLE `guild_invites` (
   KEY `invitee_user_id` (`invitee_user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+-- Guild buildings table
+CREATE TABLE guild_buildings (
+  guild_id INT UNSIGNED NOT NULL,
+  farm INT UNSIGNED NOT NULL DEFAULT 0,
+  iron_mine INT UNSIGNED NOT NULL DEFAULT 0,
+  gem_mine INT UNSIGNED NOT NULL DEFAULT 0,
+  market INT UNSIGNED NOT NULL DEFAULT 0,
+  gym INT UNSIGNED NOT NULL DEFAULT 0,
+  tavern INT UNSIGNED NOT NULL DEFAULT 0,
+  PRIMARY KEY (guild_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Seed rows for any existing guilds
+INSERT IGNORE INTO guild_buildings (guild_id) SELECT id FROM guilds;
+
 -- Market Orders Table
 CREATE TABLE `market_orders` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
