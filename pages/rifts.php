@@ -19,6 +19,13 @@
         <!-- Rift Queue Section -->
         <h2>Rift Queue (<?php echo count($queued_rifts); ?>/<?php echo $rift_queue_max; ?>)</h2>
 
+        <?php if ($has_active_sub && !empty($queued_rifts)): ?>
+            <form method="POST" action="/rifts" class="form--inline" style="margin-bottom: 16px;">
+                <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
+                <input type="submit" role="button" name="simulate_queue" value="Simulate Queue (300x each)">
+            </form>
+        <?php endif; ?>
+
         <?php if (empty($queued_rifts)): ?>
             <p><em>No rifts currently queued. Add rift stones from your available rifts below.</em></p>
         <?php else: ?>
@@ -57,6 +64,19 @@
                                     <input type="hidden" name="rift_stone_id" value="<?php echo $rift['id']; ?>">
                                     <input type="submit" role="button" name="remove_rift" value="Remove from Queue" class="secondary">
                                 </form>
+                                <?php if (!empty($rift_simulation_results[$rift['id']])): ?>
+                                    <?php
+                                        $sim = $rift_simulation_results[$rift['id']];
+                                        $sim_pct = round(($sim['won'] / $sim['total']) * 100, 1);
+                                        if ($sim_pct >= 90) {
+                                            $sim_class = 'list-item--success';
+                                        } else {
+                                            $sim_class = 'list-item--negative';
+                                        }
+                                    ?>
+                                    <p><b>Simulation (300x):</b> <span class="<?php echo $sim_class; ?>"><?php echo $sim_pct; ?>% success rate</span>
+                                    <small>(<?php echo $sim['won']; ?> wins / <?php echo $sim['lost']; ?> losses)</small></p>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>

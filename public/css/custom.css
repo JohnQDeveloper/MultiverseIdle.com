@@ -322,6 +322,11 @@ input.danger-button {
     font-weight: bold;
 }
 
+.list-item--success {
+    color: #05714B;
+    font-weight: bold;
+}
+
 .list-item--negative {
     color: #dc3545;
 }

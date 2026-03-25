@@ -61,6 +61,16 @@
     # Load queued rifts
     $queued_rifts = $rift_stone->GetQueuedRiftsByOwner($owner_id);
 
+    # Simulate entire queue (QoL subscribers only)
+    /** @var array<int, array{won: int, lost: int, total: int}> $rift_simulation_results */
+    $rift_simulation_results = [];
+    if ($has_active_sub && isset($_POST['simulate_queue'])) {
+        $Battle = new Battle();
+        foreach ($queued_rifts as $queued_rift) {
+            $rift_simulation_results[$queued_rift['id']] = $Battle->SimulateRift($queued_rift, $Character);
+        }
+    }
+
     # Load rift stone definitions for display
     $rift_stone_implicit_definitions = RiftStone::getImplicitDefinitions();
     $rift_stone_affix_definitions = RiftStone::getAffixDefinitions();

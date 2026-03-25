@@ -566,6 +566,105 @@ class Battle
          * @param int $arena_floor Floor level for monster stat calculation
          * @return array{won: int, lost: int, total: int} Battle outcome statistics
          */
+        /**
+         * Simulates a full rift delve (10 consecutive battles) 1000 times for a given rift stone.
+         *
+         * @param array{level: int, affixes: array<string>} $rift_details Rift stone details
+         * @param object $Character The character performing the simulation
+         * @return array{won: int, lost: int, total: int} Simulation results
+         */
+        public function SimulateRift(array $rift_details, object $Character): array
+        {
+            $won = 0;
+            $lost = 0;
+            $total = 300;
+
+            for ($i = 0; $i < $total; $i++) {
+                $party_config = $Character->Data['party_json'];
+
+                // Run 10 consecutive battles (all must be won)
+                $delve_won = true;
+                for ($battle_num = 1; $battle_num <= 10; $battle_num++) {
+                    $monster_strength = calculate_monster_attribute($rift_details['level']);
+                    $monster_dexterity = calculate_monster_attribute($rift_details['level']);
+                    $monster_health = calculate_monster_attribute($rift_details['level']);
+                    $monster_wisdom = calculate_monster_attribute($rift_details['level']);
+                    $monster_skills = [];
+
+                    foreach ($rift_details['affixes'] as $affix_key) {
+                        switch ($affix_key) {
+                            case 'monster_skill':
+                                $monster_skills[] = SKILL_GEMS[array_rand(SKILL_GEMS)]['Name'];
+                                break;
+                            case 'monster_damage':
+                            case 'monster_strength':
+                                $monster_strength = (int)floor($monster_strength * 1.2);
+                                break;
+                            case 'monster_dexterity':
+                                $monster_dexterity = (int)floor($monster_dexterity * 1.2);
+                                break;
+                            case 'monster_health':
+                                $monster_health = (int)floor($monster_health * 1.2);
+                                break;
+                            case 'monster_wisdom':
+                                $monster_wisdom = (int)floor($monster_wisdom * 1.2);
+                                break;
+                        }
+                    }
+
+                    while (count($monster_skills) < 2) {
+                        $monster_skills[] = SKILL_GEMS[array_rand(SKILL_GEMS)]['Name'];
+                    }
+
+                    $monster_config = [
+                        "members" => [
+                            "frontline" => [
+                                "class" => "warrior",
+                                "level" => $rift_details['level'],
+                                "strength" => $monster_strength,
+                                "dexterity" => $monster_dexterity,
+                                "health" => $monster_health,
+                                "wisdom" => $monster_wisdom,
+                                "gear" => [],
+                                "skills" => $monster_skills,
+                            ],
+                            "backline" => [
+                                "class" => "warrior",
+                                "level" => $rift_details['level'],
+                                "strength" => $monster_strength,
+                                "dexterity" => $monster_dexterity,
+                                "health" => $monster_health,
+                                "wisdom" => $monster_wisdom,
+                                "gear" => [],
+                                "skills" => $monster_skills,
+                            ],
+                        ],
+                    ];
+
+                    $battle_result = (new Battle())->Battle($party_config, $monster_config, false);
+
+                    if ($battle_result['player_won']) {
+                        // Heal to full for next battle
+                        $party_config['members']['frontline']['current_health'] =
+                            $party_config['members']['frontline']['health'] * 5;
+                        $party_config['members']['backline']['current_health'] =
+                            $party_config['members']['backline']['health'] * 5;
+                    } else {
+                        $delve_won = false;
+                        break;
+                    }
+                }
+
+                if ($delve_won) {
+                    $won++;
+                } else {
+                    $lost++;
+                }
+            }
+
+            return ["won" => $won, "lost" => $lost, "total" => $total];
+        }
+
         public function SimulateArenaFloor(object $Character, int $arena_floor): array
         {
             $won = 0;
