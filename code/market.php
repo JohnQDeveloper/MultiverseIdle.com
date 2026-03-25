@@ -8,7 +8,10 @@ $alert_danger = '';
 $character_id     = (int)$Character->Data['id'];
 $user_id          = (int)$_SESSION['auth_user_id'];
 $market_season_id = isset($Character->Data['season_id']) ? (int)$Character->Data['season_id'] : null;
-$valid_resources  = ['herbs', 'iron', 'gems', 'credits'];
+$is_season_character = $market_season_id !== null;
+$valid_resources  = $is_season_character
+    ? ['herbs', 'iron', 'gems']
+    : ['herbs', 'iron', 'gems', 'credits'];
 $valid_item_types = ['gear', 'rift_stone', 'potion'];
 $item_table_map   = ['gear' => 'gear', 'rift_stone' => 'rifts', 'potion' => 'potions'];
 

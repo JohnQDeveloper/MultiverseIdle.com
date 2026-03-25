@@ -71,6 +71,7 @@ if ($_chatIsLoggedIn) {
      data-user-id="<?php echo $_chatUserId; ?>"
      data-is-mod="<?php echo $_chatIsMod ? '1' : '0'; ?>"
      data-is-guest="<?php echo $_chatIsGuest ? '1' : '0'; ?>"
+     data-is-season="<?php echo isset($_SESSION['active_season_id']) ? '1' : '0'; ?>"
      data-guild-id="<?php echo htmlspecialchars($_chatGuildId, ENT_QUOTES, 'UTF-8'); ?>">
 
     <!-- Always-visible toggle bar -->

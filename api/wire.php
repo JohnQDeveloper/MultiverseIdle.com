@@ -31,6 +31,11 @@ $senderUserId   = (int)$_SESSION['auth_user_id'];
 $senderUsername = htmlspecialchars(trim($_SESSION['auth_username'] ?? 'Unknown'), ENT_QUOTES, 'UTF-8');
 $seasonId       = isset($_SESSION['active_season_id']) ? (int)$_SESSION['active_season_id'] : null;
 
+if ($seasonId !== null) {
+    echo json_encode(['success' => false, 'error' => 'Wires are only available to Perpetual characters']);
+    exit;
+}
+
 $recipientUsername = trim($_POST['recipient'] ?? '');
 $amount            = (int)($_POST['amount'] ?? 0);
 $commodity         = strtolower(trim($_POST['commodity'] ?? ''));
@@ -66,14 +71,14 @@ if ($recipientUserId === $senderUserId) {
     exit;
 }
 
-// Verify recipient has a character in this season
+// Verify recipient has a perpetual character
 $recipientCheck = $DAL->r(
-    'SELECT `id` FROM `characters` WHERE `user_id` = :uid AND `season_id` <=> :sid LIMIT 1',
-    [':uid' => $recipientUserId, ':sid' => $seasonId]
+    'SELECT `id` FROM `characters` WHERE `user_id` = :uid AND `season_id` IS NULL LIMIT 1',
+    [':uid' => $recipientUserId]
 );
 
 if (empty($recipientCheck)) {
-    echo json_encode(['success' => false, 'error' => "Player '{$recipientUsername}' has no character in this season"]);
+    echo json_encode(['success' => false, 'error' => "Player '{$recipientUsername}' has no Perpetual character to receive wires"]);
     exit;
 }
 

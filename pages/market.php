@@ -20,7 +20,7 @@
 
         <!-- Resource Filter Nav -->
         <div class="market-resource-nav">
-            <?php foreach (['herbs', 'iron', 'gems', 'credits'] as $res): ?>
+            <?php foreach ($valid_resources as $res): ?>
                 <a href="/market?tab=orders&resource=<?php echo $res; ?>" class="market-resource-tab <?php echo $resource_filter === $res ? 'active' : ''; ?>">
                     <?php echo ucfirst($res); ?>
                 </a>
@@ -346,7 +346,9 @@
                     <option value="herbs">Herbs &mdash; have: <?php echo human_num((int)($Character->Data['herbs'] ?? 0)); ?></option>
                     <option value="iron">Iron &mdash; have: <?php echo human_num((int)($Character->Data['iron'] ?? 0)); ?></option>
                     <option value="gems">Gems &mdash; have: <?php echo human_num((int)($Character->Data['gems'] ?? 0)); ?></option>
+                    <?php if (!$is_season_character): ?>
                     <option value="credits">Credits &mdash; have: <?php echo human_num((int)($Character->Data['credits'] ?? 0)); ?></option>
+                    <?php endif; ?>
                 </select>
 
                 <label for="amount">Amount</label>

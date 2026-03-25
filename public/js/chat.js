@@ -21,6 +21,7 @@
     const userId    = parseInt(widget.dataset.userId, 10) || 0;
     const isMod     = widget.dataset.isMod === '1';
     const isGuest   = widget.dataset.isGuest === '1';
+    const isSeason  = widget.dataset.isSeason === '1';
 
     const toggleBtn      = document.getElementById('chat-toggle');
     const body           = document.getElementById('chat-widget-body');
@@ -477,6 +478,12 @@
             hideSlashHint();
 
             // /wire <username> <amount> <commodity>
+            if (text.toLowerCase().startsWith('/wire ') && isSeason) {
+                showError('Wires are only available to Perpetual characters');
+                input.disabled = false;
+                input.focus();
+                return;
+            }
             if (text.toLowerCase().startsWith('/wire ')) {
                 const parts = text.slice(6).trim().split(/\s+/);
                 if (parts.length < 3) {
@@ -669,6 +676,6 @@
         el.textContent = msg;
         msgArea.appendChild(el);
         msgArea.scrollTop = msgArea.scrollHeight;
-        setTimeout(function () { el.remove(); }, 5000);
+        setTimeout(function () { el.remove(); }, 10000);
     }
 }());
