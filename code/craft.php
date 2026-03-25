@@ -47,7 +47,7 @@
 
             # Consume potential by alternating between affixes
             while ($potential > 0) {
-                if ($Character->Data['iron'] < 100) {
+                if ($Character->Data['iron'] < 2500) {
                     break;
                 }
 
@@ -64,7 +64,7 @@
                 }
 
                 $potential -= $consumed;
-                $Character->Data['iron'] -= 100; # Deduct iron cost per upgrade
+                $Character->Data['iron'] -= 2500; # Deduct iron cost per upgrade
             }
 
             # Calculate final affix values
@@ -132,25 +132,30 @@
             # Get party level - this is the potion level
             $party_level = $Character->Data['party_json']['members']['frontline']['level'];
             $potion_level = $party_level;
+            $herb_cost = $potion_level * 1500;
 
-            # Calculate affix values based on level
-            $prefix_value = $potion_level * $potion_prefix_definitions[$prefix_affix]['per_level'];
-            $suffix_value = $potion_level * $potion_suffix_definitions[$suffix_affix]['per_level'];
+            if ($Character->Data['herbs'] < $herb_cost) {
+                $alert_danger = 'Not enough Herbs. Required: ' . number_format($herb_cost) . '.';
+            } else {
+                # Calculate affix values based on level
+                $prefix_value = $potion_level * $potion_prefix_definitions[$prefix_affix]['per_level'];
+                $suffix_value = $potion_level * $potion_suffix_definitions[$suffix_affix]['per_level'];
 
-            # Generate potion name
-            $potion_name = $potion_prefix_definitions[$prefix_affix]['name'] . ' and ' . $potion_suffix_definitions[$suffix_affix]['name'] . ' Potion';
+                # Generate potion name
+                $potion_name = $potion_prefix_definitions[$prefix_affix]['name'] . ' and ' . $potion_suffix_definitions[$suffix_affix]['name'] . ' Potion';
 
-            # Deduct crafting cost
-            $Character->Data['herbs'] -= ($potion_level * 100);
+                # Deduct crafting cost
+                $Character->Data['herbs'] -= $herb_cost;
 
-            # Format success message
-            $alert_success = 'Crafted Level ' . $potion_level . ' ' . htmlspecialchars($potion_name) . ' with ' .
-                '+' . $prefix_value . '% ' . htmlspecialchars($potion_prefix_definitions[$prefix_affix]['name']) .
-                ' and +' . $suffix_value . '% ' . htmlspecialchars($potion_suffix_definitions[$suffix_affix]['name']);
+                # Format success message
+                $alert_success = 'Crafted Level ' . $potion_level . ' ' . htmlspecialchars($potion_name) . ' with ' .
+                    '+' . $prefix_value . '% ' . htmlspecialchars($potion_prefix_definitions[$prefix_affix]['name']) .
+                    ' and +' . $suffix_value . '% ' . htmlspecialchars($potion_suffix_definitions[$suffix_affix]['name']);
 
-            # Save the crafted potion
-            $potion = new Potion();
-            $new_potion_id = $potion->CreatePotion($potion_name, $prefix_affix, $suffix_affix, $potion_level);
+                # Save the crafted potion
+                $potion = new Potion();
+                $new_potion_id = $potion->CreatePotion($potion_name, $prefix_affix, $suffix_affix, $potion_level);
+            }
         }
     }
 
@@ -181,40 +186,44 @@
         } elseif ($rift_level < $min_rift_level || $rift_level > $max_rift_level) {
             $alert_danger = 'Invalid rift level selected. Must be between ' . $min_rift_level . ' and ' . $max_rift_level . '.';
         } else {
+            $crafting_cost = $max_rift_level * 15;
 
-            # Roll 3 random affixes (can repeat)
-            $affixes = [];
-            for ($i = 0; $i < 3; $i++) {
-                $affixes[] = array_rand($rift_stone_affix_definitions);
+            if ($Character->Data['gems'] < $crafting_cost) {
+                $alert_danger = 'Not enough Gems. Required: ' . number_format($crafting_cost) . '.';
+            } else {
+                # Roll 3 random affixes (can repeat)
+                $affixes = [];
+                for ($i = 0; $i < 3; $i++) {
+                    $affixes[] = array_rand($rift_stone_affix_definitions);
+                }
+
+                # Generate rift stone name
+                $rift_stone_name = 'Level ' . $rift_level . ' Rift Stone (' . $rift_stone_implicit_definitions[$implicit]['name'] . ')';
+
+                # Deduct crafting cost (gems based on daily highest floor)
+                $Character->Data['gems'] -= $crafting_cost;
+
+                # Create the rift stone details array
+                $rift_stone_details = [
+                    'name' => $rift_stone_name,
+                    'implicit' => $implicit,
+                    'affixes' => $affixes,
+                    'level' => $rift_level,
+                    'daily_floor_at_craft' => $max_rift_level,
+                ];
+
+                # Format success message with affixes
+                $affix_names = [];
+                foreach ($affixes as $affix_key) {
+                    $affix_names[] = $rift_stone_affix_definitions[$affix_key]['name'];
+                }
+
+                $alert_success = 'Crafted ' . htmlspecialchars($rift_stone_name) . ' with affixes: ' .
+                    htmlspecialchars(implode(', ', $affix_names));
+
+                # Save the crafted rift stone
+                $rift_stone = new RiftStone();
+                $new_rift_stone_id = $rift_stone->CreateRiftStone($rift_stone_details);
             }
-
-            # Generate rift stone name
-            $rift_stone_name = 'Level ' . $rift_level . ' Rift Stone (' . $rift_stone_implicit_definitions[$implicit]['name'] . ')';
-
-            # Deduct crafting cost (gems based on daily highest floor)
-            $crafting_cost = $max_rift_level * 50;
-            $Character->Data['gems'] -= $crafting_cost;
-
-            # Create the rift stone details array
-            $rift_stone_details = [
-                'name' => $rift_stone_name,
-                'implicit' => $implicit,
-                'affixes' => $affixes,
-                'level' => $rift_level,
-                'daily_floor_at_craft' => $max_rift_level,
-            ];
-
-            # Format success message with affixes
-            $affix_names = [];
-            foreach ($affixes as $affix_key) {
-                $affix_names[] = $rift_stone_affix_definitions[$affix_key]['name'];
-            }
-
-            $alert_success = 'Crafted ' . htmlspecialchars($rift_stone_name) . ' with affixes: ' .
-                htmlspecialchars(implode(', ', $affix_names));
-
-            # Save the crafted rift stone
-            $rift_stone = new RiftStone();
-            $new_rift_stone_id = $rift_stone->CreateRiftStone($rift_stone_details);
         }
     }

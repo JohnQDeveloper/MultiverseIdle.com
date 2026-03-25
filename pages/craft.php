@@ -125,7 +125,7 @@
 
             <p>
                 <b>Potential:</b> <?php echo $party_level; ?> (100% of Party Level <?php echo $party_level; ?>)<br />
-                <small>Each affix level consumes 1-5 potential and 100 Iron. Upgrades alternate between affixes until potential is exhausted.</small>
+                <small>Each affix level consumes 1-5 potential and 2,500 Iron. Upgrades alternate between affixes until potential is exhausted.</small>
             </p>
 
             <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
@@ -170,7 +170,7 @@
 
             <p>
                 <b>Potion Level:</b> <?php echo $party_level; ?> (Equal to Party Level <?php echo $party_level; ?>)<br />
-                <small>Crafting cost: <?php echo ($party_level * 100); ?> Herbs. Potion level is fixed at your current party level.</small>
+                <small>Crafting cost: <?php echo number_format($party_level * 1500); ?> Herbs. Potion level is fixed at your current party level.</small>
             </p>
 
             <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
@@ -232,7 +232,7 @@
             </div>
             <br />
             <div>
-                <b>Crafting Cost:</b> <?php echo ($daily_highest_floor * 50); ?> Gems
+                <b>Crafting Cost:</b> <?php echo number_format($daily_highest_floor * 15); ?> Gems
             </div>
             <br />
             <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
