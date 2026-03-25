@@ -5,6 +5,14 @@ declare(strict_types=1);
 $alert_success = '';
 $alert_danger = '';
 
+// Referral data (registered users only)
+$referral_code  = '';
+$referral_count = 0;
+if (!$Character->IsGuest() && isset($_SESSION['auth_user_id']) && $_SESSION['auth_user_id'] > 0) {
+    $referral_code  = get_or_create_referral_code((int)$_SESSION['auth_user_id']);
+    $referral_count = count_referrals((int)$_SESSION['auth_user_id']);
+}
+
 // Handle email change
 if (isset($_POST['change_email']) && isset($_POST['email'], $_POST['email_password'])) {
     $new_email = trim($_POST['email']);

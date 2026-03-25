@@ -33,6 +33,11 @@ if(isset($_POST['email'], $_POST['password'], $_POST['username'])) {
             $Character->MigrateGuestToUser($userId, $_POST['username']);
         }
 
+        // Process referral code if provided
+        if (!empty($_POST['referral_code'])) {
+            process_referral($userId, $_POST['username'], $_POST['referral_code']);
+        }
+
         echo 'Please check your e-mail to complete the registration and click here to <a href="/">login</a>.';
     }
     catch (\Delight\Auth\InvalidEmailException $e) {

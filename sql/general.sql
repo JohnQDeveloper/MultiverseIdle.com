@@ -174,3 +174,21 @@ CREATE TABLE `wire_log` (
   KEY `recipient` (`recipient_user_id`),
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Referral Codes Table
+CREATE TABLE `referral_codes` (
+    `user_id` INT UNSIGNED NOT NULL,
+    `code` VARCHAR(16) NOT NULL,
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`user_id`),
+    UNIQUE KEY `code` (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `referral_uses` (
+    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `referrer_user_id` INT UNSIGNED NOT NULL,
+    `referred_user_id` INT UNSIGNED NOT NULL,
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `referred_user_id` (`referred_user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

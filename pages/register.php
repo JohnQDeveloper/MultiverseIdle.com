@@ -16,6 +16,11 @@
                     <input type="password" id="password" name="password" minlength="8" required>
                     <small>Password must be at least 8 characters long</small>
 
+                    <label for="referral_code">Referral Code (optional):</label>
+                    <input type="text" id="referral_code" name="referral_code" maxlength="8"
+                           value="<?php echo htmlspecialchars(strtoupper($_GET['ref'] ?? '')); ?>"
+                           placeholder="e.g. ABCD1234" style="text-transform:uppercase;" />
+
                     <button type="submit">Register</button>
                 </form>
             </article>
