@@ -149,6 +149,37 @@ if (isset($_POST['disband_guild'])) {
     }
 }
 
+// Donate to Guild Bank
+if (isset($_POST['donate_to_bank'])) {
+    $commodity = strtolower(trim($_POST['commodity'] ?? ''));
+    $amount    = (int)($_POST['amount'] ?? 0);
+
+    $validCommodities = ['gold', 'iron', 'herbs', 'gems'];
+    if (!in_array($commodity, $validCommodities, true)) {
+        $alert_danger = 'Invalid resource.';
+    } elseif ($amount <= 0) {
+        $alert_danger = 'Amount must be greater than 0.';
+    } elseif ((int)($Character->Data[$commodity] ?? 0) < $amount) {
+        $alert_danger = 'You don\'t have enough ' . ucfirst($commodity) . '.';
+    } else {
+        $guild_id_for_donate = $Guild->GetUserGuildId($current_user_id);
+        if ($guild_id_for_donate === null) {
+            $alert_danger = 'You are not in a guild.';
+        } else {
+            // Deduct from in-memory character data; index.php dirty-check saves it at end of request
+            $Character->Data[$commodity] -= $amount;
+
+            $DAL->w(
+                "INSERT INTO guild_bank (guild_id, `{$commodity}`)
+                 VALUES (:guild_id, :amount)
+                 ON DUPLICATE KEY UPDATE `{$commodity}` = `{$commodity}` + :amount2",
+                [':guild_id' => $guild_id_for_donate, ':amount' => $amount, ':amount2' => $amount]
+            );
+            $alert_success = 'Donated ' . number_format($amount) . ' ' . $commodity . ' to the guild bank.';
+        }
+    }
+}
+
 // Set Tax Rate
 if (isset($_POST['set_tax_rate'])) {
     $tax_rate = (int)($_POST['tax_rate'] ?? 0);

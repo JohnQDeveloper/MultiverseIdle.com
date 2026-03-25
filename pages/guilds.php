@@ -170,6 +170,20 @@
                         <button type="submit" name="set_tax_rate" class="button button--small button--primary">Save</button>
                     </form>
                 <?php endif; ?>
+
+                <hr style="border-color: #333; margin: 15px 0;">
+                <p style="margin: 0 0 8px;"><b>Donate to Bank</b></p>
+                <form method="post" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
+                    <select name="commodity" style="padding: 6px;">
+                        <option value="gold">Gold</option>
+                        <option value="iron">Iron</option>
+                        <option value="herbs">Herbs</option>
+                        <option value="gems">Gems</option>
+                    </select>
+                    <input type="number" name="amount" min="1" placeholder="Amount" style="width: 120px; padding: 6px;">
+                    <button type="submit" name="donate_to_bank" class="button button--small button--primary">Donate</button>
+                </form>
             </div>
 
             <!-- Invite Members Section (Guild Master or Officer) -->
