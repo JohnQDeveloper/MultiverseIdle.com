@@ -133,6 +133,10 @@ CREATE TABLE `market_orders` (
   KEY `resource_status` (`resource`, `status`, `price_per_unit`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+ALTER TABLE market_orders ADD COLUMN season_id INT UNSIGNED NULL DEFAULT NULL;
+ALTER TABLE market_orders ADD INDEX idx_season_resource_status (season_id, resource, status);
+
+
 -- Season Changes
 CREATE TABLE seasons (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -192,3 +196,15 @@ CREATE TABLE `referral_uses` (
     PRIMARY KEY (`id`),
     UNIQUE KEY `referred_user_id` (`referred_user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Guild Bank Setup
+ALTER TABLE guilds ADD COLUMN tax_rate TINYINT UNSIGNED NOT NULL DEFAULT 0;
+
+CREATE TABLE guild_bank (
+  guild_id INT UNSIGNED NOT NULL,
+  gold BIGINT UNSIGNED NOT NULL DEFAULT 0,
+  iron BIGINT UNSIGNED NOT NULL DEFAULT 0,
+  herbs BIGINT UNSIGNED NOT NULL DEFAULT 0,
+  gems BIGINT UNSIGNED NOT NULL DEFAULT 0,
+  PRIMARY KEY (guild_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

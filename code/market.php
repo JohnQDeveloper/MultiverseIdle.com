@@ -138,13 +138,18 @@ if (isset($_POST['fill_order'])) {
                         if ($filled_total >= $actual_fill) {
                             break;
                         }
+                        $order_season = isset($order['season_id']) ? (int)$order['season_id'] : null;
+                        if ($order_season !== $market_season_id) {
+                            continue;
+                        }
                         $take = min($actual_fill - $filled_total, (int)$order['amount_remaining']);
                         $DAL->w(
                             "UPDATE market_orders
                              SET amount_remaining = amount_remaining - :amt1,
                                  status = IF(amount_remaining - :amt2 <= 0, 'filled', 'open')
-                             WHERE id = :id AND status = 'open' AND amount_remaining >= :amt3",
-                            ['amt1' => $take, 'amt2' => $take, 'amt3' => $take, 'id' => (int)$order['id']]
+                             WHERE id = :id AND status = 'open' AND amount_remaining >= :amt3
+                               AND season_id <=> :season_id",
+                            ['amt1' => $take, 'amt2' => $take, 'amt3' => $take, 'id' => (int)$order['id'], 'season_id' => $market_season_id]
                         );
                         if ($DAL->rows_affected() > 0) {
                             $filled_total += $take;
@@ -183,13 +188,18 @@ if (isset($_POST['fill_order'])) {
                         if ($filled_total >= $actual_fill) {
                             break;
                         }
+                        $order_season = isset($order['season_id']) ? (int)$order['season_id'] : null;
+                        if ($order_season !== $market_season_id) {
+                            continue;
+                        }
                         $take = min($actual_fill - $filled_total, (int)$order['amount_remaining']);
                         $DAL->w(
                             "UPDATE market_orders
                              SET amount_remaining = amount_remaining - :amt1,
                                  status = IF(amount_remaining - :amt2 <= 0, 'filled', 'open')
-                             WHERE id = :id AND status = 'open' AND amount_remaining >= :amt3",
-                            ['amt1' => $take, 'amt2' => $take, 'amt3' => $take, 'id' => (int)$order['id']]
+                             WHERE id = :id AND status = 'open' AND amount_remaining >= :amt3
+                               AND season_id <=> :season_id",
+                            ['amt1' => $take, 'amt2' => $take, 'amt3' => $take, 'id' => (int)$order['id'], 'season_id' => $market_season_id]
                         );
                         if ($DAL->rows_affected() > 0) {
                             $filled_total += $take;
@@ -334,18 +344,21 @@ if (isset($_POST['buy_item'])) {
         if (!$item_row) {
             $alert_danger = 'Item not available or price has changed. Please refresh.';
         } else {
-            $item       = $item_row[0];
-            $price      = (int)$item['market_price'];
-            $seller_uid = (int)$item['owner_id'];
+            $item        = $item_row[0];
+            $price       = (int)$item['market_price'];
+            $seller_uid  = (int)$item['owner_id'];
+            $item_season = isset($item['season_id']) ? (int)$item['season_id'] : null;
 
-            if ((int)$Character->Data['gold'] < $price) {
+            if ($item_season !== $market_season_id) {
+                $alert_danger = 'This item is not available in your current league.';
+            } elseif ((int)$Character->Data['gold'] < $price) {
                 $alert_danger = 'Not enough Gold. Need ' . human_num($price) . '.';
             } else {
-                // Atomic ownership transfer — reset favorite on gear
+                // Atomic ownership transfer — reset favorite on gear, enforce season on write
                 $extra = ($item_type === 'gear') ? ', favorite = 0' : '';
                 $DAL->w(
-                    "UPDATE {$table} SET owner_id = :buyer, market_price = 0{$extra} WHERE id = :id AND owner_id = :seller AND market_price = :price",
-                    ['buyer' => $user_id, 'id' => $item_id, 'seller' => $seller_uid, 'price' => $price]
+                    "UPDATE {$table} SET owner_id = :buyer, market_price = 0{$extra} WHERE id = :id AND owner_id = :seller AND market_price = :price AND season_id <=> :season_id",
+                    ['buyer' => $user_id, 'id' => $item_id, 'seller' => $seller_uid, 'price' => $price, 'season_id' => $market_season_id]
                 );
                 if ($DAL->rows_affected() === 0) {
                     $alert_danger = 'Item no longer available. Refresh and try again.';
