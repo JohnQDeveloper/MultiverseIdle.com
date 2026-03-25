@@ -30,7 +30,13 @@
               <?php if (!isset($_SESSION['guest_mode']) || $_SESSION['guest_mode'] !== true): ?>
               <li><a href="/market">Market</a></li>
               <?php endif; ?>
-              <li><a href="/guilds">Guilds</a></li>
+              <li class="dropdown">
+                <a href="/guilds">Guilds</a>
+                <ul class="dropdown-content">
+                  <li><a href="/guilds">Guild</a></li>
+                  <li><a href="/guild-bank">Guild Bank</a></li>
+                </ul>
+              </li>
               <?php if (!isset($_SESSION['guest_mode']) || $_SESSION['guest_mode'] !== true): ?>
               <li><a href="/store">Store</a></li>
               <?php endif; ?>

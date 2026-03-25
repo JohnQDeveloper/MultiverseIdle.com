@@ -146,46 +146,6 @@
                 <?php endforeach; ?>
             </div>
 
-            <!-- Guild Bank Section -->
-            <h2>Guild Bank</h2>
-            <div class="card">
-                <p style="margin-top: 0;"><b>Current Tax Rate:</b> <?php echo $guild_tax_rate; ?>%
-                    <small style="color: #999;"> — flat % taken from each member's arena and worker income</small>
-                </p>
-                <div class="grid" style="grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 10px;">
-                    <?php foreach (['gold' => 'Gold', 'iron' => 'Iron', 'herbs' => 'Herbs', 'gems' => 'Gems'] as $key => $label): ?>
-                        <div style="text-align: center; padding: 10px; border: 1px solid #444;">
-                            <div style="font-size: 0.85em; color: #999;"><?php echo $label; ?></div>
-                            <div style="font-size: 1.2em; font-weight: bold;"><?php echo number_format($guild_bank[$key]); ?></div>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-
-                <?php if ($user_role === 'guild_master' || $user_role === 'officer'): ?>
-                    <form method="post" style="margin-top: 15px; display: flex; align-items: center; gap: 10px;">
-                        <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
-                        <label for="tax_rate"><b>Set Tax Rate:</b></label>
-                        <input type="number" id="tax_rate" name="tax_rate" min="0" max="20" value="<?php echo $guild_tax_rate; ?>" style="width: 70px; padding: 6px; text-align: center;">
-                        <span style="color: #999;">% (0–20)</span>
-                        <button type="submit" name="set_tax_rate" class="button button--small button--primary">Save</button>
-                    </form>
-                <?php endif; ?>
-
-                <hr style="border-color: #333; margin: 15px 0;">
-                <p style="margin: 0 0 8px;"><b>Donate to Bank</b></p>
-                <form method="post" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                    <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
-                    <select name="commodity" style="padding: 6px;">
-                        <option value="gold">Gold</option>
-                        <option value="iron">Iron</option>
-                        <option value="herbs">Herbs</option>
-                        <option value="gems">Gems</option>
-                    </select>
-                    <input type="number" name="amount" min="1" placeholder="Amount" style="width: 120px; padding: 6px;">
-                    <button type="submit" name="donate_to_bank" class="button button--small button--primary">Donate</button>
-                </form>
-            </div>
-
             <!-- Invite Members Section (Guild Master or Officer) -->
             <?php if ($user_role === 'guild_master' || $user_role === 'officer'): ?>
                 <h2>Invite Members</h2>
