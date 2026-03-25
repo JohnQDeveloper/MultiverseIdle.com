@@ -59,6 +59,7 @@ if ($_chatIsLoggedIn) {
     $_ChatObj    = new Chat();
     $_chatIsMod  = $_ChatObj->isModerator($_chatUserId);
     $_GuildObj   = new Guild();
+    $_GuildObj->setSeasonId(isset($_SESSION['active_season_id']) ? (int)$_SESSION['active_season_id'] : null);
     $_guildIdInt = $_GuildObj->GetUserGuildId($_chatUserId);
     $_chatGuildId = $_guildIdInt !== null ? (string)$_guildIdInt : '';
 }

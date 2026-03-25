@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 $Guild = new Guild();
+$Guild->setSeasonId(isset($_SESSION['active_season_id']) ? (int)$_SESSION['active_season_id'] : null);
 $current_user_id = (int)$_SESSION['auth_user_id'];
 
 // Create Guild

@@ -89,6 +89,9 @@ CREATE TABLE `guilds` (
   UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+ALTER TABLE guilds ADD COLUMN season_id INT NULL DEFAULT NULL;
+
+
 -- Guild members table
 CREATE TABLE `guild_members` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,

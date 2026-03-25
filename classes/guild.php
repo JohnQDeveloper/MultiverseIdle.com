@@ -8,6 +8,7 @@ class Guild
     private const INVITE_EXPIRY_HOURS = 72; // 3 days
 
     private object $DAL;
+    private ?int $seasonId = null;
 
     /**
      * @var array<string, mixed> Guild data
@@ -18,6 +19,11 @@ class Guild
     {
         global $DAL;
         $this->DAL = $DAL;
+    }
+
+    public function setSeasonId(?int $season_id): void
+    {
+        $this->seasonId = $season_id;
     }
 
     /**
@@ -54,12 +60,13 @@ class Guild
         }
 
         // Create the guild
-        $query = "INSERT INTO guilds (name, description, guild_master_user_id)
-                  VALUES (:name, :description, :guild_master_user_id)";
+        $query = "INSERT INTO guilds (name, description, guild_master_user_id, season_id)
+                  VALUES (:name, :description, :guild_master_user_id, :season_id)";
         $params = [
-            ':name' => $name,
-            ':description' => $description,
-            ':guild_master_user_id' => $user_id
+            ':name'               => $name,
+            ':description'        => $description,
+            ':guild_master_user_id' => $user_id,
+            ':season_id'          => $this->seasonId,
         ];
 
         if (!$this->DAL->w($query, $params)) {
@@ -90,8 +97,10 @@ class Guild
             return null;
         }
 
-        $query = "SELECT guild_id FROM guild_members WHERE user_id = :user_id";
-        $result = $this->DAL->r($query, [':user_id' => $user_id]);
+        $query = "SELECT gm.guild_id FROM guild_members gm
+                  JOIN guilds g ON g.id = gm.guild_id
+                  WHERE gm.user_id = :user_id AND g.season_id <=> :season_id";
+        $result = $this->DAL->r($query, [':user_id' => $user_id, ':season_id' => $this->seasonId]);
 
         if (!$result || empty($result)) {
             return null;
@@ -111,8 +120,10 @@ class Guild
             return null;
         }
 
-        $query = "SELECT role FROM guild_members WHERE user_id = :user_id";
-        $result = $this->DAL->r($query, [':user_id' => $user_id]);
+        $query = "SELECT gm.role FROM guild_members gm
+                  JOIN guilds g ON g.id = gm.guild_id
+                  WHERE gm.user_id = :user_id AND g.season_id <=> :season_id";
+        $result = $this->DAL->r($query, [':user_id' => $user_id, ':season_id' => $this->seasonId]);
 
         if (!$result || empty($result)) {
             return null;
@@ -161,7 +172,7 @@ class Guild
     {
         $query = "SELECT gm.user_id, gm.role, gm.joined_at, c.name as character_name, c.level
                   FROM guild_members gm
-                  LEFT JOIN characters c ON c.user_id = gm.user_id
+                  LEFT JOIN characters c ON c.user_id = gm.user_id AND c.season_id <=> :season_id
                   WHERE gm.guild_id = :guild_id
                   ORDER BY
                     CASE gm.role
@@ -171,7 +182,7 @@ class Guild
                     END,
                     gm.joined_at ASC";
 
-        $result = $this->DAL->r($query, [':guild_id' => $guild_id]);
+        $result = $this->DAL->r($query, [':guild_id' => $guild_id, ':season_id' => $this->seasonId]);
 
         return $result ?: [];
     }
@@ -280,13 +291,17 @@ class Guild
                          g.name as guild_name, g.description,
                          c.name as inviter_name
                   FROM guild_invites gi
-                  JOIN guilds g ON g.id = gi.guild_id
-                  LEFT JOIN characters c ON c.user_id = gi.inviter_user_id
+                  JOIN guilds g ON g.id = gi.guild_id AND g.season_id <=> :season_id
+                  LEFT JOIN characters c ON c.user_id = gi.inviter_user_id AND c.season_id <=> :season_id2
                   WHERE gi.invitee_user_id = :user_id
                   AND gi.expires_at > NOW()
                   ORDER BY gi.created_at DESC";
 
-        $result = $this->DAL->r($query, [':user_id' => $user_id]);
+        $result = $this->DAL->r($query, [
+            ':user_id'   => $user_id,
+            ':season_id' => $this->seasonId,
+            ':season_id2' => $this->seasonId,
+        ]);
 
         return $result ?: [];
     }
@@ -639,11 +654,17 @@ class Guild
         $query = "SELECT c.user_id, c.name as character_name, c.level
                   FROM characters c
                   LEFT JOIN guild_members gm ON gm.user_id = c.user_id
+                  LEFT JOIN guilds g ON g.id = gm.guild_id AND g.season_id <=> :season_id
                   WHERE c.name LIKE :search_term
-                  AND gm.guild_id IS NULL
+                  AND c.season_id <=> :season_id2
+                  AND g.id IS NULL
                   LIMIT 20";
 
-        $result = $this->DAL->r($query, [':search_term' => '%' . $search_term . '%']);
+        $result = $this->DAL->r($query, [
+            ':search_term' => '%' . $search_term . '%',
+            ':season_id'   => $this->seasonId,
+            ':season_id2'  => $this->seasonId,
+        ]);
 
         return $result ?: [];
     }
