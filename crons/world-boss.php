@@ -100,8 +100,12 @@ if ($total_world_boss_damage > 0) {
         $RewardCharacter = new Character();
         $RewardCharacter->LoadById($participant['character_id']);
 
-        // Award gold
+        // Award gold (minus guild tax)
         $RewardCharacter->Data['gold'] += $gold_reward;
+        $gold_tax = collectGuildTax($participant['user_id'], $RewardCharacter->Data['season_id'] ?? null, 'gold', $gold_reward);
+        if ($gold_tax > 0) {
+            $RewardCharacter->Data['gold'] -= $gold_tax;
+        }
 
         // Load potion bonuses
         $Potion = new Potion();
@@ -121,8 +125,11 @@ if ($total_world_boss_damage > 0) {
             $RewardCharacter->Data['world_boss_log'] = '';
         }
 
+        $net_gold = $gold_reward - ($gold_tax ?? 0);
         $RewardCharacter->Data['world_boss_log'] .= date('Y-m-d H:i:s') . " - Rank #$rank: Dealt " . number_format($participant['damage']) .
-            " damage (" . $participant['damage_percent'] . "%), awarded " . number_format($gold_reward) . " gold and " . number_format($xp_reward) . " XP.\n";
+            " damage (" . $participant['damage_percent'] . "%), awarded " . number_format($net_gold) . " gold" .
+            (($gold_tax ?? 0) > 0 ? " (-" . number_format($gold_tax) . " guild tax)" : "") .
+            " and " . number_format($xp_reward) . " XP.\n";
 
         echo "  Awarded $gold_reward gold and $xp_reward XP to Character " . $participant['character_id'] . "\n";
 

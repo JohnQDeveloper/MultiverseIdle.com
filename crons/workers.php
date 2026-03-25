@@ -94,8 +94,13 @@
 
             print_r($Character->Data['worker_json']);
 
-            # Add Resource
+            # Add Resource (minus guild tax)
             $Character->Data[$resource] += $harvests;
+            $worker_tax = collectGuildTax($r['user_id'], $Character->Data['season_id'] ?? null, $resource, (int)$harvests);
+            if ($worker_tax > 0) {
+                $Character->Data[$resource] -= $worker_tax;
+                echo "Guild tax: $worker_tax $resource sent to guild bank\n";
+            }
             $Character->SaveByUserId($r['user_id']);
         }
     }

@@ -130,10 +130,14 @@
                 $gold_award = round($base_gold * $gold_multiplier);
 
                 $Character->Data['gold'] += $gold_award;
+                $gold_tax = collectGuildTax($r['user_id'], $Character->Data['season_id'] ?? null, 'gold', $gold_award);
+                if ($gold_tax > 0) {
+                    $Character->Data['gold'] -= $gold_tax;
+                }
                 if ($arena_resource_bonus > 0) {
-                    $ArenaLog = "<span class='success'>You gained $gold_award gold (base: $base_gold, +".$arena_resource_bonus."% potion bonus: +".($gold_award - $base_gold).")!</span><BR />\n$ArenaLog";
+                    $ArenaLog = "<span class='success'>You gained " . ($gold_award - $gold_tax) . " gold (base: $base_gold, +".$arena_resource_bonus."% potion bonus: +".($gold_award - $base_gold).($gold_tax > 0 ? ", -$gold_tax guild tax" : "").")!</span><BR />\n$ArenaLog";
                 } else {
-                    $ArenaLog = "<span class='success'>You gained $gold_award gold!</span><BR />\n$ArenaLog";
+                    $ArenaLog = "<span class='success'>You gained " . ($gold_award - $gold_tax) . " gold" . ($gold_tax > 0 ? " (-$gold_tax guild tax)" : "") . "!</span><BR />\n$ArenaLog";
                 }
 
                 // Award bonus resource equal to arena floor (with potion bonus)
@@ -143,10 +147,14 @@
                 $resource_award = round($base_resource * $gold_multiplier); // Same multiplier as gold
 
                 $Character->Data[$bonus_resource] += $resource_award;
+                $resource_tax = collectGuildTax($r['user_id'], $Character->Data['season_id'] ?? null, $bonus_resource, (int)$resource_award);
+                if ($resource_tax > 0) {
+                    $Character->Data[$bonus_resource] -= $resource_tax;
+                }
                 if ($arena_resource_bonus > 0) {
-                    $ArenaLog = "<span class='success'>You gained $resource_award $bonus_resource (base: $base_resource, +".$arena_resource_bonus."% potion bonus: +".($resource_award - $base_resource).")!</span><BR />\n$ArenaLog";
+                    $ArenaLog = "<span class='success'>You gained " . ((int)$resource_award - $resource_tax) . " $bonus_resource (base: $base_resource, +".$arena_resource_bonus."% potion bonus: +".((int)$resource_award - $base_resource).($resource_tax > 0 ? ", -$resource_tax guild tax" : "").")!</span><BR />\n$ArenaLog";
                 } else {
-                    $ArenaLog = "<span class='success'>You gained $resource_award $bonus_resource!</span><BR />\n$ArenaLog";
+                    $ArenaLog = "<span class='success'>You gained " . ((int)$resource_award - $resource_tax) . " $bonus_resource" . ($resource_tax > 0 ? " (-$resource_tax guild tax)" : "") . "!</span><BR />\n$ArenaLog";
                 }
 
                 // Award XP equal to arena floor * 10 (with potion bonus)

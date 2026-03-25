@@ -149,17 +149,34 @@ if (isset($_POST['disband_guild'])) {
     }
 }
 
+// Set Tax Rate
+if (isset($_POST['set_tax_rate'])) {
+    $tax_rate = (int)($_POST['tax_rate'] ?? 0);
+
+    if (!in_array($Guild->GetUserRole($current_user_id), ['guild_master', 'officer'], true)) {
+        $alert_danger = 'Only guild masters and officers can set the tax rate.';
+    } elseif ($Guild->SetTaxRate($tax_rate, $current_user_id)) {
+        $alert_success = 'Tax rate updated to ' . max(0, min(20, $tax_rate)) . '%.';
+    } else {
+        $alert_danger = 'Failed to update tax rate.';
+    }
+}
+
 // Load guild data for display
 $user_guild_id = $Guild->GetUserGuildId($current_user_id);
 $user_role = $Guild->GetUserRole($current_user_id);
 $guild_members = [];
 $guild_data = [];
+$guild_bank = ['gold' => 0, 'iron' => 0, 'herbs' => 0, 'gems' => 0];
+$guild_tax_rate = 0;
 $pending_invites = $Guild->GetUserInvites($current_user_id);
 
 if ($user_guild_id !== null) {
     $Guild->LoadGuildById($user_guild_id);
     $guild_data = $Guild->Data;
     $guild_members = $Guild->GetGuildMembers($user_guild_id);
+    $guild_bank = $Guild->GetBankBalances($user_guild_id);
+    $guild_tax_rate = $Guild->GetTaxRate($user_guild_id);
 }
 
 // Search for users to invite

@@ -51,6 +51,7 @@
     require_once(__DIR__ . '/func/common_functions.php');
     require_once(__DIR__ . '/func/guest_processing.php');
     require_once(__DIR__ . '/func/referral_functions.php');
+    require_once(__DIR__ . '/func/guild_tax.php');
 
     # Require data files
     require_once(__DIR__ . '/data/resources.php');

@@ -75,6 +75,12 @@ class Guild
 
         $guild_id = (int)$this->DAL->last_insert_id();
 
+        // Initialise the guild bank row
+        $this->DAL->w(
+            "INSERT INTO guild_bank (guild_id) VALUES (:guild_id)",
+            [':guild_id' => $guild_id]
+        );
+
         // Add creator as guild master
         $member_query = "INSERT INTO guild_members (guild_id, user_id, role)
                         VALUES (:guild_id, :user_id, 'guild_master')";
@@ -637,6 +643,76 @@ class Guild
         $delete_guild = "DELETE FROM guilds WHERE id = :guild_id";
 
         return $this->DAL->w($delete_guild, [':guild_id' => $guild_id]);
+    }
+
+    /**
+     * Get guild bank balances
+     *
+     * @return array<string, int>
+     */
+    public function GetBankBalances(int $guild_id): array
+    {
+        $result = $this->DAL->r(
+            "SELECT gold, iron, herbs, gems FROM guild_bank WHERE guild_id = :guild_id",
+            [':guild_id' => $guild_id]
+        );
+
+        if (!$result || empty($result)) {
+            return ['gold' => 0, 'iron' => 0, 'herbs' => 0, 'gems' => 0];
+        }
+
+        return [
+            'gold'  => (int)$result[0]['gold'],
+            'iron'  => (int)$result[0]['iron'],
+            'herbs' => (int)$result[0]['herbs'],
+            'gems'  => (int)$result[0]['gems'],
+        ];
+    }
+
+    /**
+     * Get the current tax rate for a guild (0–20)
+     */
+    public function GetTaxRate(int $guild_id): int
+    {
+        $result = $this->DAL->r(
+            "SELECT tax_rate FROM guilds WHERE id = :guild_id",
+            [':guild_id' => $guild_id]
+        );
+
+        if (!$result || empty($result)) {
+            return 0;
+        }
+
+        return (int)$result[0]['tax_rate'];
+    }
+
+    /**
+     * Set the tax rate for the caller's guild (guild master or officer only, 0–20 %)
+     */
+    public function SetTaxRate(int $rate, int $user_id = 0): bool
+    {
+        $user_id = $this->getUserId($user_id);
+
+        if ($user_id <= 0) {
+            return false;
+        }
+
+        $role = $this->GetUserRole($user_id);
+        if (!in_array($role, ['guild_master', 'officer'], true)) {
+            return false;
+        }
+
+        $guild_id = $this->GetUserGuildId($user_id);
+        if ($guild_id === null) {
+            return false;
+        }
+
+        $rate = max(0, min(20, $rate));
+
+        return $this->DAL->w(
+            "UPDATE guilds SET tax_rate = :rate WHERE id = :guild_id",
+            [':rate' => $rate, ':guild_id' => $guild_id]
+        );
     }
 
     /**
