@@ -43,13 +43,21 @@
               <li><a href="/store"><?php echo t('nav.store'); ?></a></li>
               <?php endif; ?>
               <li><a href="/pvp"><?php echo t('nav.pvp'); ?></a></li>
-              <li><a href="/leaderboard"><?php echo t('nav.leaderboard'); ?></a></li>
-              <!--<li><a href="/season-select"><?php echo (isset($_SESSION['active_season_id'])) ? 'Season' : 'Perpetual'; ?></a></li>-->
+
+              <li class="dropdown">
+                <a href="#">Misc</a>
+                <ul class="dropdown-content">
+                    <li><a href="/leaderboard"><?php echo t('nav.leaderboard'); ?></a></li>
+                    <li><a href="/season-select">League Swap</a></li>
+                    <li><a href="/log"><?php echo t('nav.log'); ?></a></li>
+                </ul>
+            </li>
+
+
               <li><a href="/logout"><?php echo t('nav.logout'); ?></a></li>
               <li> ::: </li>
               <li><a href="https://discord.gg/KrD7hGuDyb"><?php echo t('nav.discord'); ?></a></li>
               <li><a href="https://github.com/JohnQDeveloper/MultiverseIdle.com/issues"><?php echo t('nav.feedback'); ?></a></li>
-              <li><a href="/log"><?php echo t('nav.log'); ?></a></li>
               <li><a href="/settings"><?php echo t('nav.settings'); ?></a></li>
             </ul>
           </nav>
