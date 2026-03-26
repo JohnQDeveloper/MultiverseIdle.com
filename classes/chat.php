@@ -78,7 +78,7 @@ class Chat
      *
      * @return array<int, array<string, mixed>>
      */
-    public function getMessages(string $channel, int $sinceId = 0, int $limit = 50): array
+    public function getMessages(string $channel, int $sinceId = 0, int $limit = 50, int $viewerUserId = 0): array
     {
         if (!$this->isValidChannel($channel)) {
             return [];
@@ -92,10 +92,24 @@ class Chat
             return [];
         }
 
-        return array_values(array_filter(array_map(
+        $messages = array_values(array_filter(array_map(
             fn(string $json) => json_decode($json, true),
             $raw
         )));
+
+        if ($viewerUserId <= 0) {
+            return $messages;
+        }
+
+        $ignoredUserIds = $this->getIgnoredUserIds($viewerUserId);
+        if ($ignoredUserIds === []) {
+            return $messages;
+        }
+
+        return array_values(array_filter(
+            $messages,
+            static fn(array $message): bool => !in_array((int)($message['user_id'] ?? 0), $ignoredUserIds, true)
+        ));
     }
 
     // -------------------------------------------------------------------------
@@ -442,9 +456,14 @@ class Chat
             return [];
         }
 
+        $ignoredUserIds = $this->getIgnoredUserIds($userId);
         $result = [];
         foreach ($partners as $partnerId) {
             $pid  = (int)$partnerId;
+            if (in_array($pid, $ignoredUserIds, true)) {
+                continue;
+            }
+
             $ts   = (int)$this->redis->zScore("dm:conversations:{$userId}", $partnerId);
             $rows = $DAL->r('SELECT username FROM users WHERE id = :id LIMIT 1', [':id' => $pid]);
             $username = !empty($rows) ? $rows[0]['username'] : "User #{$pid}";
@@ -478,6 +497,135 @@ class Chat
         }
 
         return ['id' => (int)$rows[0]['id'], 'username' => $rows[0]['username']];
+    }
+
+    // -------------------------------------------------------------------------
+    // Ignore system
+    // -------------------------------------------------------------------------
+
+    public function ignoreUser(int $userId, int $ignoredUserId): bool
+    {
+        if ($userId <= 0 || $ignoredUserId <= 0 || $userId === $ignoredUserId) {
+            return false;
+        }
+
+        $result = $this->dal->w(
+            'INSERT INTO chat_ignores (user_id, ignored_user_id)
+             VALUES (:user_id, :ignored_user_id)
+             ON DUPLICATE KEY UPDATE created_at = created_at',
+            [
+                ':user_id' => $userId,
+                ':ignored_user_id' => $ignoredUserId,
+            ]
+        );
+
+        if (!$result) {
+            return false;
+        }
+
+        return $this->isIgnoringUser($userId, $ignoredUserId);
+    }
+
+    public function unignoreUser(int $userId, int $ignoredUserId): bool
+    {
+        if ($userId <= 0 || $ignoredUserId <= 0) {
+            return false;
+        }
+
+        $result = $this->dal->w(
+            'DELETE FROM chat_ignores
+             WHERE user_id = :user_id
+               AND ignored_user_id = :ignored_user_id',
+            [
+                ':user_id' => $userId,
+                ':ignored_user_id' => $ignoredUserId,
+            ]
+        );
+
+        if (!$result) {
+            return false;
+        }
+
+        return !$this->isIgnoringUser($userId, $ignoredUserId);
+    }
+
+    public function isIgnoringUser(int $userId, int $ignoredUserId): bool
+    {
+        if ($userId <= 0 || $ignoredUserId <= 0) {
+            return false;
+        }
+
+        $rows = $this->dal->r(
+            'SELECT ignored_user_id
+             FROM chat_ignores
+             WHERE user_id = :user_id
+               AND ignored_user_id = :ignored_user_id
+             LIMIT 1',
+            [
+                ':user_id' => $userId,
+                ':ignored_user_id' => $ignoredUserId,
+            ]
+        );
+
+        return !empty($rows);
+    }
+
+    /**
+     * @return int[]
+     */
+    public function getIgnoredUserIds(int $userId): array
+    {
+        if ($userId <= 0) {
+            return [];
+        }
+
+        $rows = $this->dal->r(
+            'SELECT ignored_user_id
+             FROM chat_ignores
+             WHERE user_id = :user_id
+             ORDER BY ignored_user_id ASC',
+            [':user_id' => $userId]
+        );
+
+        if (empty($rows)) {
+            return [];
+        }
+
+        return array_map(
+            static fn(array $row): int => (int)$row['ignored_user_id'],
+            $rows
+        );
+    }
+
+    /**
+     * @return array<int, array{id: int, username: string}>
+     */
+    public function getIgnoredUsers(int $userId): array
+    {
+        if ($userId <= 0) {
+            return [];
+        }
+
+        $rows = $this->dal->r(
+            'SELECT users.id, users.username
+             FROM chat_ignores
+             INNER JOIN users ON users.id = chat_ignores.ignored_user_id
+             WHERE chat_ignores.user_id = :user_id
+             ORDER BY users.username ASC',
+            [':user_id' => $userId]
+        );
+
+        if (empty($rows)) {
+            return [];
+        }
+
+        return array_map(
+            static fn(array $row): array => [
+                'id' => (int)$row['id'],
+                'username' => (string)$row['username'],
+            ],
+            $rows
+        );
     }
 
     // -------------------------------------------------------------------------

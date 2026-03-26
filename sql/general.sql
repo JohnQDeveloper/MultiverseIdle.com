@@ -278,3 +278,11 @@ CREATE TABLE `chat_mutes` (
   KEY `idx_chat_mutes_expires_at` (`expires_at`),
   KEY `idx_chat_mutes_muted_by` (`muted_by`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `chat_ignores` (
+  `user_id` int NOT NULL,
+  `ignored_user_id` int NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`user_id`, `ignored_user_id`),
+  KEY `idx_chat_ignores_ignored_user_id` (`ignored_user_id`)
+);

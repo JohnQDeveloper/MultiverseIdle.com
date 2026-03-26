@@ -8,6 +8,21 @@
 
     const SLASH_COMMANDS = [
         {
+            cmd:    '/ignore',
+            syntax: '/ignore <username>',
+            desc:   'Hide a player in chat and block DMs with them',
+        },
+        {
+            cmd:    '/unignore',
+            syntax: '/unignore <username>',
+            desc:   'Stop ignoring a player',
+        },
+        {
+            cmd:    '/ignored',
+            syntax: '/ignored',
+            desc:   'Show everyone you currently ignore',
+        },
+        {
             cmd:    '/wire',
             syntax: '/wire <username> <amount> <commodity>',
             desc:   'Wire resources to another player  (commodities: gold, iron, herbs, gems)',
@@ -552,6 +567,8 @@
                         if (lastId === 0 && placeholder) msgArea.innerHTML = '';
                         appendMessages([data.message]);
                         lastId = data.message.id;
+                    } else if (data.success && data.notice) {
+                        showNotice(data.notice);
                     } else if (!data.success) {
                         showError(data.error || 'Failed to send');
                     }
@@ -696,6 +713,15 @@
     function showError(msg) {
         const el = document.createElement('div');
         el.className = 'chat-error';
+        el.textContent = msg;
+        msgArea.appendChild(el);
+        msgArea.scrollTop = msgArea.scrollHeight;
+        setTimeout(function () { el.remove(); }, 10000);
+    }
+
+    function showNotice(msg) {
+        const el = document.createElement('div');
+        el.className = 'chat-empty';
         el.textContent = msg;
         msgArea.appendChild(el);
         msgArea.scrollTop = msgArea.scrollHeight;

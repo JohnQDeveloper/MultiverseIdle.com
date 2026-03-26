@@ -41,6 +41,95 @@ if (empty($message)) {
 
 $Chat = new Chat();
 
+if (str_starts_with($message, '/')) {
+    $parts = preg_split('/\s+/', $message);
+    $command = strtolower((string)($parts[0] ?? ''));
+    $targetUsername = trim((string)($parts[1] ?? ''));
+
+    if (in_array($command, ['/ignore', '/unignore'], true)) {
+        if ($targetUsername === '') {
+            echo json_encode([
+                'success' => false,
+                'error' => "Usage: {$command} <username>",
+            ]);
+            exit;
+        }
+
+        $targetUser = $Chat->findUserByUsername($targetUsername);
+        if ($targetUser === null) {
+            echo json_encode(['success' => false, 'error' => 'User not found']);
+            exit;
+        }
+
+        if ((int)$targetUser['id'] === $userId) {
+            echo json_encode(['success' => false, 'error' => 'You cannot ignore yourself']);
+            exit;
+        }
+
+        if ($command === '/ignore') {
+            if ($Chat->isIgnoringUser($userId, (int)$targetUser['id'])) {
+                echo json_encode([
+                    'success' => true,
+                    'notice' => "{$targetUser['username']} is already ignored.",
+                ]);
+                exit;
+            }
+
+            if (!$Chat->ignoreUser($userId, (int)$targetUser['id'])) {
+                echo json_encode(['success' => false, 'error' => 'Could not ignore that user']);
+                exit;
+            }
+
+            echo json_encode([
+                'success' => true,
+                'notice' => "You are now ignoring {$targetUser['username']}.",
+            ]);
+            exit;
+        }
+
+        if (!$Chat->isIgnoringUser($userId, (int)$targetUser['id'])) {
+            echo json_encode([
+                'success' => true,
+                'notice' => "{$targetUser['username']} was not ignored.",
+            ]);
+            exit;
+        }
+
+        if (!$Chat->unignoreUser($userId, (int)$targetUser['id'])) {
+            echo json_encode(['success' => false, 'error' => 'Could not unignore that user']);
+            exit;
+        }
+
+        echo json_encode([
+            'success' => true,
+            'notice' => "You are no longer ignoring {$targetUser['username']}.",
+        ]);
+        exit;
+    }
+
+    if ($command === '/ignored') {
+        $ignoredUsers = $Chat->getIgnoredUsers($userId);
+        if ($ignoredUsers === []) {
+            echo json_encode([
+                'success' => true,
+                'notice' => 'You are not ignoring anyone.',
+            ]);
+            exit;
+        }
+
+        $names = array_map(
+            static fn(array $ignoredUser): string => (string)$ignoredUser['username'],
+            $ignoredUsers
+        );
+
+        echo json_encode([
+            'success' => true,
+            'notice' => 'Ignored users: ' . implode(', ', $names),
+        ]);
+        exit;
+    }
+}
+
 if (!$Chat->isValidChannel($channel)) {
     http_response_code(400);
     echo json_encode(['success' => false, 'error' => 'Invalid channel']);
@@ -65,6 +154,16 @@ if ($Chat->isDMChannel($channel)) {
 
     preg_match('/^dm:(\d+):(\d+)$/', $channel, $m);
     $toUserId = ((int)$m[1] === $userId) ? (int)$m[2] : (int)$m[1];
+
+    if ($Chat->isIgnoringUser($userId, $toUserId)) {
+        echo json_encode(['success' => false, 'error' => 'Unignore this user before sending them a DM']);
+        exit;
+    }
+
+    if ($Chat->isIgnoringUser($toUserId, $userId)) {
+        echo json_encode(['success' => false, 'error' => 'That user is ignoring you']);
+        exit;
+    }
 
     $result = $Chat->sendDM($channel, $userId, $username, $toUserId, $message);
 

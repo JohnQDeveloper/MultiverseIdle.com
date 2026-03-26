@@ -46,7 +46,7 @@ if ($Chat->isDMChannel($channel)) {
     }
 }
 
-$messages = $Chat->getMessages($channel, $sinceId, $limit);
+$messages = $Chat->getMessages($channel, $sinceId, $limit, $userId);
 $lastId   = 0;
 if (!empty($messages)) {
     $lastId = (int)end($messages)['id'];
