@@ -19,7 +19,7 @@ https://resend.com/docs/send-with-php
 
 ### Non-Maintainer Issues
 - GOOD FIRST ISSUE: Good first issue for people to work on, generally for backlogged issues that are low priority
-- HELP WANTED: Good issue for people to work on, generally for backlogged issues that are low priority
+- HELP WANTED: Good issue for people to work on, generally for backlogged issues of medium priority.
 
 # Community Input Labels
 - QUESTION: Needs more information

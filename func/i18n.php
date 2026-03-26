@@ -12,6 +12,7 @@ function supported_languages(): array
         'en' => 'English',
         'es' => 'Español',
         'pt-br' => 'Português (Brasil)',
+        'zh-cn' => '简体中文',
     ];
 }
 
@@ -152,7 +153,68 @@ function localize_battle_log(string $log_html): string
         return localize_battle_log_brazilian_portuguese($log_html);
     }
 
+    if ($language === 'zh-cn') {
+        return localize_battle_log_simplified_chinese($log_html);
+    }
+
     return $log_html;
+}
+
+function localize_battle_log_simplified_chinese(string $log_html): string
+{
+    if ($log_html === '') {
+        return $log_html;
+    }
+
+    $out = $log_html;
+
+    $out = preg_replace_callback(
+        '/(Party|Monster) (frontline|backline) hits (frontline|backline) for ([0-9]+)(?:\\s+(fire|cold|physical))? damage\\./i',
+        static function (array $m): string {
+            $attackerSide = strtolower($m[1]) === 'party' ? '队伍' : '怪物';
+            $attackerPos = strtolower($m[2]) === 'frontline' ? '前排' : '后排';
+            $targetPos = strtolower($m[3]) === 'frontline' ? '前排' : '后排';
+            $damage = $m[4];
+            $type = '';
+
+            if (isset($m[5]) && $m[5] !== '') {
+                $damageType = match (strtolower($m[5])) {
+                    'fire' => '火焰',
+                    'cold' => '冰霜',
+                    default => '物理',
+                };
+                $type = '（' . $damageType . '）';
+            }
+
+            return $attackerSide . $attackerPos . '攻击' . $targetPos . '，造成 ' . $damage . ' 点' . $type . '伤害。';
+        },
+        $out
+    ) ?? $out;
+
+    $out = preg_replace_callback(
+        '/(Party|Monster) (frontline|backline) misses (frontline|backline)\\./i',
+        static function (array $m): string {
+            $attackerSide = strtolower($m[1]) === 'party' ? '队伍' : '怪物';
+            $attackerPos = strtolower($m[2]) === 'frontline' ? '前排' : '后排';
+            $targetPos = strtolower($m[3]) === 'frontline' ? '前排' : '后排';
+
+            return $attackerSide . $attackerPos . '攻击' . $targetPos . '，但未命中。';
+        },
+        $out
+    ) ?? $out;
+
+    $out = preg_replace('/casts Healing Rain, healing all allies for ([0-9]+)\\./i', '施放治疗之雨，为所有友军恢复 $1 点生命。', $out) ?? $out;
+    $out = preg_replace('/casts Greater Heal on ([a-z]+) for ([0-9]+)\\./i', '对 $1 施放强效治疗，恢复 $2 点生命。', $out) ?? $out;
+    $out = preg_replace('/casts Firestorm, scorching and hitting ([a-z]+) for ([0-9]+) fire damage\\./i', '施放火焰风暴，灼烧并命中 $1，造成 $2 点火焰伤害。', $out) ?? $out;
+    $out = preg_replace('/casts Blizzard, chilling and hitting ([a-z]+) for ([0-9]+) cold damage\\./i', '施放暴风雪，冰冻并命中 $1，造成 $2 点冰霜伤害。', $out) ?? $out;
+
+    $out = preg_replace('/Monster stats are ([0-9]+) STR,\\s*([0-9]+) DEX,\\s*([0-9]+) HP,\\s*([0-9]+) WIS\\./i', '怪物属性为：$1 力量，$2 敏捷，$3 生命，$4 智慧。', $out) ?? $out;
+    $out = preg_replace('/You won the arena battle on floor ([0-9]+)!/i', '你赢得了第 $1 层的竞技场战斗！', $out) ?? $out;
+    $out = preg_replace('/You lost the arena battle on floor ([0-9]+)\\./i', '你在第 $1 层的竞技场战斗中失败了。', $out) ?? $out;
+
+    $out = str_replace('<summary>Battle Log</summary>', '<summary>战斗记录</summary>', $out);
+
+    return $out;
 }
 
 function localize_battle_log_spanish(string $log_html): string
@@ -269,7 +331,39 @@ function localize_world_boss_log(string $log_text): string
         return localize_world_boss_log_brazilian_portuguese($log_text);
     }
 
+    if ($language === 'zh-cn') {
+        return localize_world_boss_log_simplified_chinese($log_text);
+    }
+
     return $log_text;
+}
+
+function localize_world_boss_log_simplified_chinese(string $log_text): string
+{
+    if ($log_text === '') {
+        return $log_text;
+    }
+
+    $out = $log_text;
+
+    $out = preg_replace_callback(
+        '/Rank\\s+#([0-9]+):\\s+Dealt\\s+([0-9,]+)\\s+damage\\s+\\(([0-9.]+)%\\),\\s+awarded\\s+([0-9,]+)\\s+gold(?:\\s+\\(-([0-9,]+)\\s+guild\\s+tax\\))?\\s+and\\s+([0-9,]+)\\s+XP\\./i',
+        static function (array $m): string {
+            $rank = $m[1];
+            $damage = $m[2];
+            $pct = $m[3];
+            $gold = $m[4];
+            $tax = $m[5] ?? '';
+            $xp = $m[6];
+
+            $taxPart = $tax !== '' ? '（- ' . $tax . ' 公会税）' : '';
+
+            return '排名 #' . $rank . '：造成 ' . $damage . ' 点伤害（' . $pct . '%），获得 ' . $gold . ' 金币' . $taxPart . ' 和 ' . $xp . ' 经验。';
+        },
+        $out
+    ) ?? $out;
+
+    return $out;
 }
 
 function localize_world_boss_log_spanish(string $log_text): string

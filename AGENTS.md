@@ -28,6 +28,8 @@ docker exec multiverse-idle-cron php /app/crons/arena.php   # individual cron
 - func/i18n.php is the core file for all print text
 - lang/en.php is the core file for English
 - lang/es.php is the core file for Spanish
+- lang/pt-br.php is the core file for Brazilian Portuguese
+- lang/zh-cn.php is the core file for Simplified Chinese
 
 ### Request Flow
 
