@@ -46,6 +46,7 @@ return [
     'res.iron'       => 'Iron',
     'res.herbs'      => 'Herbs',
     'res.gems'       => 'Gems',
+    'res.lucky_wyrdstone' => 'Lucky Wyrdstone',
     'res.credits'    => 'Credits',
     'res.qol_sub'    => 'QoL Sub',
     'res.active'     => 'Active',
@@ -554,7 +555,7 @@ return [
     // Market page
     // -------------------------------------------------------------------------
     'market.title'              => 'Market',
-    'market.desc'               => 'Trade Herbs, Iron, Gems, and Credits for Gold. Resources and Gold are held in escrow until an order is filled or cancelled.',
+    'market.desc'               => 'Trade Herbs, Iron, Gems, Lucky Wyrdstone, and Credits for Gold. Resources and Gold are held in escrow until an order is filled or cancelled.',
     'market.tab.orders'         => 'Resource Orders',
     'market.tab.items'          => 'Items',
     'market.tab.post_order'     => 'Post Order',
@@ -612,6 +613,7 @@ return [
     'market.post.herbs_have'    => 'Herbs &mdash; have: {amount}',
     'market.post.iron_have'     => 'Iron &mdash; have: {amount}',
     'market.post.gems_have'     => 'Gems &mdash; have: {amount}',
+    'market.post.lucky_wyrdstone_have' => 'Lucky Wyrdstone &mdash; have: {amount}',
     'market.post.credits_have'  => 'Credits &mdash; have: {amount}',
     'market.post.amount'        => 'Amount',
     'market.post.amount_ph'     => 'How much to trade',

@@ -10,8 +10,8 @@ $user_id          = (int)$_SESSION['auth_user_id'];
 $market_season_id = isset($Character->Data['season_id']) ? (int)$Character->Data['season_id'] : null;
 $is_season_character = $market_season_id !== null;
 $valid_resources  = $is_season_character
-    ? ['herbs', 'iron', 'gems']
-    : ['herbs', 'iron', 'gems', 'credits'];
+    ? ['herbs', 'iron', 'gems', 'lucky_wyrdstone']
+    : ['herbs', 'iron', 'gems', 'lucky_wyrdstone', 'credits'];
 $valid_item_types = ['gear', 'rift_stone', 'potion'];
 $item_table_map   = ['gear' => 'gear', 'rift_stone' => 'rifts', 'potion' => 'potions'];
 
@@ -31,6 +31,59 @@ $affix_filter  = array_values(array_filter($affix_filter, fn($a) => in_array($a,
 $level_min     = isset($_GET['level_min']) && $_GET['level_min'] !== '' ? max(0, (int)$_GET['level_min']) : null;
 $level_max     = isset($_GET['level_max']) && $_GET['level_max'] !== '' ? max(0, (int)$_GET['level_max']) : null;
 $resource_label = static fn (string $resource): string => t('res.' . strtolower($resource));
+
+$get_resource_amount = static function (array $character_data, string $resource): int {
+    if ($resource === 'lucky_wyrdstone') {
+        return (int)($character_data['inventory_json']['special_resources']['lucky_wyrdstone'] ?? 0);
+    }
+
+    return (int)($character_data[$resource] ?? 0);
+};
+
+$set_resource_amount = static function (array &$character_data, string $resource, int $amount): void {
+    if ($resource === 'lucky_wyrdstone') {
+        if (!isset($character_data['inventory_json']) || !is_array($character_data['inventory_json'])) {
+            $character_data['inventory_json'] = [];
+        }
+        if (!isset($character_data['inventory_json']['special_resources']) || !is_array($character_data['inventory_json']['special_resources'])) {
+            $character_data['inventory_json']['special_resources'] = [];
+        }
+        $character_data['inventory_json']['special_resources']['lucky_wyrdstone'] = max(0, $amount);
+        return;
+    }
+
+    $character_data[$resource] = max(0, $amount);
+};
+
+$add_resource_to_character_by_id = static function (int $target_character_id, string $resource, int $amount) use ($DAL): void {
+    if ($amount <= 0) {
+        return;
+    }
+
+    if ($resource !== 'lucky_wyrdstone') {
+        $col_map = ['herbs' => 'herbs', 'iron' => 'iron', 'gems' => 'gems', 'credits' => 'credits', 'gold' => 'gold'];
+        $column = $col_map[$resource] ?? null;
+
+        if ($column === null) {
+            return;
+        }
+
+        $DAL->w(
+            "UPDATE characters SET {$column} = {$column} + :amt WHERE id = :cid",
+            ['amt' => $amount, 'cid' => $target_character_id]
+        );
+        return;
+    }
+
+    $TargetCharacter = new Character();
+    if (!$TargetCharacter->LoadById($target_character_id)) {
+        return;
+    }
+
+    $current_amount = (int)($TargetCharacter->Data['inventory_json']['special_resources']['lucky_wyrdstone'] ?? 0);
+    $TargetCharacter->Data['inventory_json']['special_resources']['lucky_wyrdstone'] = $current_amount + $amount;
+    $TargetCharacter->SaveByUserId((int)$TargetCharacter->Data['user_id']);
+};
 
 // CSRF validation for all POST actions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -55,11 +108,11 @@ if (isset($_POST['post_order'])) {
     } elseif ($price_per_unit <= 0) {
         $alert_danger = t('market.alert.price_zero');
     } elseif ($order_type === 'sell') {
-        $player_resource = (int)($Character->Data[$resource] ?? 0);
+        $player_resource = $get_resource_amount($Character->Data, $resource);
         if ($player_resource < $amount) {
             $alert_danger = t('market.alert.no_resource', ['resource' => $resource_label($resource), 'amount' => human_num($player_resource)]);
         } else {
-            $Character->Data[$resource] = $player_resource - $amount;
+            $set_resource_amount($Character->Data, $resource, $player_resource - $amount);
             $inserted = $DAL->w(
                 "INSERT INTO market_orders (character_id, season_id, order_type, resource, amount, amount_remaining, price_per_unit)
                  VALUES (:cid, :season_id, 'sell', :resource, :amount, :amount2, :ppu)",
@@ -69,7 +122,7 @@ if (isset($_POST['post_order'])) {
                 $alert_success = t('market.alert.sell_posted', ['amount' => human_num($amount), 'resource' => $resource_label($resource), 'price' => human_num($price_per_unit)]);
                 $active_tab = 'my_orders';
             } else {
-                $Character->Data[$resource] = $player_resource;
+                $set_resource_amount($Character->Data, $resource, $player_resource);
                 $alert_danger = t('market.alert.post_fail');
             }
         }
@@ -125,7 +178,6 @@ if (isset($_POST['fill_order'])) {
         } else {
             $total_available = (int)array_sum(array_column($orders_at_price, 'amount_remaining'));
             $actual_fill     = min($fill_amount_req, $total_available);
-            $col_map         = ['herbs' => 'herbs', 'iron' => 'iron', 'gems' => 'gems', 'credits' => 'credits'];
 
             if ($fill_order_type === 'sell') {
                 // Player buys: pays Gold, receives resource
@@ -156,11 +208,12 @@ if (isset($_POST['fill_order'])) {
                         );
                         if ($DAL->rows_affected() > 0) {
                             $filled_total += $take;
-                            $Character->Data[$fill_resource] = ((int)($Character->Data[$fill_resource] ?? 0)) + $take;
-                            $DAL->w(
-                                "UPDATE characters SET gold = gold + :gold WHERE id = :cid",
-                                ['gold' => $take * $fill_price, 'cid' => (int)$order['character_id']]
+                            $set_resource_amount(
+                                $Character->Data,
+                                $fill_resource,
+                                $get_resource_amount($Character->Data, $fill_resource) + $take
                             );
+                            $add_resource_to_character_by_id((int)$order['character_id'], 'gold', $take * $fill_price);
                         }
                     }
 
@@ -179,12 +232,11 @@ if (isset($_POST['fill_order'])) {
                 }
             } else {
                 // Player sells: provides resource, receives Gold from escrow
-                $player_resource = (int)($Character->Data[$fill_resource] ?? 0);
+                $player_resource = $get_resource_amount($Character->Data, $fill_resource);
                 if ($player_resource < $actual_fill) {
                     $alert_danger = t('market.alert.no_resource_sell', ['resource' => $resource_label($fill_resource), 'amount' => human_num($player_resource)]);
                 } else {
-                    $Character->Data[$fill_resource] = $player_resource - $actual_fill;
-                    $col          = $col_map[$fill_resource];
+                    $set_resource_amount($Character->Data, $fill_resource, $player_resource - $actual_fill);
                     $filled_total = 0;
 
                     foreach ($orders_at_price as $order) {
@@ -207,23 +259,20 @@ if (isset($_POST['fill_order'])) {
                         if ($DAL->rows_affected() > 0) {
                             $filled_total += $take;
                             $Character->Data['gold'] = ((int)$Character->Data['gold']) + ($take * $fill_price);
-                            $DAL->w(
-                                "UPDATE characters SET {$col} = {$col} + :amt WHERE id = :cid",
-                                ['amt' => $take, 'cid' => (int)$order['character_id']]
-                            );
+                            $add_resource_to_character_by_id((int)$order['character_id'], $fill_resource, $take);
                         }
                     }
 
                     // Refund resource for any portion that couldn't be filled
                     $unfilled = $actual_fill - $filled_total;
                     if ($unfilled > 0) {
-                        $Character->Data[$fill_resource] = ((int)($Character->Data[$fill_resource] ?? 0)) + $unfilled;
+                        $set_resource_amount($Character->Data, $fill_resource, $get_resource_amount($Character->Data, $fill_resource) + $unfilled);
                     }
 
                     if ($filled_total > 0) {
                         $alert_success = t('market.alert.sold', ['amount' => human_num($filled_total), 'resource' => $resource_label($fill_resource), 'total' => human_num($filled_total * $fill_price)]);
                     } else {
-                        $Character->Data[$fill_resource] = $player_resource;
+                        $set_resource_amount($Character->Data, $fill_resource, $player_resource);
                         $alert_danger = t('market.alert.orders_gone');
                     }
                 }
@@ -254,7 +303,11 @@ if (isset($_POST['cancel_order'])) {
             );
             if ($DAL->rows_affected() > 0) {
                 if ($order['order_type'] === 'sell') {
-                    $Character->Data[$resource] = ((int)($Character->Data[$resource] ?? 0)) + (int)$order['amount_remaining'];
+                    $set_resource_amount(
+                        $Character->Data,
+                        $resource,
+                        $get_resource_amount($Character->Data, $resource) + (int)$order['amount_remaining']
+                    );
                     $alert_success = t('market.alert.cancelled_sell', ['amount' => human_num((int)$order['amount_remaining']), 'resource' => $resource_label($resource)]);
                 } else {
                     $refund = (int)$order['amount_remaining'] * (int)$order['price_per_unit'];

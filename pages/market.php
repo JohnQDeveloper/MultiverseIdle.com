@@ -29,7 +29,7 @@
 
         <p>
             <?php echo t('market.orders.your_resource', ['resource' => t('res.' . strtolower($resource_filter))]); ?>
-            <span class="text--warning"><?php echo human_num((int)($Character->Data[$resource_filter] ?? 0)); ?></span>
+            <span class="text--warning"><?php echo human_num($get_resource_amount($Character->Data, $resource_filter)); ?></span>
             &nbsp;|&nbsp;
             <?php echo t('market.orders.your_gold'); ?>
             <span class="text--gold"><?php echo human_num((int)$Character->Data['gold']); ?></span>
@@ -376,6 +376,7 @@
                     <option value="herbs"><?php echo t('market.post.herbs_have', ['amount' => human_num((int)($Character->Data['herbs'] ?? 0))]); ?></option>
                     <option value="iron"><?php echo t('market.post.iron_have', ['amount' => human_num((int)($Character->Data['iron'] ?? 0))]); ?></option>
                     <option value="gems"><?php echo t('market.post.gems_have', ['amount' => human_num((int)($Character->Data['gems'] ?? 0))]); ?></option>
+                    <option value="lucky_wyrdstone"><?php echo t('market.post.lucky_wyrdstone_have', ['amount' => human_num($get_resource_amount($Character->Data, 'lucky_wyrdstone'))]); ?></option>
                     <?php if (!$is_season_character): ?>
                     <option value="credits"><?php echo t('market.post.credits_have', ['amount' => human_num((int)($Character->Data['credits'] ?? 0))]); ?></option>
                     <?php endif; ?>
