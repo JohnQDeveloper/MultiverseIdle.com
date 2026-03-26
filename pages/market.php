@@ -147,8 +147,17 @@
 
         <?php if ($item_type_filter === 'gear'): ?>
         <!-- Affix Filter -->
+        <?php
+            $level_query_suffix = '';
+            if ($level_min !== null) {
+                $level_query_suffix .= '&level_min=' . $level_min;
+            }
+            if ($level_max !== null) {
+                $level_query_suffix .= '&level_max=' . $level_max;
+            }
+        ?>
         <div class="market-resource-nav">
-            <a href="/market?tab=items&item_type=gear" class="market-resource-tab <?php echo empty($affix_filter) ? 'active' : ''; ?>"><?php echo t('market.items.all'); ?></a>
+            <a href="/market?tab=items&item_type=gear<?php echo $level_query_suffix; ?>" class="market-resource-tab <?php echo empty($affix_filter) ? 'active' : ''; ?>"><?php echo t('market.items.all'); ?></a>
             <?php foreach ($gear_affix_defs as $affix_key => $affix_def):
                 $is_active = in_array($affix_key, $affix_filter, true);
                 if ($is_active) {
@@ -156,12 +165,31 @@
                 } else {
                     $toggled = array_merge($affix_filter, [$affix_key]);
                 }
-                $affix_href = '/market?tab=items&item_type=gear' . (!empty($toggled) ? '&' . http_build_query(['affix' => $toggled]) : '');
+                $affix_href = '/market?tab=items&item_type=gear' . (!empty($toggled) ? '&' . http_build_query(['affix' => $toggled]) : '') . $level_query_suffix;
             ?>
                 <a href="<?php echo htmlspecialchars($affix_href); ?>" class="market-resource-tab <?php echo $is_active ? 'active' : ''; ?>"><?php echo htmlspecialchars(t('gear.affix.' . $affix_key)); ?></a>
             <?php endforeach; ?>
         </div>
         <?php endif; ?>
+
+        <!-- Level Range Filter -->
+        <?php
+            $level_affix_hidden = '';
+            foreach ($affix_filter as $a) {
+                $level_affix_hidden .= '<input type="hidden" name="affix[]" value="' . htmlspecialchars($a) . '">';
+            }
+        ?>
+        <form method="GET" action="/market" class="market-level-filter">
+            <input type="hidden" name="tab" value="items">
+            <input type="hidden" name="item_type" value="<?php echo htmlspecialchars($item_type_filter); ?>">
+            <?php echo $level_affix_hidden; ?>
+            <input type="number" name="level_min" min="0" placeholder="<?php echo t('market.items.level_min'); ?>" value="<?php echo $level_min !== null ? $level_min : ''; ?>" class="market-fill-input">
+            <input type="number" name="level_max" min="0" placeholder="<?php echo t('market.items.level_max'); ?>" value="<?php echo $level_max !== null ? $level_max : ''; ?>" class="market-fill-input">
+            <button type="submit" class="market-fill-btn"><?php echo t('market.items.filter'); ?></button>
+            <?php if ($level_min !== null || $level_max !== null): ?>
+                <a href="/market?tab=items&item_type=<?php echo htmlspecialchars($item_type_filter); ?><?php echo !empty($affix_filter) ? '&' . http_build_query(['affix' => $affix_filter]) : ''; ?>" class="secondary market-fill-btn"><?php echo t('market.items.clear'); ?></a>
+            <?php endif; ?>
+        </form>
 
         <?php if (empty($listed_items)): ?>
             <p><em><?php echo t('market.items.no_items', ['type' => $item_type_filter === 'rift_stone' ? t('market.items.tab.rifts') : ($item_type_filter === 'gear' ? t('market.items.tab.gear') : t('market.items.tab.potions'))]); ?></em></p>

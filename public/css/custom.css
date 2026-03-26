@@ -547,6 +547,18 @@ input.danger-button {
 }
 
 /* Item Market */
+.market-level-filter {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+
+.market-level-filter .market-fill-input {
+    width: 110px;
+}
+
 .market-own-listing-card {
     border-color: #555;
     opacity: 0.75;

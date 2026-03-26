@@ -28,6 +28,8 @@ if (!in_array($item_type_filter, $valid_item_types, true)) {
 }
 $valid_affixes = array_keys(Gear::getAffixDefinitions());
 $affix_filter  = array_values(array_filter($affix_filter, fn($a) => in_array($a, $valid_affixes, true)));
+$level_min     = isset($_GET['level_min']) && $_GET['level_min'] !== '' ? max(0, (int)$_GET['level_min']) : null;
+$level_max     = isset($_GET['level_max']) && $_GET['level_max'] !== '' ? max(0, (int)$_GET['level_max']) : null;
 $resource_label = static fn (string $resource): string => t('res.' . strtolower($resource));
 
 // CSRF validation for all POST actions
@@ -488,6 +490,14 @@ if ($active_tab === 'items') {
             $gear_affix_clause .= " AND JSON_CONTAINS(JSON_EXTRACT(details, '$.affixes[*].key'), JSON_QUOTE(:{$param_key}))";
             $gear_params[$param_key] = $affix;
         }
+        if ($level_min !== null) {
+            $gear_affix_clause .= " AND CAST(JSON_EXTRACT(details, '$.party_level_at_craft') AS UNSIGNED) >= :level_min";
+            $gear_params['level_min'] = $level_min;
+        }
+        if ($level_max !== null) {
+            $gear_affix_clause .= " AND CAST(JSON_EXTRACT(details, '$.party_level_at_craft') AS UNSIGNED) <= :level_max";
+            $gear_params['level_max'] = $level_max;
+        }
         $raw = $DAL->r("SELECT * FROM gear WHERE market_price > 0 AND season_id <=> :season_id{$gear_affix_clause} ORDER BY market_price ASC LIMIT 50", $gear_params) ?: [];
         foreach ($raw as $r) {
             $item                = json_decode($r['details'], true) ?? [];
@@ -499,7 +509,17 @@ if ($active_tab === 'items') {
             $listed_items[]      = $item;
         }
     } elseif ($item_type_filter === 'rift_stone') {
-        $raw = $DAL->r("SELECT * FROM rifts WHERE market_price > 0 AND season_id <=> :season_id ORDER BY market_price ASC LIMIT 50", ['season_id' => $market_season_id]) ?: [];
+        $rift_params = ['season_id' => $market_season_id];
+        $rift_level_clause = '';
+        if ($level_min !== null) {
+            $rift_level_clause .= " AND CAST(JSON_EXTRACT(details, '$.level') AS UNSIGNED) >= :level_min";
+            $rift_params['level_min'] = $level_min;
+        }
+        if ($level_max !== null) {
+            $rift_level_clause .= " AND CAST(JSON_EXTRACT(details, '$.level') AS UNSIGNED) <= :level_max";
+            $rift_params['level_max'] = $level_max;
+        }
+        $raw = $DAL->r("SELECT * FROM rifts WHERE market_price > 0 AND season_id <=> :season_id{$rift_level_clause} ORDER BY market_price ASC LIMIT 50", $rift_params) ?: [];
         foreach ($raw as $r) {
             $item                = json_decode($r['details'], true) ?? [];
             $item['id']          = (int)$r['id'];
@@ -509,7 +529,17 @@ if ($active_tab === 'items') {
             $listed_items[]      = $item;
         }
     } else {
-        $raw = $DAL->r("SELECT * FROM potions WHERE market_price > 0 AND season_id <=> :season_id ORDER BY market_price ASC LIMIT 50", ['season_id' => $market_season_id]) ?: [];
+        $potion_params = ['season_id' => $market_season_id];
+        $potion_level_clause = '';
+        if ($level_min !== null) {
+            $potion_level_clause .= ' AND level >= :level_min';
+            $potion_params['level_min'] = $level_min;
+        }
+        if ($level_max !== null) {
+            $potion_level_clause .= ' AND level <= :level_max';
+            $potion_params['level_max'] = $level_max;
+        }
+        $raw = $DAL->r("SELECT * FROM potions WHERE market_price > 0 AND season_id <=> :season_id{$potion_level_clause} ORDER BY market_price ASC LIMIT 50", $potion_params) ?: [];
         foreach ($raw as $r) {
             $listed_items[] = [
                 'id'           => (int)$r['id'],
