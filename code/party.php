@@ -1,6 +1,23 @@
 <?php
 
 $gear = new Gear();
+$party_classes = ['strength', 'dexterity', 'health', 'wisdom'];
+
+// Handle frontline class updates
+if (isset($_GET['update']) && $_GET['update'] == 'frontline_class') {
+    $selected_class = $_POST['class'] ?? '';
+    if (in_array($selected_class, $party_classes, true)) {
+        $Character->Data['party_json']['members']['frontline']['class'] = $selected_class;
+    }
+}
+
+// Handle backline class updates
+if (isset($_GET['update']) && $_GET['update'] == 'backline_class') {
+    $selected_class = $_POST['class'] ?? '';
+    if (in_array($selected_class, $party_classes, true)) {
+        $Character->Data['party_json']['members']['backline']['class'] = $selected_class;
+    }
+}
 
 // Handle frontline skill updates
 if(isset($_GET['update']) && $_GET['update'] == 'frontline_skills') {

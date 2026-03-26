@@ -11,6 +11,7 @@ function supported_languages(): array
     return [
         'en' => 'English',
         'es' => 'Español',
+        'pt-br' => 'Português (Brasil)',
     ];
 }
 
@@ -137,7 +138,26 @@ function t_json(): string
  */
 function localize_battle_log(string $log_html): string
 {
-    if (get_language() !== 'es' || $log_html === '') {
+    if ($log_html === '') {
+        return $log_html;
+    }
+
+    $language = get_language();
+
+    if ($language === 'es') {
+        return localize_battle_log_spanish($log_html);
+    }
+
+    if ($language === 'pt-br') {
+        return localize_battle_log_brazilian_portuguese($log_html);
+    }
+
+    return $log_html;
+}
+
+function localize_battle_log_spanish(string $log_html): string
+{
+    if ($log_html === '') {
         return $log_html;
     }
 
@@ -181,13 +201,80 @@ function localize_battle_log(string $log_html): string
     return $out;
 }
 
+function localize_battle_log_brazilian_portuguese(string $log_html): string
+{
+    if ($log_html === '') {
+        return $log_html;
+    }
+
+    $out = $log_html;
+
+    $out = preg_replace_callback(
+        '/(Party|Monster) (frontline|backline) hits (frontline|backline) for ([0-9]+)(?:\\s+(fire|cold|physical))? damage\\./i',
+        static function (array $m): string {
+            $attackerSide = strtolower($m[1]) === 'party' ? 'Grupo' : 'Monstro';
+            $attackerPos = strtolower($m[2]) === 'frontline' ? 'linha de frente' : 'retaguarda';
+            $targetPos = strtolower($m[3]) === 'frontline' ? 'linha de frente' : 'retaguarda';
+            $damage = $m[4];
+            $type = isset($m[5]) && $m[5] !== '' ? ' (' . strtolower($m[5]) . ')' : '';
+
+            return $attackerSide . ' ' . $attackerPos . ' atinge a ' . $targetPos . ' causando ' . $damage . ' de dano' . $type . '.';
+        },
+        $out
+    ) ?? $out;
+
+    $out = preg_replace_callback(
+        '/(Party|Monster) (frontline|backline) misses (frontline|backline)\\./i',
+        static function (array $m): string {
+            $attackerSide = strtolower($m[1]) === 'party' ? 'Grupo' : 'Monstro';
+            $attackerPos = strtolower($m[2]) === 'frontline' ? 'linha de frente' : 'retaguarda';
+            $targetPos = strtolower($m[3]) === 'frontline' ? 'linha de frente' : 'retaguarda';
+
+            return $attackerSide . ' ' . $attackerPos . ' erra a ' . $targetPos . '.';
+        },
+        $out
+    ) ?? $out;
+
+    $out = preg_replace('/casts Healing Rain, healing all allies for ([0-9]+)\\./i', 'lança Chuva de Cura, curando todos os aliados em $1.', $out) ?? $out;
+    $out = preg_replace('/casts Greater Heal on ([a-z]+) for ([0-9]+)\\./i', 'lança Cura Maior em $1 por $2.', $out) ?? $out;
+    $out = preg_replace('/casts Firestorm, scorching and hitting ([a-z]+) for ([0-9]+) fire damage\\./i', 'lança Tempestade de Fogo, queimando e atingindo $1 com $2 de dano de fogo.', $out) ?? $out;
+    $out = preg_replace('/casts Blizzard, chilling and hitting ([a-z]+) for ([0-9]+) cold damage\\./i', 'lança Nevasca, congelando e atingindo $1 com $2 de dano de gelo.', $out) ?? $out;
+
+    $out = preg_replace('/Monster stats are ([0-9]+) STR,\\s*([0-9]+) DEX,\\s*([0-9]+) HP,\\s*([0-9]+) WIS\\./i', 'Os atributos do monstro são $1 FOR, $2 DES, $3 VIDA, $4 SAB.', $out) ?? $out;
+    $out = preg_replace('/You won the arena battle on floor ([0-9]+)!/i', 'Você venceu a batalha da arena no andar $1!', $out) ?? $out;
+    $out = preg_replace('/You lost the arena battle on floor ([0-9]+)\\./i', 'Você perdeu a batalha da arena no andar $1.', $out) ?? $out;
+
+    $out = str_replace('<summary>Battle Log</summary>', '<summary>Registro de batalha</summary>', $out);
+
+    return $out;
+}
+
 /**
  * Localize persisted world boss history log text at render time.
  * Logs are currently stored in English by a cron job.
  */
 function localize_world_boss_log(string $log_text): string
 {
-    if (get_language() !== 'es' || $log_text === '') {
+    if ($log_text === '') {
+        return $log_text;
+    }
+
+    $language = get_language();
+
+    if ($language === 'es') {
+        return localize_world_boss_log_spanish($log_text);
+    }
+
+    if ($language === 'pt-br') {
+        return localize_world_boss_log_brazilian_portuguese($log_text);
+    }
+
+    return $log_text;
+}
+
+function localize_world_boss_log_spanish(string $log_text): string
+{
+    if ($log_text === '') {
         return $log_text;
     }
 
@@ -205,6 +292,34 @@ function localize_world_boss_log(string $log_text): string
 
             $tax_part = $tax !== '' ? ' (-' . $tax . ' de impuesto del gremio)' : '';
             return 'Puesto #' . $rank . ': Infligiste ' . $damage . ' de daño (' . $pct . '%), recibiste ' . $gold . ' de oro' . $tax_part . ' y ' . $xp . ' de XP.';
+        },
+        $out
+    ) ?? $out;
+
+    return $out;
+}
+
+function localize_world_boss_log_brazilian_portuguese(string $log_text): string
+{
+    if ($log_text === '') {
+        return $log_text;
+    }
+
+    $out = $log_text;
+
+    $out = preg_replace_callback(
+        '/Rank\\s+#([0-9]+):\\s+Dealt\\s+([0-9,]+)\\s+damage\\s+\\(([0-9.]+)%\\),\\s+awarded\\s+([0-9,]+)\\s+gold(?:\\s+\\(-([0-9,]+)\\s+guild\\s+tax\\))?\\s+and\\s+([0-9,]+)\\s+XP\\./i',
+        static function (array $m): string {
+            $rank = $m[1];
+            $damage = $m[2];
+            $pct = $m[3];
+            $gold = $m[4];
+            $tax = $m[5] ?? '';
+            $xp = $m[6];
+
+            $taxPart = $tax !== '' ? ' (-' . $tax . ' de imposto da guilda)' : '';
+
+            return 'Posição #' . $rank . ': Você causou ' . $damage . ' de dano (' . $pct . '%), recebeu ' . $gold . ' de ouro' . $taxPart . ' e ' . $xp . ' de XP.';
         },
         $out
     ) ?? $out;

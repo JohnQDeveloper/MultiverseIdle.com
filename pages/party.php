@@ -19,12 +19,17 @@
                 <?php echo t('party.dexterity'); ?>: <?php echo $Character->Data['party_json']['members']['frontline']['dexterity']; ?> <br />
                 <?php echo t('party.health'); ?>: <?php echo $Character->Data['party_json']['members']['frontline']['health']; ?> <br />
                 <?php echo t('party.wisdom'); ?>: <?php echo $Character->Data['party_json']['members']['frontline']['wisdom']; ?> <br />
-                <form>
+                <form method="POST" action="/party?update=frontline_class">
                 <br />
                 <select name="class">
-                    <option value="<?php echo $Character->Data['party_json']['members']['frontline']['class']; ?>">
-                        <?php echo t('party.class.' . $Character->Data['party_json']['members']['frontline']['class']); ?>
+                    <?php foreach (['strength', 'dexterity', 'health', 'wisdom'] as $party_class): ?>
+                    <option
+                        value="<?php echo $party_class; ?>"
+                        <?php echo ($Character->Data['party_json']['members']['frontline']['class'] === $party_class) ? 'selected' : ''; ?>
+                    >
+                        <?php echo t('party.class.' . $party_class); ?>
                     </option>
+                    <?php endforeach; ?>
                 </select>
                  <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
                  <input type="submit" value="<?php echo t('party.update_class'); ?>" />
@@ -87,12 +92,17 @@
                 <?php echo t('party.dexterity'); ?>: <?php echo $Character->Data['party_json']['members']['backline']['dexterity']; ?> <br />
                 <?php echo t('party.health'); ?>: <?php echo $Character->Data['party_json']['members']['backline']['health']; ?> <br />
                 <?php echo t('party.wisdom'); ?>: <?php echo $Character->Data['party_json']['members']['backline']['wisdom']; ?> <br />
-                <form>
+                <form method="POST" action="/party?update=backline_class">
                 <br />
                 <select name="class">
-                    <option value="<?php echo $Character->Data['party_json']['members']['backline']['class']; ?>">
-                        <?php echo t('party.class.' . $Character->Data['party_json']['members']['backline']['class']); ?>
+                    <?php foreach (['strength', 'dexterity', 'health', 'wisdom'] as $party_class): ?>
+                    <option
+                        value="<?php echo $party_class; ?>"
+                        <?php echo ($Character->Data['party_json']['members']['backline']['class'] === $party_class) ? 'selected' : ''; ?>
+                    >
+                        <?php echo t('party.class.' . $party_class); ?>
                     </option>
+                    <?php endforeach; ?>
                 </select>
 
                  <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
