@@ -41,6 +41,7 @@
               <?php if (!isset($_SESSION['guest_mode']) || $_SESSION['guest_mode'] !== true): ?>
               <li><a href="/store"><?php echo t('nav.store'); ?></a></li>
               <?php endif; ?>
+              <li><a href="/pvp"><?php echo t('nav.pvp'); ?></a></li>
               <li><a href="/leaderboard"><?php echo t('nav.leaderboard'); ?></a></li>
               <!--<li><a href="/season-select"><?php echo (isset($_SESSION['active_season_id'])) ? 'Season' : 'Perpetual'; ?></a></li>-->
               <li><a href="/logout"><?php echo t('nav.logout'); ?></a></li>

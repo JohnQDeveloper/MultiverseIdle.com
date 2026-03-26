@@ -112,6 +112,8 @@ class Character
             'last_rift_time' => null,
             'last_rift_log' => null,
             'highest_rift_level' => 0,
+            'last_pvp_time' => null,
+            'last_pvp_log' => null,
             'last_free_credits_claim' => null,
             'active_potion_id' => null,
             'potion_expire_time' => null,
@@ -435,7 +437,9 @@ class Character
             `last_seen` = :last_seen,
             `credits` = :credits,
             `subscription_expires` = :subscription_expires,
-            `last_free_credits_claim` = :last_free_credits_claim
+            `last_free_credits_claim` = :last_free_credits_claim,
+            `last_pvp_time` = :last_pvp_time,
+            `last_pvp_log` = :last_pvp_log
             WHERE `id` = :id";
 
         $params = [
@@ -460,6 +464,8 @@ class Character
             'credits' => $this->Data['credits'] ?? 0,
             'subscription_expires' => $this->Data['subscription_expires'] ?? null,
             'last_free_credits_claim' => $this->Data['last_free_credits_claim'] ?? null,
+            'last_pvp_time' => $this->Data['last_pvp_time'] ?? null,
+            'last_pvp_log'  => $this->Data['last_pvp_log'] ?? null,
             'id' => (int)$this->Data['id'],
         ];
 

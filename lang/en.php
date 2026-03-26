@@ -958,4 +958,52 @@ return [
     'router.guest_feature' => 'This feature is not available in guest mode. Register or login to access it.',
     'footer.copyright'     => '© 2025 JohnQDeveloper',
 
+    // -------------------------------------------------------------------------
+    // PvP — Treasure Chests
+    // -------------------------------------------------------------------------
+    'nav.pvp'                    => 'PvP',
+
+    'pvp.title'                  => 'PvP Treasure Chests',
+    'pvp.desc'                   => 'Queue treasure chests for PvP battles against other players. You may have up to {max} chests queued at a time. Chests are processed once per hour.',
+
+    'pvp.how_title'              => 'How It Works',
+    'pvp.li_queue'               => 'Queue up to {max} chests at a time.{sub_note}',
+    'pvp.li_queue_sub_note'      => ' {upgrade_link} for a QoL subscription to raise the limit to 24.',
+    'pvp.li_queue_upgrade'       => 'Upgrade',
+    'pvp.li_matchmaking'         => 'Each hour the cron finds you a PvP opponent within \u00b115% of your arena floor.',
+    'pvp.li_mirror'              => 'If no opponent is found you fight a mirror clone of yourself.',
+    'pvp.li_reward'              => 'Win to earn 5,000\u00d7X of a random resource (gold, iron, herbs, or gems).',
+    'pvp.li_no_consequence'      => 'No consequences for losing \u2014 only the chest is consumed.',
+
+    'pvp.queue_title'            => 'Your Queue ({count}/{max})',
+    'pvp.queue_empty'            => 'Your queue is empty. Add a chest below to get started.',
+    'pvp.queue_full_msg'         => 'Queue is full ({max} max). Wait for a chest to be processed or remove one.',
+
+    'pvp.position'               => 'Position {pos}',
+    'pvp.chest_small'            => 'Small Chest',
+    'pvp.chest_medium'           => 'Medium Chest',
+    'pvp.chest_large'            => 'Large Chest',
+    'pvp.chest_desc_small'       => 'A modest chest. Reward multiplier: 1\u00d7.',
+    'pvp.chest_desc_medium'      => 'A hefty chest. Reward multiplier: 2\u00d7.',
+    'pvp.chest_desc_large'       => 'A treasure trove. Reward multiplier: 3\u00d7.',
+    'pvp.reward_on_win'          => 'Win reward: {amount} of a random resource',
+
+    'pvp.add_title'              => 'Add a Chest',
+    'pvp.queue_btn'              => 'Queue Chest',
+    'pvp.remove_from_queue'      => 'Remove',
+
+    'pvp.log_title'              => 'Last PvP Battle',
+    'pvp.last_completed'         => 'Last processed: {time}',
+    'pvp.never'                  => 'Never',
+
+    'pvp.alert.queued'           => 'Chest queued at position {pos} of {max}.',
+    'pvp.alert.queued_multi'     => '{count} chest(s) added to queue.',
+    'pvp.alert.queue_full'       => 'Queue is full ({max} max). Remove a chest or wait for one to process.',
+    'pvp.alert.queue_fail'       => 'Failed to queue chest. Please try again.',
+    'pvp.alert.removed'          => 'Chest removed from queue.',
+    'pvp.alert.remove_fail'      => 'Failed to remove chest from queue.',
+    'pvp.alert.invalid_size'     => 'Invalid chest size.',
+
+    'confirm.remove_chest'       => 'Remove this chest from the queue?',
+
 ];

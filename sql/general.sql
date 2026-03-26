@@ -223,3 +223,18 @@ CREATE TABLE guild_bank (
   gems BIGINT UNSIGNED NOT NULL DEFAULT 0,
   PRIMARY KEY (guild_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--- treasure_chests
+CREATE TABLE treasure_chests (
+    id            INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    created_at    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    owner_id      INT NOT NULL,
+    chest_size    ENUM('small', 'medium', 'large') NOT NULL,
+    queue_position INT NOT NULL,
+    season_id     INT UNSIGNED NULL DEFAULT NULL,
+    PRIMARY KEY (id),
+    KEY owner_queue (owner_id, queue_position)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+ALTER TABLE characters ADD COLUMN last_pvp_log  TEXT DEFAULT NULL;
+ALTER TABLE characters ADD COLUMN last_pvp_time DATETIME DEFAULT NULL;

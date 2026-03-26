@@ -23,6 +23,10 @@
     require_once('rifts.php');
     echo "Rifts Cron Completed.\n";
 
+    echo "Starting Treasure Chests Cron...\n";
+    require_once('treasure-chests.php');
+    echo "Treasure Chests Cron Completed.\n";
+
     echo "Starting Season-End Cron...\n";
     require_once('season-end.php');
     echo "Season-End Cron Completed.\n";
