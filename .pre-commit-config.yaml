@@ -6,15 +6,15 @@ repos:
     hooks:
     -   id: detect-secrets
         args: ['--baseline', '.secrets.baseline']
-        exclude: package.lock.json
+        exclude: ^(?:gitleaks-report\.json|\.secrets\.baseline)$
 
-# baseline seems broken or I'm too tired at midnight to figure it out
-#-   repo: https://github.com/gitleaks/gitleaks
-#    rev: v8.23.1
-#    hooks:
-#    -   id: gitleaks
-#        args: ['--baseline-path', 'gitleaks-report.json']
-#        language_version: 1.23.6
+-   repo: https://github.com/gitleaks/gitleaks
+    rev: v8.23.1
+    hooks:
+    -   id: gitleaks
+        args: ['--baseline-path', 'gitleaks-report.json']
+        exclude: ^(?:gitleaks-report\.json|\.secrets\.baseline)$
+        language_version: 1.23.6
 
 -   repo: https://github.com/rhysd/actionlint
     rev: v1.7.7
