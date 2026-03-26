@@ -5,6 +5,17 @@
         <h1><?php echo t('pvp.title'); ?></h1>
         <p><?php echo t('pvp.desc', ['max' => $queue_max]); ?></p>
 
+        <!-- Last Battle Log -->
+        <?php if (!empty($Character->Data['last_pvp_log'])): ?>
+            <h2><?php echo t('pvp.log_title'); ?></h2>
+            <p><small>
+                <?php echo t('pvp.last_completed', ['time' => $Character->Data['last_pvp_time'] ?? t('pvp.never')]); ?>
+            </small></p>
+            <div class="log-box">
+                <?php echo localize_battle_log((string)$Character->Data['last_pvp_log']); ?>
+            </div>
+        <?php endif; ?>
+
         <div class="info-box">
             <h3 class="heading--no-top-margin"><?php echo t('pvp.how_title'); ?></h3>
             <ul>
@@ -96,17 +107,6 @@
                         </form>
                     </div>
                 <?php endforeach; ?>
-            </div>
-        <?php endif; ?>
-
-        <!-- Last Battle Log -->
-        <?php if (!empty($Character->Data['last_pvp_log'])): ?>
-            <h2><?php echo t('pvp.log_title'); ?></h2>
-            <p><small>
-                <?php echo t('pvp.last_completed', ['time' => $Character->Data['last_pvp_time'] ?? t('pvp.never')]); ?>
-            </small></p>
-            <div class="log-box">
-                <?php echo localize_battle_log((string)$Character->Data['last_pvp_log']); ?>
             </div>
         <?php endif; ?>
 
