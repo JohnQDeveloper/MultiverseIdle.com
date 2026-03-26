@@ -11,6 +11,13 @@ class TreasureChest
         'large'  => 3,
     ];
 
+    /** @var array<string, int> Total number of PvP battles granted by each chest size */
+    public const CHEST_BATTLES = [
+        'small'  => 1,
+        'medium' => 2,
+        'large'  => 3,
+    ];
+
     public const REWARD_BASE    = 5000;
     public const QUEUE_MAX      = 4;
     public const QUEUE_MAX_SUB  = 24;

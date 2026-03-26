@@ -84,8 +84,8 @@
             <p class="text--warning"><em><?php echo t('pvp.queue_full_msg', ['max' => $queue_max]); ?></em></p>
         <?php else: ?>
             <div class="grid">
-                <?php foreach (TreasureChest::CHEST_MULTIPLIERS as $size => $multiplier): ?>
-                    <?php $reward = TreasureChest::REWARD_BASE * $multiplier; ?>
+                <?php foreach (TreasureChest::CHEST_BATTLES as $size => $battle_count): ?>
+                    <?php $reward = TreasureChest::REWARD_BASE * $battle_count; ?>
                     <div class="card">
                         <h3 class="heading--no-top-margin"><?php echo t('pvp.chest_' . $size); ?></h3>
                         <p><?php echo t('pvp.chest_desc_' . $size); ?></p>
