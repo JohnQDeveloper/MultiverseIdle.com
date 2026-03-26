@@ -59,7 +59,7 @@ return [
     'chat.login' => 'faça login',
     'chat.muted' => 'Silenciado:',
     'chat.mod.title' => 'Moderação',
-    'chat.mod.user_id' => 'ID do usuário',
+    'chat.mod.user_id' => 'Nome do personagem',
     'chat.mod.promote' => 'Promover',
     'chat.mod.demote' => 'Rebaixar',
     'chat.mod.mute' => 'Silenciar',

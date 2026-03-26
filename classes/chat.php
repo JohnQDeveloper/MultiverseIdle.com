@@ -4,17 +4,19 @@ declare(strict_types=1);
 
 class Chat
 {
-    private const MAX_MESSAGES     = 200;
-    private const RATE_LIMIT_MAX   = 5;
+    private const MAX_MESSAGES = 200;
+    private const RATE_LIMIT_MAX = 5;
     private const RATE_LIMIT_WINDOW = 10; // seconds
-    private const MAX_MSG_LENGTH   = 500;
-    private const PUBLIC_CHANNELS  = ['global', 'help'];
+    private const MAX_MSG_LENGTH = 500;
+    private const PUBLIC_CHANNELS = ['global', 'help'];
 
     private Redis $redis;
+    private DAL $dal;
 
     public function __construct()
     {
-        global $redis;
+        global $DAL, $redis;
+        $this->dal = $DAL;
         $this->redis = $redis;
     }
 
@@ -136,15 +138,12 @@ class Chat
 
     public function isMuted(int $userId): bool
     {
-        $data = $this->redis->hGetAll("chat:mute:{$userId}");
-        if (empty($data)) {
+        $muteInfo = $this->getActiveMuteRow($userId);
+        if ($muteInfo === null) {
             return false;
         }
-        $until = (int)($data['until'] ?? 0);
-        if ($until === -1) {
-            return true; // permanent mute
-        }
-        return time() < $until;
+
+        return true;
     }
 
     /**
@@ -152,35 +151,62 @@ class Chat
      */
     public function getMuteInfo(int $userId): ?array
     {
-        $data = $this->redis->hGetAll("chat:mute:{$userId}");
-        return empty($data) ? null : $data;
+        $muteInfo = $this->getActiveMuteRow($userId);
+        if ($muteInfo === null) {
+            return null;
+        }
+
+        return [
+            'until' => $muteInfo['expires_at'] === null ? '-1' : (string)strtotime($muteInfo['expires_at']),
+            'reason' => (string)$muteInfo['reason'],
+            'muted_by' => (string)$muteInfo['muted_by'],
+        ];
     }
 
     /**
      * Mute a user. Pass $seconds = -1 for a permanent mute.
      */
-    public function muteUser(int $userId, int $seconds, string $reason, int $mutedBy): void
+    public function muteUser(int $userId, int $seconds, string $reason, int $mutedBy): bool
     {
-        $key   = "chat:mute:{$userId}";
-        $until = ($seconds === -1) ? -1 : time() + $seconds;
+        $expiresAt = $seconds === -1
+            ? null
+            : date('Y-m-d H:i:s', time() + $seconds);
 
-        $this->redis->hMSet($key, [
-            'until'    => (string)$until,
-            'reason'   => $reason,
-            'muted_by' => (string)$mutedBy,
-        ]);
+        $result = $this->dal->w(
+            'INSERT INTO chat_mutes (user_id, muted_by, reason, expires_at)
+             VALUES (:user_id, :muted_by, :reason, :expires_at)
+             ON DUPLICATE KEY UPDATE
+                muted_by = VALUES(muted_by),
+                reason = VALUES(reason),
+                expires_at = VALUES(expires_at),
+                updated_at = CURRENT_TIMESTAMP',
+            [
+                ':user_id' => $userId,
+                ':muted_by' => $mutedBy,
+                ':reason' => $reason,
+                ':expires_at' => $expiresAt,
+            ]
+        );
 
-        if ($seconds !== -1) {
-            $this->redis->expire($key, $seconds);
-        } else {
-            // Remove TTL so the key persists
-            $this->redis->persist($key);
+        if (!$result) {
+            return false;
         }
+
+        return $this->getActiveMuteRow($userId) !== null;
     }
 
-    public function unmuteUser(int $userId): void
+    public function unmuteUser(int $userId): bool
     {
-        $this->redis->del("chat:mute:{$userId}");
+        $result = $this->dal->w(
+            'DELETE FROM chat_mutes WHERE user_id = :user_id',
+            [':user_id' => $userId]
+        );
+
+        if (!$result) {
+            return false;
+        }
+
+        return $this->getActiveMuteRow($userId) === null;
     }
 
     // -------------------------------------------------------------------------
@@ -195,20 +221,52 @@ class Chat
         if ($userId <= 0) {
             return false;
         }
-        if ((bool)$this->redis->sIsMember('chat:moderators', (string)$userId)) {
+        $rows = $this->dal->r(
+            'SELECT user_id
+             FROM chat_moderators
+             WHERE user_id = :user_id
+             LIMIT 1',
+            [':user_id' => $userId]
+        );
+
+        if (!empty($rows)) {
             return true;
         }
+
         return $this->isSiteAdmin($userId);
     }
 
-    public function promoteModerator(int $userId): void
+    public function promoteModerator(int $userId, int $promotedBy = 0): bool
     {
-        $this->redis->sAdd('chat:moderators', (string)$userId);
+        $result = $this->dal->w(
+            'INSERT INTO chat_moderators (user_id, promoted_by)
+             VALUES (:user_id, :promoted_by)
+             ON DUPLICATE KEY UPDATE promoted_by = VALUES(promoted_by)',
+            [
+                ':user_id' => $userId,
+                ':promoted_by' => $promotedBy > 0 ? $promotedBy : null,
+            ]
+        );
+
+        if (!$result) {
+            return false;
+        }
+
+        return $this->hasModeratorRecord($userId);
     }
 
-    public function demoteModerator(int $userId): void
+    public function demoteModerator(int $userId): bool
     {
-        $this->redis->sRem('chat:moderators', (string)$userId);
+        $result = $this->dal->w(
+            'DELETE FROM chat_moderators WHERE user_id = :user_id',
+            [':user_id' => $userId]
+        );
+
+        if (!$result) {
+            return false;
+        }
+
+        return !$this->hasModeratorRecord($userId);
     }
 
     /**
@@ -216,8 +274,15 @@ class Chat
      */
     public function getModeratorIds(): array
     {
-        $members = $this->redis->sMembers('chat:moderators');
-        return array_map('intval', $members ?: []);
+        $rows = $this->dal->r('SELECT user_id FROM chat_moderators');
+        if (empty($rows)) {
+            return [];
+        }
+
+        return array_map(
+            static fn(array $row): int => (int)$row['user_id'],
+            $rows
+        );
     }
 
     // -------------------------------------------------------------------------
@@ -226,8 +291,7 @@ class Chat
 
     private function isSiteAdmin(int $userId): bool
     {
-        global $DAL;
-        $rows = $DAL->r(
+        $rows = $this->dal->r(
             'SELECT roles_mask FROM users WHERE id = :id LIMIT 1',
             [':id' => $userId]
         );
@@ -250,6 +314,50 @@ class Chat
         $a = min($userId1, $userId2);
         $b = max($userId1, $userId2);
         return "dm:{$a}:{$b}";
+    }
+
+    private function hasModeratorRecord(int $userId): bool
+    {
+        $rows = $this->dal->r(
+            'SELECT user_id
+             FROM chat_moderators
+             WHERE user_id = :user_id
+             LIMIT 1',
+            [':user_id' => $userId]
+        );
+
+        return !empty($rows);
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function getActiveMuteRow(int $userId): ?array
+    {
+        if ($userId <= 0) {
+            return null;
+        }
+
+        $rows = $this->dal->r(
+            'SELECT user_id, muted_by, reason, expires_at
+             FROM chat_mutes
+             WHERE user_id = :user_id
+             LIMIT 1',
+            [':user_id' => $userId]
+        );
+
+        if (empty($rows)) {
+            return null;
+        }
+
+        $muteInfo = $rows[0];
+        $expiresAt = $muteInfo['expires_at'];
+        if ($expiresAt !== null && strtotime((string)$expiresAt) <= time()) {
+            $this->unmuteUser($userId);
+            return null;
+        }
+
+        return $muteInfo;
     }
 
     /**

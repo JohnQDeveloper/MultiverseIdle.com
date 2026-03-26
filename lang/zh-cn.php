@@ -59,7 +59,7 @@ return [
     'chat.login' => '登录',
     'chat.muted' => '已禁言：',
     'chat.mod.title' => '管理',
-    'chat.mod.user_id' => '用户 ID',
+    'chat.mod.user_id' => '角色名',
     'chat.mod.promote' => '提升',
     'chat.mod.demote' => '降级',
     'chat.mod.mute' => '禁言',

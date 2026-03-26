@@ -258,3 +258,23 @@ CREATE TABLE `guild_quests` (
   FOREIGN KEY (`guild_id`) REFERENCES `guilds`(`id`) ON DELETE CASCADE,
   INDEX `idx_guild_quests_active` (`guild_id`, `is_completed`, `season_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE `chat_moderators` (
+  `user_id` INT UNSIGNED NOT NULL,
+  `promoted_by` INT UNSIGNED NULL DEFAULT NULL,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`user_id`),
+  KEY `idx_chat_moderators_promoted_by` (`promoted_by`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `chat_mutes` (
+  `user_id` INT UNSIGNED NOT NULL,
+  `muted_by` INT UNSIGNED NOT NULL,
+  `reason` VARCHAR(200) NOT NULL,
+  `expires_at` DATETIME NULL DEFAULT NULL,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`user_id`),
+  KEY `idx_chat_mutes_expires_at` (`expires_at`),
+  KEY `idx_chat_mutes_muted_by` (`muted_by`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

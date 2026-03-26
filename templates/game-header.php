@@ -171,7 +171,7 @@ if ($_chatIsLoggedIn) {
             <details>
                 <summary class="chat-mod-summary"><?php echo t('chat.mod.title'); ?></summary>
                 <form id="mod-form" class="chat-mod-form">
-                    <input type="text" id="mod-user-id" placeholder="<?php echo t('chat.mod.user_id'); ?>" class="mod-input" style="width:80px;" required>
+                    <input type="text" id="mod-character-name" placeholder="<?php echo t('chat.mod.user_id'); ?>" class="mod-input" style="width:120px;" required>
                     <select id="mod-action" class="mod-input">
                         <option value="promote"><?php echo t('chat.mod.promote'); ?></option>
                         <option value="demote"><?php echo t('chat.mod.demote'); ?></option>
@@ -185,7 +185,7 @@ if ($_chatIsLoggedIn) {
                         <option value="-1"><?php echo t('chat.mod.permanent'); ?></option>
                     </select>
                     <input type="text" id="mod-reason" placeholder="<?php echo t('chat.mod.reason'); ?>" class="mod-input" style="width:120px;">
-                    <button type="submit" class="chat-send-btn chat-send-btn--danger"><?php echo t('chat.mod.apply'); ?></button>
+                    <button type="button" id="mod-apply-btn" class="chat-send-btn chat-send-btn--danger"><?php echo t('chat.mod.apply'); ?></button>
                 </form>
                 <div id="mod-result" class="mod-result" style="display:none;"></div>
             </details>
@@ -197,7 +197,7 @@ if ($_chatIsLoggedIn) {
 <script>
 window.MI_LANG = <?php echo t_json(); ?>;
 </script>
-<script src="/js/chat.js"></script>
+<script src="/js/chat.js?v=<?php echo (string)filemtime(__DIR__ . '/../public/js/chat.js'); ?>"></script>
 
 <main class="container">
     <div class="wrapper">

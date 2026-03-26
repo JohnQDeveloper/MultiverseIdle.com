@@ -569,14 +569,14 @@
     msgArea.addEventListener('click', function (e) {
         const btn = e.target.closest('.chat-mod-quick');
         if (!btn) return;
-        const uid = btn.dataset.uid;
-        const uidInput = document.getElementById('mod-user-id');
-        if (uidInput) {
-            uidInput.value = uid;
-            // Open the details element if closed
-            const details = document.querySelector('#chat-mod-panel details');
-            if (details) details.open = true;
+        const characterName = btn.dataset.username || '';
+        const nameInput = document.getElementById('mod-character-name');
+        if (nameInput && characterName) {
+            nameInput.value = characterName;
         }
+        // Open the details element if closed
+        const details = document.querySelector('#chat-mod-panel details');
+        if (details) details.open = true;
     });
 
     // -----------------------------------------------------------------------
@@ -585,6 +585,7 @@
     if (modForm) {
         const durationSel = document.getElementById('mod-duration');
         const actionSel   = document.getElementById('mod-action');
+        const modApplyBtn = document.getElementById('mod-apply-btn');
 
         function toggleDuration() {
             if (durationSel && actionSel) {
@@ -596,19 +597,27 @@
             toggleDuration();
         }
 
-        modForm.addEventListener('submit', function (e) {
-            e.preventDefault();
-            const targetId = (document.getElementById('mod-user-id') || {}).value || '';
-            const action   = (document.getElementById('mod-action') || {}).value || '';
-            const duration = (document.getElementById('mod-duration') || {}).value || '3600';
-            const reason   = ((document.getElementById('mod-reason') || {}).value || '').trim();
+        function submitModeration() {
+            const targetName = ((document.getElementById('mod-character-name') || {}).value || '').trim();
+            const action     = (document.getElementById('mod-action') || {}).value || '';
+            const duration   = (document.getElementById('mod-duration') || {}).value || '3600';
+            const reason     = ((document.getElementById('mod-reason') || {}).value || '').trim();
 
-            if (!targetId) return;
+            if (!targetName) {
+                if (modResult) {
+                    modResult.className = 'mod-result mod-result--err';
+                    modResult.textContent = 'Character name is required';
+                    modResult.style.display = '';
+                }
+                return;
+            }
+
+            if (modApplyBtn) modApplyBtn.disabled = true;
 
             const modPayload = new URLSearchParams({
                 csrf_token: csrf,
                 action,
-                user_id:  targetId,
+                character_name: targetName,
                 duration,
                 reason,
             });
@@ -621,6 +630,7 @@
             })
                 .then(function (r) { return r.json(); })
                 .then(function (data) {
+                    if (modApplyBtn) modApplyBtn.disabled = false;
                     if (!modResult) return;
                     modResult.className = 'mod-result ' + (data.success ? 'mod-result--ok' : 'mod-result--err');
                     modResult.textContent = data.message || data.error || '';
@@ -628,13 +638,26 @@
                     setTimeout(function () { modResult.style.display = 'none'; }, 4000);
                 })
                 .catch(function () {
+                    if (modApplyBtn) modApplyBtn.disabled = false;
                     if (modResult) {
                         modResult.className = 'mod-result mod-result--err';
                         modResult.textContent = 'Network error';
                         modResult.style.display = '';
                     }
                 });
+        }
+
+        modForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            submitModeration();
         });
+
+        if (modApplyBtn) {
+            modApplyBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                submitModeration();
+            });
+        }
     }
 
     // -----------------------------------------------------------------------

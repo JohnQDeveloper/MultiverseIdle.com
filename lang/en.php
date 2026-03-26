@@ -73,7 +73,7 @@ return [
     'chat.login'             => 'login',
     'chat.muted'             => 'Muted:',
     'chat.mod.title'         => 'Moderation',
-    'chat.mod.user_id'       => 'User ID',
+    'chat.mod.user_id'       => 'Character Name',
     'chat.mod.promote'       => 'Promote',
     'chat.mod.demote'        => 'Demote',
     'chat.mod.mute'          => 'Mute',
