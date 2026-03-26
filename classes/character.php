@@ -14,7 +14,7 @@ class Character
     private bool $isGuest = false;
 
     /**
-     * @var array<string, mixed> Character data including party_json and worker_json
+     * @var array<string, mixed> Character data including party_json, worker_json, and inventory_json
      */
     public array $Data = [];
 
@@ -87,6 +87,12 @@ class Character
             ]
         ];
 
+        $inventory_json = [
+            "special_resources" => [
+                "lucky_wyrdstone" => 0,
+            ],
+        ];
+
         return [
             'id' => 0,
             'user_id' => 0,
@@ -100,6 +106,7 @@ class Character
             'gems' => self::DEFAULT_RESOURCE_AMOUNT,
             'party_json' => $party_json,
             'worker_json' => $worker_json,
+            'inventory_json' => $inventory_json,
             'rift_queued' => null,
             'world_boss_queued' => null,
             'world_boss_log' => null,
@@ -123,6 +130,7 @@ class Character
     private function initGuestCharacter(string $name = 'Guest'): bool
     {
         $this->Data = $this->buildDefaultCharacterData($name);
+        $this->normalizeCharacterData();
         $_SESSION['guest_character'] = $this->Data;
         $this->isGuest = true;
         return true;
@@ -135,6 +143,7 @@ class Character
         }
         $this->Data = $_SESSION['guest_character'];
         $this->Data['id'] = $this->Data['id'] ?? 0;
+        $this->normalizeCharacterData();
         $this->isGuest = true;
         return true;
     }
@@ -158,37 +167,49 @@ class Character
             return false;
         }
 
-        $query = "INSERT INTO `characters` (
-            `user_id`,
-            `name`,
-            `level`,
-            `arena_floor`,
-            `gold`,
-            `iron`,
-            `herbs`,
-            `gems`,
-            `party_json`,
-            `worker_json`,
-            `rift_queued`,
-            `world_boss_queued`,
-            `credits`,
-            `subscription_expires`
-        ) VALUES (
-            :user_id,
-            :name,
-            :level,
-            :arena_floor,
-            :gold,
-            :iron,
-            :herbs,
-            :gems,
-            :party_json,
-            :worker_json,
-            NULL,
-            NULL,
-            0,
-            NULL
-        )";
+        $has_inventory_json = $this->hasInventoryJsonColumn();
+        $columns = [
+            '`user_id`',
+            '`name`',
+            '`level`',
+            '`arena_floor`',
+            '`gold`',
+            '`iron`',
+            '`herbs`',
+            '`gems`',
+            '`party_json`',
+            '`worker_json`',
+        ];
+        $values = [
+            ':user_id',
+            ':name',
+            ':level',
+            ':arena_floor',
+            ':gold',
+            ':iron',
+            ':herbs',
+            ':gems',
+            ':party_json',
+            ':worker_json',
+        ];
+
+        if ($has_inventory_json) {
+            $columns[] = '`inventory_json`';
+            $values[] = ':inventory_json';
+        }
+
+        $columns[] = '`rift_queued`';
+        $columns[] = '`world_boss_queued`';
+        $columns[] = '`credits`';
+        $columns[] = '`subscription_expires`';
+
+        $values[] = 'NULL';
+        $values[] = 'NULL';
+        $values[] = '0';
+        $values[] = 'NULL';
+
+        $query = "INSERT INTO `characters` (" . implode(', ', $columns) . ")
+        VALUES (" . implode(', ', $values) . ")";
 
         $params = [
             'user_id' => $user_id,
@@ -202,6 +223,10 @@ class Character
             'party_json' => json_encode($this->Data['party_json']),
             'worker_json' => json_encode($this->Data['worker_json']),
         ];
+
+        if ($has_inventory_json) {
+            $params['inventory_json'] = json_encode($this->Data['inventory_json']);
+        }
 
         $this->DAL->w($query, $params);
 
@@ -297,40 +322,52 @@ class Character
         $defaults = $this->buildDefaultCharacterData($name);
         $party_json = json_encode($defaults['party_json']);
         $worker_json = json_encode($defaults['worker_json']);
+        $has_inventory_json = $this->hasInventoryJsonColumn();
 
-        $query = "INSERT INTO `characters` (
-            `user_id`,
-            `season_id`,
-            `name`,
-            `level`,
-            `arena_floor`,
-            `gold`,
-            `iron`,
-            `herbs`,
-            `gems`,
-            `party_json`,
-            `worker_json`,
-            `rift_queued`,
-            `world_boss_queued`,
-            `credits`,
-            `subscription_expires`
-        ) VALUES (
-            :user_id,
-            :season_id,
-            :name,
-            :level,
-            :arena_floor,
-            :gold,
-            :iron,
-            :herbs,
-            :gems,
-            :party_json,
-            :worker_json,
-            NULL,
-            NULL,
-            0,
-            NULL
-        )";
+        $columns = [
+            '`user_id`',
+            '`season_id`',
+            '`name`',
+            '`level`',
+            '`arena_floor`',
+            '`gold`',
+            '`iron`',
+            '`herbs`',
+            '`gems`',
+            '`party_json`',
+            '`worker_json`',
+        ];
+        $values = [
+            ':user_id',
+            ':season_id',
+            ':name',
+            ':level',
+            ':arena_floor',
+            ':gold',
+            ':iron',
+            ':herbs',
+            ':gems',
+            ':party_json',
+            ':worker_json',
+        ];
+
+        if ($has_inventory_json) {
+            $columns[] = '`inventory_json`';
+            $values[] = ':inventory_json';
+        }
+
+        $columns[] = '`rift_queued`';
+        $columns[] = '`world_boss_queued`';
+        $columns[] = '`credits`';
+        $columns[] = '`subscription_expires`';
+
+        $values[] = 'NULL';
+        $values[] = 'NULL';
+        $values[] = '0';
+        $values[] = 'NULL';
+
+        $query = "INSERT INTO `characters` (" . implode(', ', $columns) . ")
+        VALUES (" . implode(', ', $values) . ")";
 
         $params = [
             'user_id' => $user_id,
@@ -343,8 +380,12 @@ class Character
             'herbs' => self::DEFAULT_RESOURCE_AMOUNT,
             'gems' => self::DEFAULT_RESOURCE_AMOUNT,
             'party_json' => $party_json,
-            'worker_json' => $worker_json
+            'worker_json' => $worker_json,
         ];
+
+        if ($has_inventory_json) {
+            $params['inventory_json'] = json_encode($defaults['inventory_json']);
+        }
 
         $this->DAL->w($query, $params);
 
@@ -375,6 +416,10 @@ class Character
         $this->Data = $result[0];
         $this->Data['party_json'] = json_decode($this->Data['party_json'], true);
         $this->Data['worker_json'] = json_decode($this->Data['worker_json'], true);
+        $this->Data['inventory_json'] = isset($this->Data['inventory_json'])
+            ? json_decode((string)$this->Data['inventory_json'], true)
+            : [];
+        $this->normalizeCharacterData();
 
         return true;
     }
@@ -391,6 +436,10 @@ class Character
         $this->Data = $result[0];
         $this->Data['party_json'] = json_decode($this->Data['party_json'], true);
         $this->Data['worker_json'] = json_decode($this->Data['worker_json'], true);
+        $this->Data['inventory_json'] = isset($this->Data['inventory_json'])
+            ? json_decode((string)$this->Data['inventory_json'], true)
+            : [];
+        $this->normalizeCharacterData();
 
         return true;
     }
@@ -415,31 +464,43 @@ class Character
             return false;
         }
 
+        $has_inventory_json = $this->hasInventoryJsonColumn();
+        $set_clauses = [
+            '`name` = :name',
+            '`level` = :level',
+            '`arena_floor` = :arena_floor',
+            '`gold` = :gold',
+            '`iron` = :iron',
+            '`herbs` = :herbs',
+            '`gems` = :gems',
+            '`party_json` = :party_json',
+            '`worker_json` = :worker_json',
+        ];
+
+        if ($has_inventory_json) {
+            $set_clauses[] = '`inventory_json` = :inventory_json';
+        }
+
+        $set_clauses = array_merge($set_clauses, [
+            '`rift_queued` = :rift_queued',
+            '`world_boss_queued` = :world_boss_queued',
+            '`world_boss_log` = :world_boss_log',
+            '`last_save` = NOW()',
+            '`last_arena_time` = :last_arena_time',
+            '`last_arena_log` = :last_arena_log',
+            '`last_rift_time` = :last_rift_time',
+            '`last_rift_log` = :last_rift_log',
+            '`highest_rift_level` = :highest_rift_level',
+            '`last_seen` = :last_seen',
+            '`credits` = :credits',
+            '`subscription_expires` = :subscription_expires',
+            '`last_free_credits_claim` = :last_free_credits_claim',
+            '`last_pvp_time` = :last_pvp_time',
+            '`last_pvp_log` = :last_pvp_log',
+        ]);
+
         $query = "UPDATE `characters` SET
-            `name` = :name,
-            `level` = :level,
-            `arena_floor` = :arena_floor,
-            `gold` = :gold,
-            `iron` = :iron,
-            `herbs` = :herbs,
-            `gems` = :gems,
-            `party_json` = :party_json,
-            `worker_json` = :worker_json,
-            `rift_queued` = :rift_queued,
-            `world_boss_queued` = :world_boss_queued,
-            `world_boss_log` = :world_boss_log,
-            `last_save` = NOW(),
-            `last_arena_time` = :last_arena_time,
-            `last_arena_log` = :last_arena_log,
-            `last_rift_time` = :last_rift_time,
-            `last_rift_log` = :last_rift_log,
-            `highest_rift_level` = :highest_rift_level,
-            `last_seen` = :last_seen,
-            `credits` = :credits,
-            `subscription_expires` = :subscription_expires,
-            `last_free_credits_claim` = :last_free_credits_claim,
-            `last_pvp_time` = :last_pvp_time,
-            `last_pvp_log` = :last_pvp_log
+            " . implode(",\n            ", $set_clauses) . "
             WHERE `id` = :id";
 
         $params = [
@@ -468,6 +529,10 @@ class Character
             'last_pvp_log'  => $this->Data['last_pvp_log'] ?? null,
             'id' => (int)$this->Data['id'],
         ];
+
+        if ($has_inventory_json) {
+            $params['inventory_json'] = json_encode($this->Data['inventory_json']);
+        }
 
         $this->DAL->w($query, $params);
 
@@ -504,7 +569,58 @@ class Character
             $Perpetual->Data[$resource] = ((int)$Perpetual->Data[$resource]) + ((int)($this->Data[$resource] ?? 0));
         }
 
+        $Perpetual->Data['inventory_json']['special_resources']['lucky_wyrdstone'] =
+            ((int)($Perpetual->Data['inventory_json']['special_resources']['lucky_wyrdstone'] ?? 0))
+            + ((int)($this->Data['inventory_json']['special_resources']['lucky_wyrdstone'] ?? 0));
+
         $Perpetual->Data['last_seen'] = date('Y-m-d H:i:s');
         return $Perpetual->SaveByUserId($user_id);
+    }
+
+    private function normalizeCharacterData(): void
+    {
+        if (!isset($this->Data['worker_json']) || !is_array($this->Data['worker_json'])) {
+            $this->Data['worker_json'] = [];
+        }
+
+        if (!isset($this->Data['inventory_json']) || !is_array($this->Data['inventory_json'])) {
+            $this->Data['inventory_json'] = [];
+        }
+
+        if (!isset($this->Data['inventory_json']['special_resources']) || !is_array($this->Data['inventory_json']['special_resources'])) {
+            $this->Data['inventory_json']['special_resources'] = [];
+        }
+
+        $legacy_lucky_wyrdstone = (int)($this->Data['worker_json']['special_resources']['lucky_wyrdstone'] ?? 0);
+        $this->Data['inventory_json']['special_resources']['lucky_wyrdstone'] =
+            (int)($this->Data['inventory_json']['special_resources']['lucky_wyrdstone'] ?? 0) + $legacy_lucky_wyrdstone;
+
+        if (isset($this->Data['worker_json']['special_resources']) && is_array($this->Data['worker_json']['special_resources'])) {
+            unset($this->Data['worker_json']['special_resources']['lucky_wyrdstone']);
+            if ($this->Data['worker_json']['special_resources'] === []) {
+                unset($this->Data['worker_json']['special_resources']);
+            }
+        }
+    }
+
+    private function hasInventoryJsonColumn(): bool
+    {
+        static $has_inventory_json = null;
+
+        if ($has_inventory_json !== null) {
+            return $has_inventory_json;
+        }
+
+        $result = $this->DAL->r(
+            "SELECT 1
+             FROM information_schema.COLUMNS
+             WHERE TABLE_SCHEMA = DATABASE()
+               AND TABLE_NAME = 'characters'
+               AND COLUMN_NAME = 'inventory_json'
+             LIMIT 1"
+        );
+
+        $has_inventory_json = !empty($result);
+        return $has_inventory_json;
     }
 }

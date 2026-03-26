@@ -16,6 +16,7 @@
             # Load rift stone definitions for dynamic dropdowns
             $rift_stone_implicit_definitions = RiftStone::getImplicitDefinitions();
             $rift_stone_affix_definitions = RiftStone::getAffixDefinitions();
+            $lucky_wyrdstone = (int)($Character->Data['inventory_json']['special_resources']['lucky_wyrdstone'] ?? 0);
 
             # Get daily highest floor completed for rift stone crafting
             $rift_owner_id = isset($_SESSION['auth_user_id']) ? (int)$_SESSION['auth_user_id'] : 0;
@@ -41,6 +42,11 @@
         <!-- Gear Crafting Tab -->
         <h2><?php echo t('craft.gear.title'); ?></h2>
         <p><?php echo t('craft.gear.desc'); ?></p>
+
+        <p>
+            <b><?php echo t('craft.gear.lucky_wyrdstone_owned', ['amount' => number_format($lucky_wyrdstone)]); ?></b><br />
+            <small><?php echo t('craft.gear.lucky_wyrdstone_note'); ?></small>
+        </p>
 
         <form method="POST" action="/craft?tab=gear">
             <b><?php echo t('craft.gear.select_item'); ?></b><br />
@@ -127,6 +133,12 @@
                 <b><?php echo t('craft.gear.potential', ['level' => $party_level]); ?></b><br />
                 <small><?php echo t('craft.gear.potential_note'); ?></small>
             </p>
+
+            <label>
+                <input type="checkbox" name="use_lucky_wyrdstone" value="1" <?php echo $lucky_wyrdstone <= 0 ? 'disabled' : ''; ?>>
+                <?php echo t('craft.gear.use_lucky_wyrdstone'); ?>
+            </label>
+            <br /><br />
 
             <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
             <input type="submit" role="button" name="craft_item" value="<?php echo t('craft.gear.submit'); ?>">

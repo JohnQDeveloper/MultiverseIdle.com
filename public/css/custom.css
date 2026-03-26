@@ -357,6 +357,47 @@ input.danger-button {
     color: #dc3545;
 }
 
+/* PvP Queue Layout */
+.pvp-queue-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.pvp-queue-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 15px;
+    align-items: stretch;
+}
+
+.pvp-card {
+    display: flex;
+    flex-direction: column;
+}
+
+.pvp-card__form {
+    margin-top: auto;
+    padding-top: 12px;
+}
+
+.pvp-card__actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.pvp-card__quantity {
+    width: 72px;
+    margin-bottom: 0;
+}
+
+.pvp-card__button {
+    margin-bottom: 0;
+}
+
 /* Typography */
 .heading--no-top-margin {
     margin-top: 0;
@@ -511,6 +552,20 @@ input.danger-button {
 @media (max-width: 768px) {
     .market-order-columns {
         grid-template-columns: 1fr;
+    }
+
+    .pvp-queue-list,
+    .pvp-queue-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .pvp-card__actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .pvp-card__quantity {
+        width: 100%;
     }
 }
 

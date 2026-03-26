@@ -6,18 +6,15 @@ $time_start = microtime(true);
 require_once('../config.php');
 
 /**
- * Treasure Chests PvP Cron
+ * PvP Queue Cron
  *
- * Runs once per hour. For each active user with a chest queued at position 1,
+ * Runs once per hour. For each active user with a PvP reward queued at position 1,
  * finds a PvP opponent within +/-15% arena floor. Falls back to a mirror match
  * (clone of the player's own party) when no opponent is available.
  *
- * Small chests grant 1 battle, medium chests grant 2 battles, and large chests
- * grant 3 battles. Each battle starts fully healed.
- *
- * Perfect clear reward: 5000 * X of a random resource, where X is the total
- * battle count for the chest size.
- * Any loss in the sequence means no reward. The chest is consumed either way.
+ * Treasure chests and wyrdstone nodes share the same queue and battle counts.
+ * Each battle starts fully healed. Any loss in the sequence means no reward.
+ * The queued entry is consumed either way.
  */
 
 // Dedup: run at most once per hour
@@ -32,13 +29,13 @@ $redis->setex($dedup_key, 3600, '1');
 $row = ActiveUsers();
 
 foreach ($row as $r) {
-    echo "Processing treasure chests for user_id: " . $r['user_id'] . "\n";
+    echo "Processing PvP queue for user_id: " . $r['user_id'] . "\n";
 
     $TreasureChest = new TreasureChest();
     $queued_chests = $TreasureChest->GetQueuedChestsByOwner($r['user_id']);
 
     if (empty($queued_chests)) {
-        echo "  No queued chests.\n";
+        echo "  No queued entries.\n";
         continue;
     }
 
@@ -52,7 +49,7 @@ foreach ($row as $r) {
     }
 
     if ($current_chest === null) {
-        echo "  No chest at position 1.\n";
+        echo "  No queue entry at position 1.\n";
         continue;
     }
 
@@ -60,14 +57,25 @@ foreach ($row as $r) {
     $Character->LoadById($r['id']);
 
     $arena_floor   = (int)$Character->Data['arena_floor'];
-    $chest_size    = $current_chest['chest_size'];
-    $battle_count  = TreasureChest::CHEST_BATTLES[$chest_size];
-    $reward_amount = TreasureChest::REWARD_BASE * $battle_count;
+    $queue_type       = (string)($current_chest['queue_type'] ?? TreasureChest::ENTRY_TYPE_CHEST);
+    $queue_size       = $TreasureChest->GetQueueEntryDisplaySize($current_chest);
+    $storage_size     = (string)$current_chest['chest_size'];
+    $battle_count     = TreasureChest::CHEST_BATTLES[$storage_size];
+    $is_wyrdstone_node = $queue_type === TreasureChest::ENTRY_TYPE_WYRDSTONE_NODE;
+    $reward_amount    = $is_wyrdstone_node
+        ? TreasureChest::WYRDSTONE_NODE_REWARDS[$storage_size]
+        : TreasureChest::REWARD_BASE * $battle_count;
 
-    echo "  Processing {$chest_size} chest ({$battle_count} battle(s), {$reward_amount} perfect-clear reward).\n";
+    $entry_label = $is_wyrdstone_node ? ucfirst($queue_size) . ' Wyrdstone Node' : ucfirst($queue_size) . ' Chest';
 
-    $pvp_log  = "<h3>PvP Treasure Chest Battle</h3>\n";
-    $pvp_log .= "<p><b>Chest:</b> " . ucfirst($chest_size) . " &mdash; {$battle_count} battle(s), {$reward_amount} of a random resource only if you win every battle</p>\n";
+    echo "  Processing {$entry_label} ({$battle_count} battle(s), {$reward_amount} perfect-clear reward).\n";
+
+    $pvp_log  = "<h3>PvP Queue Battle</h3>\n";
+    if ($is_wyrdstone_node) {
+        $pvp_log .= "<p><b>Node:</b> {$entry_label} &mdash; {$battle_count} battle(s), {$reward_amount} lucky wyrdstone only if you win every battle</p>\n";
+    } else {
+        $pvp_log .= "<p><b>Chest:</b> {$entry_label} &mdash; {$battle_count} battle(s), {$reward_amount} of a random resource only if you win every battle</p>\n";
+    }
 
     $Battle = new Battle();
     $pvp_wins = 0;
@@ -116,8 +124,8 @@ foreach ($row as $r) {
         } else {
             $all_battles_won = false;
             $pvp_log .= "<span class='danger'>Defeat! {$opponent_name} was stronger this time.</span><BR />\n";
-            $pvp_log .= "<p>The chest reward is lost because this chest must be cleared perfectly.</p>\n";
-            echo "  Battle {$battle_number}: defeat — chest reward failed.\n";
+            $pvp_log .= "<p>The queue reward is lost because this entry must be cleared perfectly.</p>\n";
+            echo "  Battle {$battle_number}: defeat — queue reward failed.\n";
         }
 
         if (!empty($battle_result['log'])) {
@@ -128,20 +136,27 @@ foreach ($row as $r) {
     }
 
     if ($all_battles_won) {
-        $resources = ['gold', 'iron', 'herbs', 'gems'];
-        $reward_resource = $resources[array_rand($resources)];
-        $Character->Data[$reward_resource] += $reward_amount;
-
         $pvp_log .= "<p><b>Total victories:</b> {$pvp_wins} / {$battle_count}</p>\n";
-        $pvp_log .= "<span class='success'>Perfect clear! You earned {$reward_amount} {$reward_resource} from the " . ucfirst($chest_size) . " Chest.</span><BR />\n";
-        echo "  Chest cleared perfectly — awarded {$reward_amount} {$reward_resource}.\n";
+
+        if ($is_wyrdstone_node) {
+            $Character->Data['inventory_json']['special_resources']['lucky_wyrdstone'] =
+                (int)($Character->Data['inventory_json']['special_resources']['lucky_wyrdstone'] ?? 0) + $reward_amount;
+            $pvp_log .= "<span class='success'>Perfect clear! You earned {$reward_amount} lucky wyrdstone from the {$entry_label}.</span><BR />\n";
+            echo "  Node cleared perfectly — awarded {$reward_amount} lucky wyrdstone.\n";
+        } else {
+            $resources = ['gold', 'iron', 'herbs', 'gems'];
+            $reward_resource = $resources[array_rand($resources)];
+            $Character->Data[$reward_resource] += $reward_amount;
+            $pvp_log .= "<span class='success'>Perfect clear! You earned {$reward_amount} {$reward_resource} from the {$entry_label}.</span><BR />\n";
+            echo "  Chest cleared perfectly — awarded {$reward_amount} {$reward_resource}.\n";
+        }
     } else {
         $pvp_log .= "<p><b>Total victories:</b> {$pvp_wins} / {$battle_count}</p>\n";
-        $pvp_log .= "<p>No chest reward earned.</p>\n";
-        echo "  Chest not cleared perfectly — no reward.\n";
+        $pvp_log .= "<p>No queue reward earned.</p>\n";
+        echo "  Queue entry not cleared perfectly — no reward.\n";
     }
 
-    // Consume the chest and save
+    // Consume the queue entry and save
     $TreasureChest->RemoveChest((int)$current_chest['id'], $r['user_id']);
 
     $Character->Data['last_pvp_time'] = date('Y-m-d H:i:s');
@@ -162,4 +177,4 @@ foreach ($row as $r) {
 }
 
 $time_end = microtime(true);
-echo "Treasure chests cron execution time: " . ($time_end - $time_start) . " seconds\n";
+echo "PvP queue cron execution time: " . ($time_end - $time_start) . " seconds\n";

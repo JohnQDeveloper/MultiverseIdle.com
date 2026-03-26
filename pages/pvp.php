@@ -30,6 +30,7 @@
                 <li><?php echo t('pvp.li_matchmaking'); ?></li>
                 <li><?php echo t('pvp.li_mirror'); ?></li>
                 <li><?php echo t('pvp.li_reward'); ?></li>
+                <li><?php echo t('pvp.li_wyrdstone'); ?></li>
                 <li><?php echo t('pvp.li_no_consequence'); ?></li>
             </ul>
         </div>
@@ -40,38 +41,39 @@
         <?php if (empty($queued_chests)): ?>
             <p><em><?php echo t('pvp.queue_empty'); ?></em></p>
         <?php else: ?>
-            <div style="margin-bottom: 30px;">
+            <div class="pvp-queue-list">
                 <?php foreach ($queued_chests as $chest): ?>
                     <?php
-                        $size       = $chest['chest_size'];
-                        $multiplier = TreasureChest::CHEST_MULTIPLIERS[$size];
-                        $reward     = TreasureChest::REWARD_BASE * $multiplier;
+                        $queue_type = $chest['queue_type'] ?? TreasureChest::ENTRY_TYPE_CHEST;
+                        $size = $TreasureChest->GetQueueEntryDisplaySize($chest);
+                        $storage_size = $chest['chest_size'];
+                        $is_wyrdstone_node = $queue_type === TreasureChest::ENTRY_TYPE_WYRDSTONE_NODE;
+                        $reward = $is_wyrdstone_node
+                            ? TreasureChest::WYRDSTONE_NODE_REWARDS[$storage_size]
+                            : TreasureChest::REWARD_BASE * TreasureChest::CHEST_MULTIPLIERS[$storage_size];
                     ?>
                     <div class="card card--active">
-                        <div class="grid">
-                            <div>
-                                <h3 class="heading--no-top-margin">
-                                    <span class="badge">
-                                        <?php echo t('pvp.position', ['pos' => $chest['queue_position']]); ?>
-                                    </span>
-                                    <?php echo t('pvp.chest_' . $size); ?>
-                                </h3>
-                                <ul class="list--compact">
-                                    <li class="list-item--positive">
-                                        <?php echo t('pvp.reward_on_win', ['amount' => number_format($reward)]); ?>
-                                    </li>
-                                </ul>
-                            </div>
-                            <div>
-                                <form method="POST" action="/pvp" class="form--inline"
-                                      onsubmit="return confirm('<?php echo t('confirm.remove_chest'); ?>');">
-                                    <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
-                                    <input type="hidden" name="chest_id" value="<?php echo (int)$chest['id']; ?>">
-                                    <input type="submit" role="button" name="remove_chest"
-                                           value="<?php echo t('pvp.remove_from_queue'); ?>" class="secondary">
-                                </form>
-                            </div>
-                        </div>
+                        <h3 class="heading--no-top-margin">
+                            <span class="badge">
+                                <?php echo t('pvp.position', ['pos' => $chest['queue_position']]); ?>
+                            </span>
+                            <?php echo t($is_wyrdstone_node ? 'pvp.node_' . $size : 'pvp.chest_' . $size); ?>
+                        </h3>
+                        <ul class="list--compact">
+                            <li class="list-item--positive">
+                                <?php echo t(
+                                    $is_wyrdstone_node ? 'pvp.reward_wyrdstone_on_win' : 'pvp.reward_on_win',
+                                    ['amount' => number_format($reward)]
+                                ); ?>
+                            </li>
+                        </ul>
+                        <form method="POST" action="/pvp"
+                              onsubmit="return confirm('<?php echo t('confirm.remove_pvp_queue'); ?>');">
+                            <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
+                            <input type="hidden" name="chest_id" value="<?php echo (int)$chest['id']; ?>">
+                            <input type="submit" role="button" name="remove_chest"
+                                   value="<?php echo t('pvp.remove_from_queue'); ?>" class="secondary pvp-card__button">
+                        </form>
                     </div>
                 <?php endforeach; ?>
             </div>
@@ -83,10 +85,11 @@
         <?php if (count($queued_chests) >= $queue_max): ?>
             <p class="text--warning"><em><?php echo t('pvp.queue_full_msg', ['max' => $queue_max]); ?></em></p>
         <?php else: ?>
-            <div class="grid">
+            <?php $slots_available = $queue_max - count($queued_chests); ?>
+            <div class="pvp-queue-grid">
                 <?php foreach (TreasureChest::CHEST_BATTLES as $size => $battle_count): ?>
                     <?php $reward = TreasureChest::REWARD_BASE * $battle_count; ?>
-                    <div class="card">
+                    <div class="card pvp-card">
                         <h3 class="heading--no-top-margin"><?php echo t('pvp.chest_' . $size); ?></h3>
                         <p><?php echo t('pvp.chest_desc_' . $size); ?></p>
                         <ul class="list--compact">
@@ -94,15 +97,40 @@
                                 <?php echo t('pvp.reward_on_win', ['amount' => number_format($reward)]); ?>
                             </li>
                         </ul>
-                        <?php $slots_available = $queue_max - count($queued_chests); ?>
-                        <form method="POST" action="/pvp" style="margin-top: 12px;">
+                        <form method="POST" action="/pvp" class="pvp-card__form">
                             <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
                             <input type="hidden" name="chest_size" value="<?php echo $size; ?>">
-                            <div role="group">
+                            <div role="group" class="pvp-card__actions">
                                 <input type="number" name="quantity" value="1" min="1"
+                                       class="pvp-card__quantity"
                                        max="<?php echo $slots_available; ?>">
                                 <input type="submit" name="queue_chest"
+                                       class="pvp-card__button"
                                        value="<?php echo t('pvp.queue_btn'); ?>">
+                            </div>
+                        </form>
+                    </div>
+                <?php endforeach; ?>
+                <?php foreach (TreasureChest::WYRDSTONE_NODE_STORAGE_SIZES as $size => $storage_size): ?>
+                    <?php $reward = TreasureChest::WYRDSTONE_NODE_REWARDS[$storage_size]; ?>
+                    <div class="card pvp-card">
+                        <h3 class="heading--no-top-margin"><?php echo t('pvp.node_' . $size); ?></h3>
+                        <p><?php echo t('pvp.node_desc_' . $size); ?></p>
+                        <ul class="list--compact">
+                            <li class="list-item--positive">
+                                <?php echo t('pvp.reward_wyrdstone_on_win', ['amount' => number_format($reward)]); ?>
+                            </li>
+                        </ul>
+                        <form method="POST" action="/pvp" class="pvp-card__form">
+                            <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
+                            <input type="hidden" name="node_size" value="<?php echo $size; ?>">
+                            <div role="group" class="pvp-card__actions">
+                                <input type="number" name="quantity" value="1" min="1"
+                                       class="pvp-card__quantity"
+                                       max="<?php echo $slots_available; ?>">
+                                <input type="submit" name="queue_wyrdstone_node"
+                                       class="pvp-card__button"
+                                       value="<?php echo t('pvp.queue_node_btn'); ?>">
                             </div>
                         </form>
                     </div>

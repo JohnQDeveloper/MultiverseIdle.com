@@ -1,5 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
+    $lucky_wyrdstone = (int)($Character->Data['inventory_json']['special_resources']['lucky_wyrdstone'] ?? 0);
+
     # Gear affix and item type definitions (from Gear class)
     $affix_definitions = Gear::getAffixDefinitions();
     $item_type_definitions = Gear::getItemTypeDefinitions();
@@ -40,83 +44,100 @@
             $party_level = $Character->Data['party_json']['members']['frontline']['level'];
             $potential = floor($party_level * 1);
 
-            # Initialize affix levels
-            $affix_1_level = 0;
-            $affix_2_level = 0;
-            $current_affix = 1; # Start with first affix
+            $use_lucky_wyrdstone = isset($_POST['use_lucky_wyrdstone']);
+            if ($use_lucky_wyrdstone && $lucky_wyrdstone <= 0) {
+                $alert_danger = t('craft.alert.no_lucky_wyrdstone');
+            } else {
+                # Initialize affix levels
+                $affix_1_level = 0;
+                $affix_2_level = 0;
+                $current_affix = 1; # Start with first affix
 
-            # Consume potential by alternating between affixes
-            while ($potential > 0) {
-                if ($Character->Data['iron'] < 2500) {
-                    break;
+                # Consume potential by alternating between affixes
+                while ($potential > 0) {
+                    if ($Character->Data['iron'] < 2500) {
+                        break;
+                    }
+
+                    # Lucky wyrdstone rolls twice and keeps the more favorable potential cost.
+                    $consumed = rand(1, 5);
+                    if ($use_lucky_wyrdstone) {
+                        $consumed = min($consumed, rand(1, 5));
+                    }
+                    $consumed = min($consumed, $potential); # Don't consume more than available
+
+                    if ($current_affix === 1) {
+                        $affix_1_level++;
+                        $current_affix = 2;
+                    } else {
+                        $affix_2_level++;
+                        $current_affix = 1;
+                    }
+
+                    $potential -= $consumed;
+                    $Character->Data['iron'] -= 2500; # Deduct iron cost per upgrade
                 }
 
-                # Random potential consumed per upgrade (1-5)
-                $consumed = rand(1, 5);
-                $consumed = min($consumed, $potential); # Don't consume more than available
-
-                if ($current_affix === 1) {
-                    $affix_1_level++;
-                    $current_affix = 2;
-                } else {
-                    $affix_2_level++;
-                    $current_affix = 1;
+                if ($use_lucky_wyrdstone) {
+                    $Character->Data['inventory_json']['special_resources']['lucky_wyrdstone'] = $lucky_wyrdstone - 1;
+                    $lucky_wyrdstone--;
                 }
 
-                $potential -= $consumed;
-                $Character->Data['iron'] -= 2500; # Deduct iron cost per upgrade
+                # Calculate final affix values
+                $affix_1_value = $affix_1_level * $affix_definitions[$affix_1]['per_level'];
+                $affix_2_value = $affix_2_level * $affix_definitions[$affix_2]['per_level'];
+
+                # Generate random item name: PREFIX MATERIAL ITEM_TYPE SUFFIX
+                $random_prefix = GEARNAMES_PREFIX[array_rand(GEARNAMES_PREFIX)];
+                $random_material = GEARNAMES_MATERIAL[array_rand(GEARNAMES_MATERIAL)];
+                $random_suffix = GEARNAMES_SUFFIX[array_rand(GEARNAMES_SUFFIX)];
+                $item_name = $random_prefix . ' ' . $random_material . ' ' . t('gear.item.' . $item_type) . ' ' . $random_suffix;
+
+                # Create the item array
+                $crafted_item = [
+                    'type' => $item_type,
+                    'name' => $item_name,
+                    'slot' => $item_type_definitions[$item_type]['slot'],
+                    'base_bonuses' => $item_type_definitions[$item_type]['bonuses'],
+                    'affixes' => [
+                        [
+                            'key' => $affix_1,
+                            'name' => t('gear.affix.' . $affix_1),
+                            'level' => $affix_1_level,
+                            'value' => $affix_1_value,
+                            'type' => $affix_definitions[$affix_1]['type'],
+                        ],
+                        [
+                            'key' => $affix_2,
+                            'name' => t('gear.affix.' . $affix_2),
+                            'level' => $affix_2_level,
+                            'value' => $affix_2_value,
+                            'type' => $affix_definitions[$affix_2]['type'],
+                        ],
+                    ],
+                    'party_level_at_craft' => $party_level,
+                ];
+
+                # Format success message
+                $affix_1_suffix = $affix_definitions[$affix_1]['type'] === 'percent' ? '%' : '';
+                $affix_2_suffix = $affix_definitions[$affix_2]['type'] === 'percent' ? '%' : '';
+
+                $affix_1_text = '+' . $affix_1_value . $affix_1_suffix . ' ' . htmlspecialchars(t('gear.affix.' . $affix_1)) .
+                    ' ' . t('craft.level_short', ['level' => $affix_1_level]);
+                $affix_2_text = '+' . $affix_2_value . $affix_2_suffix . ' ' . htmlspecialchars(t('gear.affix.' . $affix_2)) .
+                    ' ' . t('craft.level_short', ['level' => $affix_2_level]);
+
+                $alert_success = t('craft.alert.crafted_gear', ['name' => htmlspecialchars($crafted_item['name']), 'affixes' =>
+                    $affix_1_text . ' ' . t('craft.and') . ' ' . $affix_2_text]);
+
+                if ($use_lucky_wyrdstone) {
+                    $alert_success .= ' ' . t('craft.alert.used_lucky_wyrdstone');
+                }
+
+                # Save the crafted item
+                $gear = new Gear();
+                $new_gear_id = $gear->CreateItem($crafted_item['name'], $crafted_item);
             }
-
-            # Calculate final affix values
-            $affix_1_value = $affix_1_level * $affix_definitions[$affix_1]['per_level'];
-            $affix_2_value = $affix_2_level * $affix_definitions[$affix_2]['per_level'];
-
-            # Generate random item name: PREFIX MATERIAL ITEM_TYPE SUFFIX
-            $random_prefix = GEARNAMES_PREFIX[array_rand(GEARNAMES_PREFIX)];
-            $random_material = GEARNAMES_MATERIAL[array_rand(GEARNAMES_MATERIAL)];
-            $random_suffix = GEARNAMES_SUFFIX[array_rand(GEARNAMES_SUFFIX)];
-            $item_name = $random_prefix . ' ' . $random_material . ' ' . t('gear.item.' . $item_type) . ' ' . $random_suffix;
-
-            # Create the item array
-            $crafted_item = [
-                'type' => $item_type,
-                'name' => $item_name,
-                'slot' => $item_type_definitions[$item_type]['slot'],
-                'base_bonuses' => $item_type_definitions[$item_type]['bonuses'],
-                'affixes' => [
-                    [
-                        'key' => $affix_1,
-                        'name' => t('gear.affix.' . $affix_1),
-                        'level' => $affix_1_level,
-                        'value' => $affix_1_value,
-                        'type' => $affix_definitions[$affix_1]['type'],
-                    ],
-                    [
-                        'key' => $affix_2,
-                        'name' => t('gear.affix.' . $affix_2),
-                        'level' => $affix_2_level,
-                        'value' => $affix_2_value,
-                        'type' => $affix_definitions[$affix_2]['type'],
-                    ],
-                ],
-                'party_level_at_craft' => $party_level,
-            ];
-
-            # Format success message
-            $affix_1_suffix = $affix_definitions[$affix_1]['type'] === 'percent' ? '%' : '';
-            $affix_2_suffix = $affix_definitions[$affix_2]['type'] === 'percent' ? '%' : '';
-
-            $affix_1_text = '+' . $affix_1_value . $affix_1_suffix . ' ' . htmlspecialchars(t('gear.affix.' . $affix_1)) .
-                ' ' . t('craft.level_short', ['level' => $affix_1_level]);
-            $affix_2_text = '+' . $affix_2_value . $affix_2_suffix . ' ' . htmlspecialchars(t('gear.affix.' . $affix_2)) .
-                ' ' . t('craft.level_short', ['level' => $affix_2_level]);
-
-            $alert_success = t('craft.alert.crafted_gear', ['name' => htmlspecialchars($crafted_item['name']), 'affixes' =>
-                $affix_1_text . ' ' . t('craft.and') . ' ' . $affix_2_text]);
-
-            # Save the crafted item
-            $gear = new Gear();
-            $new_gear_id = $gear->CreateItem($crafted_item['name'], $crafted_item);
         }
     }
 
