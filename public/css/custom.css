@@ -32,6 +32,32 @@ article {
     padding: 1em;
 }
 
+.language-picker {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.language-picker label {
+    margin-bottom: 0;
+}
+
+.language-picker__controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.language-picker__controls select {
+    margin-bottom: 0;
+}
+
+.language-picker__controls button {
+    margin-bottom: 0;
+}
+
 /* alert box */
 .alert {
   padding: 1em;
