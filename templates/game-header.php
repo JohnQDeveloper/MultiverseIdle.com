@@ -36,6 +36,7 @@
                   <li><a href="/guilds"><?php echo t('nav.guild'); ?></a></li>
                   <li><a href="/guild-bank"><?php echo t('nav.guild_bank'); ?></a></li>
                   <li><a href="/guild-buildings"><?php echo t('nav.guild_buildings'); ?></a></li>
+                  <li><a href="/guild-quests"><?php echo t('nav.guild_quests'); ?></a></li>
                 </ul>
               </li>
               <?php if (!isset($_SESSION['guest_mode']) || $_SESSION['guest_mode'] !== true): ?>

@@ -1006,4 +1006,44 @@ return [
 
     'confirm.remove_chest'       => 'Remove this chest from the queue?',
 
+    // -------------------------------------------------------------------------
+    // Guild Quests
+    // -------------------------------------------------------------------------
+    'nav.guild_quests'                      => 'Guild Quests',
+
+    'guild_quests.title'                    => 'Guild Quests',
+    'guild_quests.not_in_guild'             => 'You are not in a guild',
+    'guild_quests.not_in_desc'              => 'Join or create a guild to access guild quests.',
+    'guild_quests.back'                     => 'Back to {name}',
+
+    'guild_quests.active_title'             => 'Active Quests ({count}/{max})',
+    'guild_quests.no_active'                => 'No active quests. Add a quest below to get started!',
+
+    'guild_quests.progress'                 => '{current} / {target}',
+    'guild_quests.completed_at'             => 'Completed: {date}',
+    'guild_quests.reward'                   => 'Reward: {amount} {resource}',
+
+    'guild_quests.grade.easy'               => 'Easy',
+    'guild_quests.grade.normal'             => 'Normal',
+    'guild_quests.grade.hard'               => 'Hard',
+    'guild_quests.grade.legendary'          => 'Legendary',
+
+    'guild_quests.type.pvp_wins'            => 'Win {target} PvP Encounters',
+    'guild_quests.type.arena_wins'          => 'Win {target} Arena Matches',
+    'guild_quests.type.world_boss_top50'    => '{target} Members Rank in Top 50% of World Boss',
+
+    'guild_quests.add_title'                => 'Add a Quest',
+    'guild_quests.add_desc'                 => 'Queue up to {max} quests at a time. All quests run in parallel.',
+    'guild_quests.grade_label'              => 'Grade',
+    'guild_quests.add_submit'               => 'Add Quest',
+    'guild_quests.queue_full'               => 'Quest queue is full ({max} max). Wait for an active quest to complete.',
+
+    'guild_quests.history_title'            => 'Recent Completions',
+    'guild_quests.no_history'               => 'No quests completed yet.',
+
+    'guild_quests.alert.added'              => 'Quest added successfully!',
+    'guild_quests.alert.add_fail'           => 'Failed to add quest. The queue may be full.',
+    'guild_quests.alert.invalid_grade'      => 'Invalid quest grade.',
+    'guild_quests.alert.no_permission'      => 'Only officers and guild masters can add quests.',
+
 ];

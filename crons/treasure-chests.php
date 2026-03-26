@@ -123,6 +123,16 @@ foreach ($row as $r) {
     $Character->Data['last_pvp_log']  = $pvp_log;
     $Character->SaveByUserId($r['user_id']);
 
+    // Increment guild quest progress for PvP wins
+    if ($battle_result['player_won']) {
+        $GuildQuestsPvp = new GuildQuests();
+        $GuildQuestsPvp->setSeasonId($Character->Data['season_id'] ?? null);
+        $pvp_guild_id = (new Guild())->GetUserGuildId($r['user_id']);
+        if ($pvp_guild_id !== null) {
+            $GuildQuestsPvp->IncrementProgress($pvp_guild_id, 'pvp_wins');
+        }
+    }
+
     echo "  Saved PvP results for user_id: " . $r['user_id'] . "\n";
 }
 

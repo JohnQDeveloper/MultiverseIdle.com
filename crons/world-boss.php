@@ -154,6 +154,30 @@ if ($total_world_boss_damage > 0) {
 
 // TODO: Log results to character's log
 
+// Increment guild quest progress for world boss top 50%
+if ($total_world_boss_damage > 0 && count($participant_damage) >= 2) {
+    $top50_cutoff = (int) ceil(count($participant_damage) / 2);
+    // $participant_damage is already sorted by damage descending with rank assigned
+    $guild_top50_counts = [];
+    foreach ($participant_damage as $participant) {
+        if ($participant['rank'] <= $top50_cutoff) {
+            // Look up this user's guild
+            $GuildLookup = new Guild();
+            $wb_guild_id = $GuildLookup->GetUserGuildId($participant['user_id']);
+            if ($wb_guild_id !== null) {
+                $guild_top50_counts[$wb_guild_id] = ($guild_top50_counts[$wb_guild_id] ?? 0) + 1;
+            }
+        }
+    }
+    foreach ($guild_top50_counts as $wb_guild_id => $count) {
+        $GuildQuestsWb = new GuildQuests();
+        // Season ID: world boss runs globally without season filtering; use null
+        $GuildQuestsWb->setSeasonId(null);
+        $GuildQuestsWb->IncrementProgress($wb_guild_id, 'world_boss_top50', $count);
+        echo "Guild $wb_guild_id had $count member(s) in top 50% of World Boss.\n";
+    }
+}
+
 // Clear the queue - remove all participants after battle completes
 $DAL->w("UPDATE characters SET world_boss_queued = 0 WHERE world_boss_queued = 1");
 $rows_cleared = $DAL->rows_affected();

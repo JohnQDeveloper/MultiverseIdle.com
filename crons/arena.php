@@ -185,6 +185,16 @@
             $Character->Data['last_arena_time'] = date('Y-m-d H:i:s');
             $Character->Data['last_arena_log'] = $ArenaLog;
             $Character->SaveByUserId($r['user_id']);
+
+            // Increment guild quest progress for arena wins
+            if ($battle_result['player_won']) {
+                $GuildQuestsArena = new GuildQuests();
+                $GuildQuestsArena->setSeasonId($Character->Data['season_id'] ?? null);
+                $arena_guild_id = (new Guild())->GetUserGuildId($r['user_id']);
+                if ($arena_guild_id !== null) {
+                    $GuildQuestsArena->IncrementProgress($arena_guild_id, 'arena_wins');
+                }
+            }
             echo "Saved arena results for user_id: ".$r['user_id']."\n";
         }
     }

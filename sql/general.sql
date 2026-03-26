@@ -238,3 +238,23 @@ CREATE TABLE treasure_chests (
 
 ALTER TABLE characters ADD COLUMN last_pvp_log  TEXT DEFAULT NULL;
 ALTER TABLE characters ADD COLUMN last_pvp_time DATETIME DEFAULT NULL;
+
+
+--- guild quests
+CREATE TABLE `guild_quests` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `guild_id` INT UNSIGNED NOT NULL,
+  `season_id` INT UNSIGNED NULL DEFAULT NULL,
+  `grade` ENUM('easy', 'normal', 'hard', 'legendary') NOT NULL,
+  `quest_type` ENUM('pvp_wins', 'arena_wins', 'world_boss_top50') NOT NULL,
+  `resource_type` ENUM('gold', 'iron', 'herbs', 'gems') NOT NULL,
+  `target_amount` INT UNSIGNED NOT NULL,
+  `current_amount` INT UNSIGNED NOT NULL DEFAULT 0,
+  `reward_amount` BIGINT UNSIGNED NOT NULL,
+  `is_completed` TINYINT(1) NOT NULL DEFAULT 0,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `completed_at` TIMESTAMP NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`guild_id`) REFERENCES `guilds`(`id`) ON DELETE CASCADE,
+  INDEX `idx_guild_quests_active` (`guild_id`, `is_completed`, `season_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
