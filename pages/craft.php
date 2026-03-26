@@ -2,8 +2,8 @@
     <!-- Page Details -->
     <div class="wrapper">
     <article class="main">
-        <h1>Craft</h1>
-        <p>Craft powerful gear and potions to enhance your party's abilities.</p>
+        <h1><?php echo t('craft.title'); ?></h1>
+        <p><?php echo t('craft.desc'); ?></p>
 
         <?php
             $party_level = $Character->Data['party_json']['members']['frontline']['level'];
@@ -32,18 +32,18 @@
 
         <!-- Tab Navigation -->
         <div class="tab-nav">
-            <a href="/craft?tab=gear" class="tab-nav-item <?php echo $active_tab === 'gear' ? 'active' : ''; ?>">Gear Crafting</a>
-            <a href="/craft?tab=potions" class="tab-nav-item <?php echo $active_tab === 'potions' ? 'active' : ''; ?>">Potion Crafting</a>
-            <a href="/craft?tab=rift_stones" class="tab-nav-item <?php echo $active_tab === 'rift_stones' ? 'active' : ''; ?>">Rift Stones</a>
+            <a href="/craft?tab=gear" class="tab-nav-item <?php echo $active_tab === 'gear' ? 'active' : ''; ?>"><?php echo t('craft.tab.gear'); ?></a>
+            <a href="/craft?tab=potions" class="tab-nav-item <?php echo $active_tab === 'potions' ? 'active' : ''; ?>"><?php echo t('craft.tab.potions'); ?></a>
+            <a href="/craft?tab=rift_stones" class="tab-nav-item <?php echo $active_tab === 'rift_stones' ? 'active' : ''; ?>"><?php echo t('craft.tab.rift_stones'); ?></a>
         </div>
 
         <?php if ($active_tab === 'gear'): ?>
         <!-- Gear Crafting Tab -->
-        <h2>Gear Crafting</h2>
-        <p>Craft powerful gear to enhance your party's abilities. Each item type provides different stat bonuses.</p>
+        <h2><?php echo t('craft.gear.title'); ?></h2>
+        <p><?php echo t('craft.gear.desc'); ?></p>
 
         <form method="POST" action="/craft?tab=gear">
-            <b>Select Item to Craft:</b><br />
+            <b><?php echo t('craft.gear.select_item'); ?></b><br />
             <select name="item_type">
                 <?php
                     # Group items by slot type
@@ -53,49 +53,49 @@
                     }
                 ?>
                 <?php foreach ($items_by_slot as $slot => $items): ?>
-                <optgroup label="<?php echo htmlspecialchars(ucfirst($slot) . 's'); ?>">
+                <optgroup label="<?php echo htmlspecialchars(t('craft.gear.slot.' . $slot)); ?>">
                     <?php foreach ($items as $key => $item): ?>
                         <?php
                             # Build bonus description
                             $bonus_parts = [];
                             foreach ($item['bonuses'] as $bonus_stat => $bonus_value) {
-                                $bonus_parts[] = '+' . $bonus_value . '% ' . ucfirst($bonus_stat);
+                                $bonus_parts[] = '+' . $bonus_value . '% ' . t('gear.stat_bonus.' . $bonus_stat);
                             }
                             $bonus_text = implode(', ', $bonus_parts);
                         ?>
-                        <option value="<?php echo htmlspecialchars($key); ?>"><?php echo htmlspecialchars($item['name']); ?> (<?php echo htmlspecialchars($bonus_text); ?>)</option>
+                        <option value="<?php echo htmlspecialchars($key); ?>"><?php echo htmlspecialchars(t('gear.item.' . $key)); ?> (<?php echo htmlspecialchars($bonus_text); ?>)</option>
                     <?php endforeach; ?>
                 </optgroup>
                 <?php endforeach; ?>
             </select>
             <br /><br />
 
-            <b>Select First Affix:</b><br />
+            <b><?php echo t('craft.gear.select_affix1'); ?></b><br />
             <select name="affix_1">
                 <?php
                     # Group affixes by type
                     $affixes_by_group = [
-                        'Stats' => [],
-                        'Damage' => [],
-                        'Resistances' => []
+                        'stats' => [],
+                        'damage' => [],
+                        'resistances' => []
                     ];
                     foreach ($affix_definitions as $key => $affix) {
                         if (str_contains($key, 'damage')) {
-                            $affixes_by_group['Damage'][$key] = $affix;
+                            $affixes_by_group['damage'][$key] = $affix;
                         } elseif (str_contains($key, 'resistance')) {
-                            $affixes_by_group['Resistances'][$key] = $affix;
+                            $affixes_by_group['resistances'][$key] = $affix;
                         } else {
-                            $affixes_by_group['Stats'][$key] = $affix;
+                            $affixes_by_group['stats'][$key] = $affix;
                         }
                     }
                 ?>
                 <?php foreach ($affixes_by_group as $group_name => $affixes): ?>
                     <?php if (!empty($affixes)): ?>
-                    <optgroup label="<?php echo htmlspecialchars($group_name); ?>">
+                    <optgroup label="<?php echo htmlspecialchars(t('craft.gear.group.' . $group_name)); ?>">
                         <?php foreach ($affixes as $key => $affix): ?>
                             <?php
                                 $suffix = $affix['type'] === 'percent' ? '%' : '';
-                                $description = htmlspecialchars($affix['name']) . ' (+' . $affix['per_level'] . $suffix . ' per level)';
+                                $description = htmlspecialchars(t('gear.affix.' . $key)) . ' (' . t('common.per_level', ['value' => $affix['per_level'], 'suffix' => $suffix]) . ')';
                             ?>
                             <option value="<?php echo htmlspecialchars($key); ?>"><?php echo $description; ?></option>
                         <?php endforeach; ?>
@@ -105,15 +105,15 @@
             </select>
             <br /><br />
 
-            <b>Select Second Affix:</b><br />
+            <b><?php echo t('craft.gear.select_affix2'); ?></b><br />
             <select name="affix_2">
                 <?php foreach ($affixes_by_group as $group_name => $affixes): ?>
                     <?php if (!empty($affixes)): ?>
-                    <optgroup label="<?php echo htmlspecialchars($group_name); ?>">
+                    <optgroup label="<?php echo htmlspecialchars(t('craft.gear.group.' . $group_name)); ?>">
                         <?php foreach ($affixes as $key => $affix): ?>
                             <?php
                                 $suffix = $affix['type'] === 'percent' ? '%' : '';
-                                $description = htmlspecialchars($affix['name']) . ' (+' . $affix['per_level'] . $suffix . ' per level)';
+                                $description = htmlspecialchars(t('gear.affix.' . $key)) . ' (' . t('common.per_level', ['value' => $affix['per_level'], 'suffix' => $suffix]) . ')';
                             ?>
                             <option value="<?php echo htmlspecialchars($key); ?>"><?php echo $description; ?></option>
                         <?php endforeach; ?>
@@ -124,89 +124,89 @@
             <br /><br />
 
             <p>
-                <b>Potential:</b> <?php echo $party_level; ?> (100% of Party Level <?php echo $party_level; ?>)<br />
-                <small>Each affix level consumes 1-5 potential and 2,500 Iron. Upgrades alternate between affixes until potential is exhausted.</small>
+                <b><?php echo t('craft.gear.potential', ['level' => $party_level]); ?></b><br />
+                <small><?php echo t('craft.gear.potential_note'); ?></small>
             </p>
 
             <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
-            <input type="submit" role="button" name="craft_item" value="Craft Item">
+            <input type="submit" role="button" name="craft_item" value="<?php echo t('craft.gear.submit'); ?>">
         </form>
 
         <?php elseif ($active_tab === 'potions'): ?>
         <!-- Potion Crafting Tab -->
-        <h2>Potion Crafting</h2>
-        <p>Brew potions to boost your resource gains and experience. Potions have a prefix and suffix affix.</p>
+        <h2><?php echo t('craft.potion.title'); ?></h2>
+        <p><?php echo t('craft.potion.desc'); ?></p>
 
         <form method="POST" action="/craft?tab=potions">
-            <b>Select Prefix Affix:</b><br />
+            <b><?php echo t('craft.potion.select_prefix'); ?></b><br />
             <select name="prefix_affix">
-                <optgroup label="Worker Yields">
+                <optgroup label="<?php echo t('craft.potion.group.worker_yields'); ?>">
                     <?php foreach (['herb_worker_yield', 'gold_worker_yield', 'iron_worker_yield', 'gems_worker_yield'] as $key): ?>
-                    <option value="<?php echo $key; ?>"><?php echo $potion_prefix_definitions[$key]['name']; ?> (+<?php echo $potion_prefix_definitions[$key]['per_level']; ?>% per level)</option>
+                    <option value="<?php echo $key; ?>"><?php echo t('potion.affix.' . $key); ?> (<?php echo t('common.per_level', ['value' => $potion_prefix_definitions[$key]['per_level'], 'suffix' => '%']); ?>)</option>
                     <?php endforeach; ?>
                 </optgroup>
-                <optgroup label="Resource Drops">
+                <optgroup label="<?php echo t('craft.potion.group.resource_drops'); ?>">
                     <?php foreach (['arena_resource_drops', 'rift_drops'] as $key): ?>
-                    <option value="<?php echo $key; ?>"><?php echo $potion_prefix_definitions[$key]['name']; ?> (+<?php echo $potion_prefix_definitions[$key]['per_level']; ?>% per level)</option>
+                    <option value="<?php echo $key; ?>"><?php echo t('potion.affix.' . $key); ?> (<?php echo t('common.per_level', ['value' => $potion_prefix_definitions[$key]['per_level'], 'suffix' => '%']); ?>)</option>
                     <?php endforeach; ?>
                 </optgroup>
             </select>
             <br /><br />
 
-            <b>Select Suffix Affix:</b><br />
+            <b><?php echo t('craft.potion.select_suffix'); ?></b><br />
             <select name="suffix_affix">
-                <optgroup label="Experience Gains">
+                <optgroup label="<?php echo t('craft.potion.group.xp_gains'); ?>">
                     <?php foreach (['arena_xp', 'rift_xp', 'world_boss_xp'] as $key): ?>
-                    <option value="<?php echo $key; ?>"><?php echo $potion_suffix_definitions[$key]['name']; ?> (+<?php echo $potion_suffix_definitions[$key]['per_level']; ?>% per level)</option>
+                    <option value="<?php echo $key; ?>"><?php echo t('potion.affix.' . $key); ?> (<?php echo t('common.per_level', ['value' => $potion_suffix_definitions[$key]['per_level'], 'suffix' => '%']); ?>)</option>
                     <?php endforeach; ?>
                 </optgroup>
-                <optgroup label="Stat Gains">
+                <optgroup label="<?php echo t('craft.potion.group.stat_gains'); ?>">
                     <?php foreach (['arena_stat_gains', 'rift_stat_gains'] as $key): ?>
-                    <option value="<?php echo $key; ?>"><?php echo $potion_suffix_definitions[$key]['name']; ?> (+<?php echo $potion_suffix_definitions[$key]['per_level']; ?>% per level)</option>
+                    <option value="<?php echo $key; ?>"><?php echo t('potion.affix.' . $key); ?> (<?php echo t('common.per_level', ['value' => $potion_suffix_definitions[$key]['per_level'], 'suffix' => '%']); ?>)</option>
                     <?php endforeach; ?>
                 </optgroup>
             </select>
             <br /><br />
 
             <p>
-                <b>Potion Level:</b> <?php echo $party_level; ?> (Equal to Party Level <?php echo $party_level; ?>)<br />
-                <small>Crafting cost: <?php echo number_format($party_level * 1500); ?> Herbs. Potion level is fixed at your current party level.</small>
+                <b><?php echo t('craft.potion.level', ['level' => $party_level]); ?></b><br />
+                <small><?php echo t('craft.potion.cost_note', ['cost' => number_format($party_level * 1500)]); ?></small>
             </p>
 
             <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
-            <input type="submit" role="button" name="craft_potion" value="Craft Potion">
+            <input type="submit" role="button" name="craft_potion" value="<?php echo t('craft.potion.submit'); ?>">
         </form>
 
         <?php elseif ($active_tab === 'rift_stones'): ?>
         <!-- Rift Stones Crafting Tab -->
-        <h2>Rift Stone Crafting</h2>
-        <p>Craft Rift Stones to unlock challenging 10-battle Rift Delves. Choose one implicit modifier that defines your rewards, and receive 3 random difficulty affixes.</p>
+        <h2><?php echo t('craft.rift.title'); ?></h2>
+        <p><?php echo t('craft.rift.desc'); ?></p>
 
         <div>
-            <h3 class="heading--no-top-margin">What are Rift Delves?</h3>
+            <h3 class="heading--no-top-margin"><?php echo t('craft.rift.what_title'); ?></h3>
             <ul>
-                <li><b>10 consecutive battles</b> against random monsters</li>
-                <li><b>Heal to full</b> before each battle</li>
-                <li><b>Rewards only if you win all 10 battles</b></li>
-                <li><b>Rift Level:</b> Rolls between 80-100% of your highest arena floor completed today</li>
-                <li><b>3 random affixes</b> make monsters stronger (can repeat)</li>
+                <li><?php echo t('craft.rift.li_battles'); ?></li>
+                <li><?php echo t('craft.rift.li_heal'); ?></li>
+                <li><?php echo t('craft.rift.li_rewards'); ?></li>
+                <li><?php echo t('craft.rift.li_level'); ?></li>
+                <li><?php echo t('craft.rift.li_affixes'); ?></li>
             </ul>
         </div>
 
         <form method="POST" action="/craft?tab=rift_stones">
-            <b>Select Reward Implicit:</b><br />
+            <b><?php echo t('craft.rift.select_implicit'); ?></b><br />
             <select name="implicit">
                 <?php foreach ($rift_stone_implicit_definitions as $key => $implicit): ?>
                     <option value="<?php echo htmlspecialchars($key); ?>">
-                        <?php echo htmlspecialchars($implicit['name']); ?> - <?php echo htmlspecialchars($implicit['description']); ?>
+                        <?php echo htmlspecialchars(t('riftstone.implicit.' . $key . '.name')); ?> - <?php echo htmlspecialchars(t('riftstone.implicit.' . $key . '.description')); ?>
                     </option>
                 <?php endforeach; ?>
             </select>
             <br /><br />
 
-            <b>Select Rift Level:</b><br />
+            <b><?php echo t('craft.rift.select_level'); ?></b><br />
             <?php if ($daily_highest_floor <= 0): ?>
-                <p><i>You must win at least one arena battle today to craft a rift stone.</i></p>
+                <p><i><?php echo t('craft.rift.no_battles'); ?></i></p>
             <?php else: ?>
             <select name="rift_level">
                 <?php
@@ -217,26 +217,26 @@
                 <?php endfor; ?>
             </select>
             <br />
-            <small>Choose a rift level between <?php echo $min_rift_level; ?> and <?php echo $daily_highest_floor; ?> (80-100% of today's highest floor: <?php echo $daily_highest_floor; ?>)</small>
+            <small><?php echo t('craft.rift.level_range', ['min' => $min_rift_level, 'max' => $daily_highest_floor, 'floor' => $daily_highest_floor]); ?></small>
             <?php endif; ?>
             <br /><br />
 
             <div>
-                <b>Random Affixes (3 will be rolled automatically):</b>
+                <b><?php echo t('craft.rift.random_affixes'); ?></b>
                 <ul style="margin: 5px 0;">
-                    <?php foreach ($rift_stone_affix_definitions as $affix): ?>
-                        <li><?php echo htmlspecialchars($affix['description']); ?></li>
+                    <?php foreach ($rift_stone_affix_definitions as $affix_key => $affix): ?>
+                        <li><?php echo htmlspecialchars(t('riftstone.affix.' . $affix_key . '.description')); ?></li>
                     <?php endforeach; ?>
                 </ul>
-                <small><i>These affixes increase monster difficulty and can appear multiple times on the same stone.</i></small>
+                <small><i><?php echo t('craft.rift.affixes_note'); ?></i></small>
             </div>
             <br />
             <div>
-                <b>Crafting Cost:</b> <?php echo number_format($daily_highest_floor * 15); ?> Gems
+                <b><?php echo t('craft.rift.cost', ['cost' => number_format($daily_highest_floor * 15)]); ?></b>
             </div>
             <br />
             <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
-            <input type="submit" role="button" name="craft_rift_stone" value="Craft Rift Stone">
+            <input type="submit" role="button" name="craft_rift_stone" value="<?php echo t('craft.rift.submit'); ?>">
         </form>
 
         <?php endif; ?>

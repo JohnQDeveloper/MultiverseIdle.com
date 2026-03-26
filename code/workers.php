@@ -6,9 +6,9 @@
         $valid_resources = array_map('strtolower', RESOURCES);
         if (in_array($selected_resource, $valid_resources, true)) {
             $Character->Data['worker_json']['resource'] = $selected_resource;
-            $alert_success = 'Workers have been assigned to gather ' . htmlspecialchars(ucfirst($selected_resource)) . '.';
+            $alert_success = t('workers.alert.assigned', ['resource' => t('res.' . strtolower($selected_resource))]);
         } else {
-            $alert_danger = 'Invalid resource selected.';
+            $alert_danger = t('workers.alert.invalid_res');
         }
     }
 
@@ -45,12 +45,11 @@
             $current_intelligence = $Character->Data['worker_json']['intelligence_upgrades'];
             $next_intelligence_upgrade_cost = calculate_worker_cost(500, 1.4, $current_intelligence);
 
-            $alert_success = 'You have upgraded worker intelligence by ' . $increased_intelligence . '% for ' .
-            human_num($total_cost) . ' gold!';
+            $alert_success = t('workers.alert.upgraded_int', ['pct' => $increased_intelligence, 'cost' => human_num($total_cost)]);
         }
 
         if($increased_intelligence == 0) {
-            $alert_danger = 'You do not have enough gold to upgrade worker intelligence.';
+            $alert_danger = t('workers.alert.no_gold_int');
         }
 
     }
@@ -75,12 +74,11 @@
             $current_speed = $Character->Data['worker_json']['speed_upgrades'];
             $next_speed_upgrade_cost = calculate_worker_cost(500, 1.4, $current_speed);
 
-            $alert_success = 'You have upgraded worker speed by ' . $increased_speed . '% for ' .
-            human_num($total_cost) . ' gold!';
+            $alert_success = t('workers.alert.upgraded_spd', ['pct' => $increased_speed, 'cost' => human_num($total_cost)]);
         }
 
         if($increased_speed == 0) {
-            $alert_danger = 'You do not have enough gold to upgrade worker speed.';
+            $alert_danger = t('workers.alert.no_gold_spd');
         }
     }
 
@@ -90,10 +88,10 @@
         if($Character->Data['gold'] >= $new_worker_cost) {
             $Character->Data['gold'] -= $new_worker_cost;
             $Character->Data['worker_json']['workers'] += 1;
-            $alert_success = 'You have hired a new worker for ' . human_num($new_worker_cost) . ' gold!';
+            $alert_success = t('workers.alert.hired', ['cost' => human_num($new_worker_cost)]);
         }
         else {
-            $alert_danger = 'You do not have enough gold to hire a new worker.';
+            $alert_danger = t('workers.alert.no_gold_hire');
         }
     }
     #echo $alert_success;die();

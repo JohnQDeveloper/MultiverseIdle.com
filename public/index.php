@@ -76,7 +76,7 @@
             require_once("../pages/login.php");
         }
         elseif ($isGuest && in_array(ltrim(strtolower($unsafe_main_page), '/'), $registeredOnlyPages, true)) {
-            $alert_danger = 'This feature is not available in guest mode. Register or login to access it.';
+            $alert_danger = t('router.guest_feature');
             require_once("../pages/play-now.php");
         }
         else {

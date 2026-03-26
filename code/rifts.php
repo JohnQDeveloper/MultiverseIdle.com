@@ -13,13 +13,13 @@
 
         # Verify ownership
         if (!$rift_stone->VerifyOwnership($rift_stone_id, $owner_id)) {
-            $alert_danger = 'You do not own that rift stone.';
+            $alert_danger = t('rifts.alert.not_owner');
         } else {
             # Check how many rifts are currently queued
             $queued_rifts = $rift_stone->GetQueuedRiftsByOwner($owner_id);
 
             if (count($queued_rifts) >= $rift_queue_max) {
-                $alert_danger = 'You can only queue up to ' . $rift_queue_max . ' rifts at a time. Wait for some to complete.';
+                $alert_danger = t('rifts.alert.queue_full', ['max' => $rift_queue_max]);
             } else {
                 # Load the rift stone to queue it
                 if ($rift_stone->LoadRiftStoneByID($rift_stone_id)) {
@@ -28,12 +28,12 @@
 
                     # Update rift stone with queue position
                     if ($rift_stone->QueueRift($rift_stone_id, $next_position, $owner_id)) {
-                        $alert_success = 'Rift stone queued successfully! Position: ' . $next_position . '/' . $rift_queue_max;
+                        $alert_success = t('rifts.alert.queued', ['pos' => $next_position, 'max' => $rift_queue_max]);
                     } else {
-                        $alert_danger = 'Failed to queue rift stone.';
+                        $alert_danger = t('rifts.alert.queue_fail');
                     }
                 } else {
-                    $alert_danger = 'Failed to load rift stone.';
+                    $alert_danger = t('rifts.alert.load_fail');
                 }
             }
         }
@@ -45,12 +45,12 @@
 
         # Verify ownership
         if (!$rift_stone->VerifyOwnership($rift_stone_id, $owner_id)) {
-            $alert_danger = 'You do not own that rift stone.';
+            $alert_danger = t('rifts.alert.not_owner');
         } else {
             if ($rift_stone->RemoveFromQueue($rift_stone_id, $owner_id)) {
-                $alert_success = 'Rift stone removed from queue.';
+                $alert_success = t('rifts.alert.removed');
             } else {
-                $alert_danger = 'Failed to remove rift stone from queue.';
+                $alert_danger = t('rifts.alert.remove_fail');
             }
         }
     }

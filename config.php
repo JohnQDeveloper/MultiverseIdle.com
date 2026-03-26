@@ -49,6 +49,7 @@
     require_once(__DIR__ . '/func/format_functions.php');
     require_once(__DIR__ . '/func/formula_functions.php');
     require_once(__DIR__ . '/func/common_functions.php');
+    require_once(__DIR__ . '/func/i18n.php');
     require_once(__DIR__ . '/func/guest_processing.php');
     require_once(__DIR__ . '/func/referral_functions.php');
     require_once(__DIR__ . '/func/guild_tax.php');
@@ -61,6 +62,9 @@
 
     # Web container only - session and CSRF handling
     if (IS_WEB_CONTEXT) {
+        # i18n
+        init_language();
+
         # authentication
         if(isset($_SESSION['auth_logged_in']) && $_SESSION['auth_logged_in'] === 1) {
             $_SESSION['user_id'] = $_SESSION['auth_user_id'];

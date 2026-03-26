@@ -2,18 +2,14 @@
     <!-- Page Details -->
     <div class="wrapper">
     <article class="main">
-        <h1>2v2 Arena</h1>
-        <p>You battle a pair of monsters or other gladiators at your level every minute.
-            They drop gold, experience, resources, and stats.
-            Keep in mind your class influences your stat drops.
-            (i.e. healer = lucky wisdom drops, warrior = lucky strength drops)
-        </p>
+        <h1><?php echo t('arena.title'); ?></h1>
+        <p><?php echo t('arena.desc'); ?></p>
         <?php if(!empty($simulated_results)) {
             $class = $simulated_results['won'] > $simulated_results['lost'] ? 'alert-success' : 'alert-danger';
         ?>
         <div class="alert <?php echo $class; ?>">
-            <b>Simulation Results for Floor <?php echo intval($_POST['new_floor']); ?></b> <BR />
-            Wins: <?php echo $simulated_results['won']; ?> | Losses: <?php echo $simulated_results['lost']; ?> | Total Battles: <?php echo $simulated_results['total']; ?>
+            <b><?php echo t('arena.sim_title', ['floor' => intval($_POST['new_floor'])]); ?></b> <BR />
+            <?php echo t('arena.wins'); ?>: <?php echo $simulated_results['won']; ?> | <?php echo t('arena.losses'); ?>: <?php echo $simulated_results['lost']; ?> | <?php echo t('arena.total_battles'); ?>: <?php echo $simulated_results['total']; ?>
         </div>
         <?php } ?>
 
@@ -24,21 +20,21 @@
                 $arena_bonuses = [];
 
                 if (isset($potion_bonuses['arena_xp']) && $potion_bonuses['arena_xp'] > 0) {
-                    $arena_bonuses[] = '+' . $potion_bonuses['arena_xp'] . '% Arena XP';
+                    $arena_bonuses[] = t('arena.xp_bonus', ['pct' => $potion_bonuses['arena_xp']]);
                     $has_arena_bonus = true;
                 }
                 if (isset($potion_bonuses['arena_stat_gains']) && $potion_bonuses['arena_stat_gains'] > 0) {
-                    $arena_bonuses[] = '+' . $potion_bonuses['arena_stat_gains'] . '% chance for bonus stat';
+                    $arena_bonuses[] = t('arena.stat_bonus', ['pct' => $potion_bonuses['arena_stat_gains']]);
                     $has_arena_bonus = true;
                 }
                 if (isset($potion_bonuses['arena_resource_drops']) && $potion_bonuses['arena_resource_drops'] > 0) {
-                    $arena_bonuses[] = '+' . $potion_bonuses['arena_resource_drops'] . '% Arena Resource Drops';
+                    $arena_bonuses[] = t('arena.resource_bonus', ['pct' => $potion_bonuses['arena_resource_drops']]);
                     $has_arena_bonus = true;
                 }
             ?>
             <?php if ($has_arena_bonus): ?>
                 <div class="potion-effect-box">
-                    <b class="potion-effect-box__title">Active Potion Effects:</b>
+                    <b class="potion-effect-box__title"><?php echo t('common.active_effects'); ?></b>
                     <ul class="potion-effect-box__list">
                         <?php foreach ($arena_bonuses as $bonus): ?>
                             <li><?php echo $bonus; ?></li>
@@ -49,7 +45,7 @@
                         $hours_remaining = floor($time_remaining / 3600);
                         $minutes_remaining = floor(($time_remaining % 3600) / 60);
                     ?>
-                    <small>Expires in: <?php echo $hours_remaining; ?>h <?php echo $minutes_remaining; ?>m</small>
+                    <small><?php echo t('common.expires_in', ['h' => $hours_remaining, 'm' => $minutes_remaining]); ?></small>
                 </div>
             <?php endif; ?>
         <?php endif; ?>
@@ -57,22 +53,22 @@
         <div class="grid">
             <form METHOD="POST" action="/arena">
                 <div>
-                    Current Floor: <?php echo $Character->Data['arena_floor']; ?> <br />
+                    <?php echo t('arena.current_floor'); ?> <?php echo $Character->Data['arena_floor']; ?> <br />
                     <input type="number" name="new_floor" value="<?php echo $Character->Data['arena_floor']; ?>"
                     min="1" max="1000000" />
                     <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
-                    <input type="submit" value="Update Floor" name="update_floor" />
-                    <input type="submit" value="Simulate Floor" name="simulate_floor"
-                        <?php echo $has_active_sub ? '' : 'disabled title="Requires QoL Subscription"'; ?> />
+                    <input type="submit" value="<?php echo t('arena.update_floor'); ?>" name="update_floor" />
+                    <input type="submit" value="<?php echo t('arena.simulate_floor'); ?>" name="simulate_floor"
+                        <?php echo $has_active_sub ? '' : 'disabled title="' . t('arena.requires_sub') . '"'; ?> />
                 </div>
             </form>
             <div>
-                <div>Last Arena Battle Was At
+                <div><?php echo t('arena.last_battle_at'); ?>
                 <?php echo $Character->Data['last_arena_time']; ?>
                 </div>
                 <div>
-                <h3>Battle Log</h3>
-                <div><?php echo $Character->Data['last_arena_log']; ?></div>
+                <h3><?php echo t('arena.battle_log'); ?></h3>
+                <div><?php echo localize_battle_log((string)$Character->Data['last_arena_log']); ?></div>
             </div>
     </article>
     </div>

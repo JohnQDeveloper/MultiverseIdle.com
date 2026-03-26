@@ -28,12 +28,12 @@ if (isset($_POST['play_season'])) {
     $season_id = (int)($_POST['season_id'] ?? 0);
 
     if ($season_id <= 0) {
-        $alert_danger = 'Invalid season.';
+        $alert_danger = t('season.alert.invalid');
     } else {
         $SeasonData = $Season->GetSeasonById($season_id);
 
         if (!$SeasonData || $SeasonData['status'] !== 'active') {
-            $alert_danger = 'That season is no longer active.';
+            $alert_danger = t('season.alert.not_active');
         } else {
             $SeasonCharacter = new Character();
             if (!$SeasonCharacter->CharacterExists($user_id, $season_id)) {

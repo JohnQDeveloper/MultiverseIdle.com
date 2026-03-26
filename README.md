@@ -7,8 +7,10 @@ https://github.com/delight-im/PHP-Auth
 https://resend.com/docs/send-with-php
 
 # AI Services
- * Claude Code
- * Github Copilot
+- OpenAI Codex
+- Claude Code
+- Github Copilot
+
 
 # Issue Priority Labels
 - TODO: Will try to put into the next major release

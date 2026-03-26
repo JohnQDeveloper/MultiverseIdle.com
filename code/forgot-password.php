@@ -25,14 +25,14 @@ if (isset($_POST['email'])) {
         });
 
         // Generic message to prevent user enumeration
-        $alert_success = 'If an account with that email exists, a password reset link has been sent.';
+        $alert_success = t('auth.forgot.alert.sent');
     } catch (\Delight\Auth\InvalidEmailException $e) {
-        $alert_danger = 'Please enter a valid email address.';
+        $alert_danger = t('auth.forgot.alert.invalid_email');
     } catch (\Delight\Auth\EmailNotVerifiedException $e) {
-        $alert_danger = 'This account has not been verified yet. Please check your inbox for the verification email.';
+        $alert_danger = t('auth.forgot.alert.not_verified');
     } catch (\Delight\Auth\ResetDisabledException $e) {
-        $alert_danger = 'Password reset is not available for this account.';
+        $alert_danger = t('auth.forgot.alert.reset_disabled');
     } catch (\Delight\Auth\TooManyRequestsException $e) {
-        $alert_danger = 'Too many requests. Please wait before trying again.';
+        $alert_danger = t('auth.forgot.alert.too_many');
     }
 }

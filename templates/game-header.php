@@ -1,6 +1,6 @@
 <!-- Header Navigation -->
       <div class="navbar">
-        <button class="hamburger" aria-label="Toggle menu">
+        <button class="hamburger" aria-label="<?php echo t('nav.actions'); ?>">
           <span></span>
           <span></span>
           <span></span>
@@ -11,44 +11,44 @@
             <ul class="nav-menu">
               <li><a href="#"><img src="/img/logo.png" height="64"></a></li>
               <li class="dropdown">
-                <a href="#">Actions</a>
+                <a href="#"><?php echo t('nav.actions'); ?></a>
                 <ul class="dropdown-content">
-                  <li><a href="/arena">2v2 Arena</a></li>
-                  <li><a href="/rifts">Rifts</a></li>
-                  <li><a href="/world-boss">World Boss</a></li>
-                  <li><a href="/workers">Workers</a></li>
+                  <li><a href="/arena"><?php echo t('nav.arena'); ?></a></li>
+                  <li><a href="/rifts"><?php echo t('nav.rifts'); ?></a></li>
+                  <li><a href="/world-boss"><?php echo t('nav.world_boss'); ?></a></li>
+                  <li><a href="/workers"><?php echo t('nav.workers'); ?></a></li>
                 </ul>
               </li>
               <li class="dropdown">
-                <a href="#">Items</a>
+                <a href="#"><?php echo t('nav.items'); ?></a>
                 <ul class="dropdown-content">
-                  <li><a href="/craft">Craft</a></li>
-                  <li><a href="/inventory">Inventory</a></li>
-                  <li><a href="/party">Party</a></li>
+                  <li><a href="/craft"><?php echo t('nav.craft'); ?></a></li>
+                  <li><a href="/inventory"><?php echo t('nav.inventory'); ?></a></li>
+                  <li><a href="/party"><?php echo t('nav.party'); ?></a></li>
                 </ul>
               </li>
               <?php if (!isset($_SESSION['guest_mode']) || $_SESSION['guest_mode'] !== true): ?>
-              <li><a href="/market">Market</a></li>
+              <li><a href="/market"><?php echo t('nav.market'); ?></a></li>
               <?php endif; ?>
               <li class="dropdown">
-                <a href="/guilds">Guilds</a>
+                <a href="/guilds"><?php echo t('nav.guilds'); ?></a>
                 <ul class="dropdown-content">
-                  <li><a href="/guilds">Guild</a></li>
-                  <li><a href="/guild-bank">Guild Bank</a></li>
-                  <li><a href="/guild-buildings">Guild Buildings</a></li>
+                  <li><a href="/guilds"><?php echo t('nav.guild'); ?></a></li>
+                  <li><a href="/guild-bank"><?php echo t('nav.guild_bank'); ?></a></li>
+                  <li><a href="/guild-buildings"><?php echo t('nav.guild_buildings'); ?></a></li>
                 </ul>
               </li>
               <?php if (!isset($_SESSION['guest_mode']) || $_SESSION['guest_mode'] !== true): ?>
-              <li><a href="/store">Store</a></li>
+              <li><a href="/store"><?php echo t('nav.store'); ?></a></li>
               <?php endif; ?>
-              <li><a href="/leaderboard">Leaderboard</a></li>
+              <li><a href="/leaderboard"><?php echo t('nav.leaderboard'); ?></a></li>
               <!--<li><a href="/season-select"><?php echo (isset($_SESSION['active_season_id'])) ? 'Season' : 'Perpetual'; ?></a></li>-->
-              <li><a href="/logout">Logout</a></li>
+              <li><a href="/logout"><?php echo t('nav.logout'); ?></a></li>
               <li> ::: </li>
-              <li><a href="https://discord.gg/KrD7hGuDyb">Discord</a></li>
-              <li><a href="https://github.com/JohnQDeveloper/MultiverseIdle.com/issues">Feedback</a></li>
-              <li><a href="/log">Log</a></li>
-              <li><a href="/settings">Settings</a></li>
+              <li><a href="https://discord.gg/KrD7hGuDyb"><?php echo t('nav.discord'); ?></a></li>
+              <li><a href="https://github.com/JohnQDeveloper/MultiverseIdle.com/issues"><?php echo t('nav.feedback'); ?></a></li>
+              <li><a href="/log"><?php echo t('nav.log'); ?></a></li>
+              <li><a href="/settings"><?php echo t('nav.settings'); ?></a></li>
             </ul>
           </nav>
 
@@ -84,7 +84,7 @@ if ($_chatIsLoggedIn) {
 
     <!-- Always-visible toggle bar -->
     <button id="chat-toggle" class="chat-toggle" aria-expanded="false" aria-controls="chat-widget-body">
-        <span class="chat-toggle-label">&#128172; Chat</span>
+        <span class="chat-toggle-label">&#128172; <?php echo t('chat.toggle'); ?></span>
         <span id="chat-unread" class="chat-unread" style="display:none"></span>
         <span class="chat-toggle-arrow">&#9650;</span>
     </button>
@@ -94,15 +94,15 @@ if ($_chatIsLoggedIn) {
 
         <!-- Channel tabs -->
         <div class="chat-tabs" role="tablist">
-            <button class="chat-tab active" data-channel="global" role="tab">Global</button>
-            <button class="chat-tab" data-channel="help" role="tab">Help</button>
+            <button class="chat-tab active" data-channel="global" role="tab"><?php echo t('chat.channel.global'); ?></button>
+            <button class="chat-tab" data-channel="help" role="tab"><?php echo t('chat.channel.help'); ?></button>
             <?php if ($_chatGuildId !== ''): ?>
-            <button class="chat-tab" data-channel="guild:<?php echo htmlspecialchars($_chatGuildId, ENT_QUOTES, 'UTF-8'); ?>" role="tab">Guild</button>
+            <button class="chat-tab" data-channel="guild:<?php echo htmlspecialchars($_chatGuildId, ENT_QUOTES, 'UTF-8'); ?>" role="tab"><?php echo t('chat.channel.guild'); ?></button>
             <?php else: ?>
-            <button class="chat-tab chat-tab--disabled" disabled title="Join a guild to use guild chat">Guild</button>
+            <button class="chat-tab chat-tab--disabled" disabled title="<?php echo t('chat.guild_join_title'); ?>"><?php echo t('chat.channel.guild'); ?></button>
             <?php endif; ?>
             <?php if ($_chatIsLoggedIn && !$_chatIsGuest): ?>
-            <button class="chat-tab" data-channel="dm" role="tab">DM</button>
+            <button class="chat-tab" data-channel="dm" role="tab"><?php echo t('chat.channel.dm'); ?></button>
             <?php endif; ?>
         </div>
 
@@ -110,69 +110,72 @@ if ($_chatIsLoggedIn) {
         <?php if ($_chatIsLoggedIn && !$_chatIsGuest): ?>
         <div id="dm-conversations" class="dm-conversations" style="display:none;">
             <div id="dm-conversation-list" class="dm-conversation-list">
-                <div class="chat-loading">Loading&hellip;</div>
+                <div class="chat-loading"><?php echo t('chat.loading'); ?></div>
             </div>
             <div class="dm-new-row">
                 <input type="text" id="dm-new-username" class="chat-input"
-                       placeholder="Start new DM&hellip;" maxlength="50" autocomplete="off" aria-label="Username to DM">
-                <button type="button" id="dm-new-btn" class="chat-send-btn">Open</button>
+                       placeholder="<?php echo t('chat.dm_placeholder'); ?>" maxlength="50" autocomplete="off" aria-label="<?php echo t('chat.dm_placeholder'); ?>">
+                <button type="button" id="dm-new-btn" class="chat-send-btn"><?php echo t('chat.dm_open'); ?></button>
             </div>
         </div>
         <?php endif; ?>
 
         <!-- DM: chat header with back button (shown when a DM conversation is open) -->
         <div id="dm-chat-header" class="dm-chat-header" style="display:none;">
-            <button type="button" id="dm-back-btn" class="dm-back-btn">&#8592; Back</button>
+            <button type="button" id="dm-back-btn" class="dm-back-btn"><?php echo t('chat.back'); ?></button>
             <span id="dm-partner-name" class="dm-partner-name"></span>
         </div>
 
         <!-- Messages -->
         <div id="chat-messages" class="chat-messages" aria-live="polite">
-            <div class="chat-loading">Loading&hellip;</div>
+            <div class="chat-loading"><?php echo t('chat.loading'); ?></div>
         </div>
 
         <!-- Mute notice -->
         <div id="chat-muted-banner" class="chat-muted-banner" style="display:none;">
-            Muted: <span id="chat-muted-reason"></span>
+            <?php echo t('chat.muted'); ?> <span id="chat-muted-reason"></span>
         </div>
 
         <!-- Slash command hint -->
         <?php if (!$_chatIsGuest): ?>
-        <div id="chat-slash-hint" class="chat-slash-hint" style="display:none;" role="listbox" aria-label="Slash command suggestions"></div>
+        <div id="chat-slash-hint" class="chat-slash-hint" style="display:none;" role="listbox" aria-label="<?php echo t('chat.msg_placeholder'); ?>"></div>
         <?php endif; ?>
 
         <!-- Input -->
         <?php if (!$_chatIsGuest): ?>
         <form id="chat-form" class="chat-input-row" autocomplete="off">
             <input type="text" id="chat-input" class="chat-input"
-                   placeholder="Message&hellip;" maxlength="500" aria-label="Chat message">
-            <button type="submit" class="chat-send-btn">Send</button>
+                   placeholder="<?php echo t('chat.msg_placeholder'); ?>" maxlength="500" aria-label="<?php echo t('chat.msg_placeholder'); ?>">
+            <button type="submit" class="chat-send-btn"><?php echo t('chat.send'); ?></button>
         </form>
         <?php else: ?>
-        <p class="chat-guest-notice"><a href="/register">Register</a> or <a href="/login">login</a> to chat.</p>
+        <p class="chat-guest-notice"><?php echo t('chat.guest_notice', [
+            'register_link' => '<a href="/register">' . t('chat.register') . '</a>',
+            'login_link' => '<a href="/login">' . t('chat.login') . '</a>',
+        ]); ?></p>
         <?php endif; ?>
 
         <!-- Mod panel -->
         <?php if ($_chatIsMod): ?>
         <div id="chat-mod-panel" class="chat-mod-panel">
             <details>
-                <summary class="chat-mod-summary">Moderation</summary>
+                <summary class="chat-mod-summary"><?php echo t('chat.mod.title'); ?></summary>
                 <form id="mod-form" class="chat-mod-form">
-                    <input type="text" id="mod-user-id" placeholder="User ID" class="mod-input" style="width:80px;" required>
+                    <input type="text" id="mod-user-id" placeholder="<?php echo t('chat.mod.user_id'); ?>" class="mod-input" style="width:80px;" required>
                     <select id="mod-action" class="mod-input">
-                        <option value="promote">Promote</option>
-                        <option value="demote">Demote</option>
-                        <option value="mute">Mute</option>
-                        <option value="unmute">Unmute</option>
+                        <option value="promote"><?php echo t('chat.mod.promote'); ?></option>
+                        <option value="demote"><?php echo t('chat.mod.demote'); ?></option>
+                        <option value="mute"><?php echo t('chat.mod.mute'); ?></option>
+                        <option value="unmute"><?php echo t('chat.mod.unmute'); ?></option>
                     </select>
                     <select id="mod-duration" class="mod-input">
-                        <option value="3600">1 hour</option>
-                        <option value="86400">24 hours</option>
-                        <option value="604800">7 days</option>
-                        <option value="-1">Permanent</option>
+                        <option value="3600"><?php echo t('chat.mod.1h'); ?></option>
+                        <option value="86400"><?php echo t('chat.mod.24h'); ?></option>
+                        <option value="604800"><?php echo t('chat.mod.7d'); ?></option>
+                        <option value="-1"><?php echo t('chat.mod.permanent'); ?></option>
                     </select>
-                    <input type="text" id="mod-reason" placeholder="Reason" class="mod-input" style="width:120px;">
-                    <button type="submit" class="chat-send-btn chat-send-btn--danger">Apply</button>
+                    <input type="text" id="mod-reason" placeholder="<?php echo t('chat.mod.reason'); ?>" class="mod-input" style="width:120px;">
+                    <button type="submit" class="chat-send-btn chat-send-btn--danger"><?php echo t('chat.mod.apply'); ?></button>
                 </form>
                 <div id="mod-result" class="mod-result" style="display:none;"></div>
             </details>
@@ -181,38 +184,44 @@ if ($_chatIsLoggedIn) {
     </div>
 </div>
 
+<script>
+window.MI_LANG = <?php echo t_json(); ?>;
+</script>
 <script src="/js/chat.js"></script>
 
 <main class="container">
     <div class="wrapper">
     <div class="resources">
         <div class="row">
-            Level: <?php echo htmlspecialchars($Character->Data['party_json']['members']['frontline']['level']); ?> <BR />
+            <?php echo t('res.level'); ?>: <?php echo htmlspecialchars($Character->Data['party_json']['members']['frontline']['level']); ?> <BR />
             <!-- XP: <?php echo htmlspecialchars($Character->Data['party_json']['members']['frontline']['xp']); ?> <BR /> -->
-            Arena: <?php echo htmlspecialchars($Character->Data['arena_floor']); ?> <BR />
+            <?php echo t('res.arena'); ?>: <?php echo htmlspecialchars($Character->Data['arena_floor']); ?> <BR />
         </div>
         <div class="row">
-            Gold: <?php echo human_num($Character->Data['gold']); ?> <BR />
-            Iron: <?php echo human_num($Character->Data['iron']); ?> <BR />
+            <?php echo t('res.gold'); ?>: <?php echo human_num($Character->Data['gold']); ?> <BR />
+            <?php echo t('res.iron'); ?>: <?php echo human_num($Character->Data['iron']); ?> <BR />
         </div>
         <div class="row">
-            Herbs: <?php echo human_num($Character->Data['herbs']); ?> <BR />
-            Gems: <?php echo human_num($Character->Data['gems']); ?> <BR />
+            <?php echo t('res.herbs'); ?>: <?php echo human_num($Character->Data['herbs']); ?> <BR />
+            <?php echo t('res.gems'); ?>: <?php echo human_num($Character->Data['gems']); ?> <BR />
         </div>
         <div class="row">
-            Credits: <?php echo human_num($Character->Data['credits'] ?? 0); ?> <BR />
-            QoL Sub: <?php echo (!empty($Character->Data['subscription_expires']) && strtotime($Character->Data['subscription_expires']) > time()) ? 'Active' : 'None'; ?> <BR />
+            <?php echo t('res.credits'); ?>: <?php echo human_num($Character->Data['credits'] ?? 0); ?> <BR />
+            <?php echo t('res.qol_sub'); ?>: <?php echo (!empty($Character->Data['subscription_expires']) && strtotime($Character->Data['subscription_expires']) > time()) ? t('res.active') : t('res.none'); ?> <BR />
         </div>
         <div class="row">
-            Rift: Queued <BR />
-            Boss: Queued <BR />
+            <?php echo t('res.rift'); ?>: <?php echo t('res.queued'); ?> <BR />
+            <?php echo t('res.boss'); ?>: <?php echo t('res.queued'); ?> <BR />
         </div>
         </div>
     </div>
     <?php
     # Guest mode banner
     if (isset($_SESSION['guest_mode']) && $_SESSION['guest_mode'] === true) {
-        echo '<div class="alert alert-warning">You are playing as a guest. Your progress is only saved in this browser session. <a href="/register"><strong>Register now</strong></a> to keep your progress permanently, or <a href="/login">login</a> to an existing account.</div>';
+        echo '<div class="alert alert-warning">' . t('banner.guest', [
+            'register_link' => '<a href="/register"><strong>' . t('banner.guest.register') . '</strong></a>',
+            'login_link' => '<a href="/login">' . t('banner.guest.login') . '</a>',
+        ]) . '</div>';
     }
 
     # Season / Perpetual mode banner
@@ -221,10 +230,16 @@ if ($_chatIsLoggedIn) {
         $SeasonBannerData = $SeasonBanner->GetSeasonById((int)$_SESSION['active_season_id']);
         if ($SeasonBannerData) {
             $days_left = max(0, (int)ceil((strtotime($SeasonBannerData['end_date']) - time()) / 86400));
-            echo '<div class="alert alert-warning">&#9733; Season mode: <strong>' . htmlspecialchars($SeasonBannerData['name']) . '</strong> &mdash; ' . $days_left . ' days remaining. <a href="/season-select">Switch mode</a></div>';
+            echo '<div class="alert alert-warning">' . t('banner.season', [
+                'name' => htmlspecialchars($SeasonBannerData['name']),
+                'days' => $days_left,
+                'switch_link' => '<a href="/season-select">' . t('banner.switch_mode') . '</a>',
+            ]) . '</div>';
         }
     } else {
-        echo '<div class="alert alert-info">&#9670; Perpetual mode &mdash; progress never resets. <a href="/season-select">Switch mode</a></div>';
+        echo '<div class="alert alert-info">' . t('banner.perpetual', [
+            'switch_link' => '<a href="/season-select">' . t('banner.switch_mode') . '</a>',
+        ]) . '</div>';
     }
 
     # generic alerts for top of page

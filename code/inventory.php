@@ -10,9 +10,9 @@
         $owner_id = $_SESSION['auth_user_id'];
 
         if ($gear->DestroyItem($gear_id, $owner_id)) {
-            $alert_success = 'Item has been destroyed.';
+            $alert_success = t('inventory.alert.destroyed');
         } else {
-            $alert_danger = 'Failed to destroy item.';
+            $alert_danger = t('inventory.alert.destroy_fail');
         }
     }
 
@@ -22,9 +22,9 @@
         $owner_id = $_SESSION['auth_user_id'];
 
         if ($gear->ToggleFavorite($gear_id, $owner_id)) {
-            $alert_success = 'Item favorite status updated.';
+            $alert_success = t('inventory.alert.fav_updated');
         } else {
-            $alert_danger = 'Failed to update favorite status.';
+            $alert_danger = t('inventory.alert.fav_fail');
         }
     }
 
@@ -34,9 +34,9 @@
         $owner_id = $_SESSION['auth_user_id'];
 
         if ($potion->DestroyPotion($potion_id, $owner_id)) {
-            $alert_success = 'Potion has been destroyed.';
+            $alert_success = t('inventory.alert.potion_destroyed');
         } else {
-            $alert_danger = 'Failed to destroy potion.';
+            $alert_danger = t('inventory.alert.potion_dest_fail');
         }
     }
 
@@ -49,12 +49,12 @@
         # Check if there's already an active potion
         $active_potion = $potion->GetActivePotion($character_id);
         if ($active_potion) {
-            $alert_danger = 'You already have an active potion. Wait for it to expire before using another.';
+            $alert_danger = t('inventory.alert.potion_active');
         } else {
             if ($potion->UsePotion($potion_id, $character_id, $owner_id)) {
-                $alert_success = 'Potion activated! Effects will last for 24 hours.';
+                $alert_success = t('inventory.alert.potion_used');
             } else {
-                $alert_danger = 'Failed to use potion.';
+                $alert_danger = t('inventory.alert.potion_use_fail');
             }
         }
     }
@@ -65,9 +65,9 @@
         $character_id = $Character->Data['id'];
 
         if ($potion->CancelActivePotion($character_id, $owner_id)) {
-            $alert_success = 'Active potion has been cancelled and deleted.';
+            $alert_success = t('inventory.alert.potion_cancelled');
         } else {
-            $alert_danger = 'Failed to cancel active potion.';
+            $alert_danger = t('inventory.alert.potion_cancel_fail');
         }
     }
 
@@ -77,9 +77,9 @@
         $owner_id = $_SESSION['auth_user_id'];
 
         if ($rift_stone->DestroyRiftStone($rift_stone_id, $owner_id)) {
-            $alert_success = 'Rift stone has been destroyed.';
+            $alert_success = t('inventory.alert.rift_destroyed');
         } else {
-            $alert_danger = 'Failed to destroy rift stone.';
+            $alert_danger = t('inventory.alert.rift_dest_fail');
         }
     }
 

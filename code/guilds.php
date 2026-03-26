@@ -12,13 +12,13 @@ if (isset($_POST['create_guild'])) {
     $guild_description = trim($_POST['guild_description'] ?? '');
 
     if (strlen($guild_name) < 3 || strlen($guild_name) > 50) {
-        $alert_danger = 'Guild name must be between 3 and 50 characters.';
+        $alert_danger = t('guilds.alert.name_length');
     } elseif ($Guild->GetUserGuildId($current_user_id) !== null) {
-        $alert_danger = 'You are already in a guild. Leave your current guild before creating a new one.';
+        $alert_danger = t('guilds.alert.already_in_guild');
     } elseif ($Guild->CreateGuild($guild_name, $guild_description, $current_user_id)) {
-        $alert_success = 'Guild "' . htmlspecialchars($guild_name) . '" created successfully!';
+        $alert_success = t('guilds.alert.created', ['name' => htmlspecialchars($guild_name)]);
     } else {
-        $alert_danger = 'Failed to create guild. The name might already be taken.';
+        $alert_danger = t('guilds.alert.create_fail');
     }
 }
 
@@ -27,13 +27,13 @@ if (isset($_POST['send_invite'])) {
     $invitee_user_id = (int)($_POST['invitee_user_id'] ?? 0);
 
     if ($invitee_user_id <= 0) {
-        $alert_danger = 'Invalid user selected.';
+        $alert_danger = t('guilds.alert.invalid_user');
     } elseif (!$Guild->CanInviteMembers($current_user_id)) {
-        $alert_danger = 'You do not have permission to invite members.';
+        $alert_danger = t('guilds.alert.no_invite_perm');
     } elseif ($Guild->SendInvite($invitee_user_id, $current_user_id)) {
-        $alert_success = 'Invite sent successfully!';
+        $alert_success = t('guilds.alert.invite_sent');
     } else {
-        $alert_danger = 'Failed to send invite. User may already be in a guild or guild is full.';
+        $alert_danger = t('guilds.alert.invite_fail');
     }
 }
 
@@ -42,11 +42,11 @@ if (isset($_POST['accept_invite'])) {
     $invite_id = (int)($_POST['invite_id'] ?? 0);
 
     if ($invite_id <= 0) {
-        $alert_danger = 'Invalid invite.';
+        $alert_danger = t('guilds.alert.invalid_invite');
     } elseif ($Guild->AcceptInvite($invite_id, $current_user_id)) {
-        $alert_success = 'You have joined the guild!';
+        $alert_success = t('guilds.alert.joined');
     } else {
-        $alert_danger = 'Failed to accept invite. The guild may be full or the invite expired.';
+        $alert_danger = t('guilds.alert.join_fail');
     }
 }
 
@@ -55,11 +55,11 @@ if (isset($_POST['decline_invite'])) {
     $invite_id = (int)($_POST['invite_id'] ?? 0);
 
     if ($invite_id <= 0) {
-        $alert_danger = 'Invalid invite.';
+        $alert_danger = t('guilds.alert.invalid_invite');
     } elseif ($Guild->DeclineInvite($invite_id, $current_user_id)) {
-        $alert_success = 'Invite declined.';
+        $alert_success = t('guilds.alert.declined');
     } else {
-        $alert_danger = 'Failed to decline invite.';
+        $alert_danger = t('guilds.alert.decline_fail');
     }
 }
 
@@ -68,24 +68,24 @@ if (isset($_POST['kick_member'])) {
     $target_user_id = (int)($_POST['target_user_id'] ?? 0);
 
     if ($target_user_id <= 0) {
-        $alert_danger = 'Invalid user.';
+        $alert_danger = t('guilds.alert.invalid_user2');
     } elseif (!$Guild->CanKickMembers($current_user_id)) {
-        $alert_danger = 'You do not have permission to kick members.';
+        $alert_danger = t('guilds.alert.no_kick_perm');
     } elseif ($Guild->KickMember($target_user_id, $current_user_id)) {
-        $alert_success = 'Member kicked successfully.';
+        $alert_success = t('guilds.alert.kicked');
     } else {
-        $alert_danger = 'Failed to kick member. You may not have permission.';
+        $alert_danger = t('guilds.alert.kick_fail');
     }
 }
 
 // Leave Guild
 if (isset($_POST['leave_guild'])) {
     if ($Guild->IsGuildMaster($current_user_id)) {
-        $alert_danger = 'Guild masters cannot leave. Transfer leadership or disband the guild first.';
+        $alert_danger = t('guilds.alert.master_cant_leave');
     } elseif ($Guild->LeaveGuild($current_user_id)) {
-        $alert_success = 'You have left the guild.';
+        $alert_success = t('guilds.alert.left');
     } else {
-        $alert_danger = 'Failed to leave guild.';
+        $alert_danger = t('guilds.alert.leave_fail');
     }
 }
 
@@ -94,13 +94,13 @@ if (isset($_POST['transfer_master'])) {
     $new_master_user_id = (int)($_POST['new_master_user_id'] ?? 0);
 
     if ($new_master_user_id <= 0) {
-        $alert_danger = 'Invalid user.';
+        $alert_danger = t('guilds.alert.invalid_user2');
     } elseif (!$Guild->IsGuildMaster($current_user_id)) {
-        $alert_danger = 'Only the guild master can transfer leadership.';
+        $alert_danger = t('guilds.alert.no_transfer_perm');
     } elseif ($Guild->TransferGuildMaster($new_master_user_id, $current_user_id)) {
-        $alert_success = 'Guild master role transferred successfully!';
+        $alert_success = t('guilds.alert.transfer_done');
     } else {
-        $alert_danger = 'Failed to transfer guild master role.';
+        $alert_danger = t('guilds.alert.transfer_fail');
     }
 }
 
@@ -109,13 +109,13 @@ if (isset($_POST['promote_officer'])) {
     $target_user_id = (int)($_POST['target_user_id'] ?? 0);
 
     if ($target_user_id <= 0) {
-        $alert_danger = 'Invalid user.';
+        $alert_danger = t('guilds.alert.invalid_user2');
     } elseif (!$Guild->IsGuildMaster($current_user_id)) {
-        $alert_danger = 'Only the guild master can promote officers.';
+        $alert_danger = t('guilds.alert.no_promote_perm');
     } elseif ($Guild->PromoteToOfficer($target_user_id, $current_user_id)) {
-        $alert_success = 'Member promoted to officer!';
+        $alert_success = t('guilds.alert.promoted');
     } else {
-        $alert_danger = 'Failed to promote member.';
+        $alert_danger = t('guilds.alert.promote_fail');
     }
 }
 
@@ -124,13 +124,13 @@ if (isset($_POST['demote_member'])) {
     $target_user_id = (int)($_POST['target_user_id'] ?? 0);
 
     if ($target_user_id <= 0) {
-        $alert_danger = 'Invalid user.';
+        $alert_danger = t('guilds.alert.invalid_user2');
     } elseif (!$Guild->IsGuildMaster($current_user_id)) {
-        $alert_danger = 'Only the guild master can demote officers.';
+        $alert_danger = t('guilds.alert.no_demote_perm');
     } elseif ($Guild->DemoteToMember($target_user_id, $current_user_id)) {
-        $alert_success = 'Officer demoted to member.';
+        $alert_success = t('guilds.alert.demoted');
     } else {
-        $alert_danger = 'Failed to demote officer.';
+        $alert_danger = t('guilds.alert.demote_fail');
     }
 }
 
@@ -139,13 +139,13 @@ if (isset($_POST['disband_guild'])) {
     $confirm = trim($_POST['confirm_disband'] ?? '');
 
     if ($confirm !== 'DISBAND') {
-        $alert_danger = 'You must type "DISBAND" to confirm guild deletion.';
+        $alert_danger = t('guilds.alert.disband_confirm');
     } elseif (!$Guild->IsGuildMaster($current_user_id)) {
-        $alert_danger = 'Only the guild master can disband the guild.';
+        $alert_danger = t('guilds.alert.no_disband_perm');
     } elseif ($Guild->DisbandGuild($current_user_id)) {
-        $alert_success = 'Guild disbanded successfully.';
+        $alert_success = t('guilds.alert.disbanded');
     } else {
-        $alert_danger = 'Failed to disband guild.';
+        $alert_danger = t('guilds.alert.disband_fail');
     }
 }
 

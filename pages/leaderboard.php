@@ -2,14 +2,14 @@
     <!-- Page Details -->
     <div class="wrapper">
     <article class="main">
-        <h1>Leaderboards</h1>
-        <p>Compete with other players across multiple categories and climb to the top!</p>
+        <h1><?php echo t('lb.title'); ?></h1>
+        <p><?php echo t('lb.desc'); ?></p>
 
         <!-- Mode Toggle (shown when a season is active) -->
         <?php if ($active_season): ?>
         <div class="tab-nav" style="margin-bottom:0.5rem;">
             <a href="?mode=perpetual&tab=<?php echo htmlspecialchars($_GET['tab'] ?? 'combined'); ?>"
-               class="tab-nav-item <?php echo $lb_mode !== 'season' ? 'active' : ''; ?>">Perpetual</a>
+               class="tab-nav-item <?php echo $lb_mode !== 'season' ? 'active' : ''; ?>"><?php echo t('lb.tab.perpetual'); ?></a>
             <a href="?mode=season&tab=<?php echo htmlspecialchars($_GET['tab'] ?? 'combined'); ?>"
                class="tab-nav-item <?php echo $lb_mode === 'season' ? 'active' : ''; ?>">
                 &#9733; <?php echo htmlspecialchars($active_season['name']); ?>
@@ -19,13 +19,13 @@
 
         <!-- Tab Navigation -->
         <div class="tab-nav">
-            <a href="?mode=<?php echo $lb_mode; ?>&tab=combined" class="tab-nav-item <?php echo (!isset($_GET['tab']) || $_GET['tab'] === 'combined') ? 'active' : ''; ?>">Combined Stats</a>
-            <a href="?mode=<?php echo $lb_mode; ?>&tab=strength" class="tab-nav-item <?php echo (isset($_GET['tab']) && $_GET['tab'] === 'strength') ? 'active' : ''; ?>">Strength</a>
-            <a href="?mode=<?php echo $lb_mode; ?>&tab=dexterity" class="tab-nav-item <?php echo (isset($_GET['tab']) && $_GET['tab'] === 'dexterity') ? 'active' : ''; ?>">Dexterity</a>
-            <a href="?mode=<?php echo $lb_mode; ?>&tab=health" class="tab-nav-item <?php echo (isset($_GET['tab']) && $_GET['tab'] === 'health') ? 'active' : ''; ?>">Health</a>
-            <a href="?mode=<?php echo $lb_mode; ?>&tab=wisdom" class="tab-nav-item <?php echo (isset($_GET['tab']) && $_GET['tab'] === 'wisdom') ? 'active' : ''; ?>">Wisdom</a>
-            <a href="?mode=<?php echo $lb_mode; ?>&tab=arena" class="tab-nav-item <?php echo (isset($_GET['tab']) && $_GET['tab'] === 'arena') ? 'active' : ''; ?>">Arena Floor</a>
-            <a href="?mode=<?php echo $lb_mode; ?>&tab=rift" class="tab-nav-item <?php echo (isset($_GET['tab']) && $_GET['tab'] === 'rift') ? 'active' : ''; ?>">Highest Rift</a>
+            <a href="?mode=<?php echo $lb_mode; ?>&tab=combined" class="tab-nav-item <?php echo (!isset($_GET['tab']) || $_GET['tab'] === 'combined') ? 'active' : ''; ?>"><?php echo t('lb.tab.combined'); ?></a>
+            <a href="?mode=<?php echo $lb_mode; ?>&tab=strength" class="tab-nav-item <?php echo (isset($_GET['tab']) && $_GET['tab'] === 'strength') ? 'active' : ''; ?>"><?php echo t('lb.tab.strength'); ?></a>
+            <a href="?mode=<?php echo $lb_mode; ?>&tab=dexterity" class="tab-nav-item <?php echo (isset($_GET['tab']) && $_GET['tab'] === 'dexterity') ? 'active' : ''; ?>"><?php echo t('lb.tab.dexterity'); ?></a>
+            <a href="?mode=<?php echo $lb_mode; ?>&tab=health" class="tab-nav-item <?php echo (isset($_GET['tab']) && $_GET['tab'] === 'health') ? 'active' : ''; ?>"><?php echo t('lb.tab.health'); ?></a>
+            <a href="?mode=<?php echo $lb_mode; ?>&tab=wisdom" class="tab-nav-item <?php echo (isset($_GET['tab']) && $_GET['tab'] === 'wisdom') ? 'active' : ''; ?>"><?php echo t('lb.tab.wisdom'); ?></a>
+            <a href="?mode=<?php echo $lb_mode; ?>&tab=arena" class="tab-nav-item <?php echo (isset($_GET['tab']) && $_GET['tab'] === 'arena') ? 'active' : ''; ?>"><?php echo t('lb.tab.arena'); ?></a>
+            <a href="?mode=<?php echo $lb_mode; ?>&tab=rift" class="tab-nav-item <?php echo (isset($_GET['tab']) && $_GET['tab'] === 'rift') ? 'active' : ''; ?>"><?php echo t('lb.tab.rift'); ?></a>
         </div>
 
         <?php
@@ -34,20 +34,20 @@
 
         <!-- Combined Stats Leaderboard -->
         <?php if ($active_tab === 'combined'): ?>
-            <h2>Combined Stats Leaderboard</h2>
-            <p>Ranking by total stats across both party members (STR + DEX + HP + WIS).</p>
+            <h2><?php echo t('lb.combined.title'); ?></h2>
+            <p><?php echo t('lb.combined.desc'); ?></p>
 
             <?php if (empty($combined_stats_leaderboard)): ?>
-                <p><em>No data available yet.</em></p>
+                <p><em><?php echo t('common.no_data'); ?></em></p>
             <?php else: ?>
                 <table>
                     <thead>
                         <tr>
-                            <th>Rank</th>
-                            <th>Player</th>
-                            <th>Total Stats</th>
-                            <th>Frontline</th>
-                            <th>Backline</th>
+                            <th><?php echo t('common.rank'); ?></th>
+                            <th><?php echo t('common.player'); ?></th>
+                            <th><?php echo t('lb.combined.total'); ?></th>
+                            <th><?php echo t('lb.combined.frontline'); ?></th>
+                            <th><?php echo t('lb.combined.backline'); ?></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -81,18 +81,18 @@
 
         <!-- Strength Leaderboard -->
         <?php if ($active_tab === 'strength'): ?>
-            <h2>Strength Leaderboard</h2>
-            <p>Ranking by highest strength value across party members.</p>
+            <h2><?php echo t('lb.strength.title'); ?></h2>
+            <p><?php echo t('lb.strength.desc'); ?></p>
 
             <?php if (empty($strength_leaderboard)): ?>
-                <p><em>No data available yet.</em></p>
+                <p><em><?php echo t('common.no_data'); ?></em></p>
             <?php else: ?>
                 <table>
                     <thead>
                         <tr>
-                            <th>Rank</th>
-                            <th>Player</th>
-                            <th>Max Strength</th>
+                            <th><?php echo t('common.rank'); ?></th>
+                            <th><?php echo t('common.player'); ?></th>
+                            <th><?php echo t('lb.strength.col'); ?></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -110,18 +110,18 @@
 
         <!-- Dexterity Leaderboard -->
         <?php if ($active_tab === 'dexterity'): ?>
-            <h2>Dexterity Leaderboard</h2>
-            <p>Ranking by highest dexterity value across party members.</p>
+            <h2><?php echo t('lb.dexterity.title'); ?></h2>
+            <p><?php echo t('lb.dexterity.desc'); ?></p>
 
             <?php if (empty($dexterity_leaderboard)): ?>
-                <p><em>No data available yet.</em></p>
+                <p><em><?php echo t('common.no_data'); ?></em></p>
             <?php else: ?>
                 <table>
                     <thead>
                         <tr>
-                            <th>Rank</th>
-                            <th>Player</th>
-                            <th>Max Dexterity</th>
+                            <th><?php echo t('common.rank'); ?></th>
+                            <th><?php echo t('common.player'); ?></th>
+                            <th><?php echo t('lb.dexterity.col'); ?></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -139,18 +139,18 @@
 
         <!-- Health Leaderboard -->
         <?php if ($active_tab === 'health'): ?>
-            <h2>Health Leaderboard</h2>
-            <p>Ranking by highest health value across party members.</p>
+            <h2><?php echo t('lb.health.title'); ?></h2>
+            <p><?php echo t('lb.health.desc'); ?></p>
 
             <?php if (empty($health_leaderboard)): ?>
-                <p><em>No data available yet.</em></p>
+                <p><em><?php echo t('common.no_data'); ?></em></p>
             <?php else: ?>
                 <table>
                     <thead>
                         <tr>
-                            <th>Rank</th>
-                            <th>Player</th>
-                            <th>Max Health</th>
+                            <th><?php echo t('common.rank'); ?></th>
+                            <th><?php echo t('common.player'); ?></th>
+                            <th><?php echo t('lb.health.col'); ?></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -168,18 +168,18 @@
 
         <!-- Wisdom Leaderboard -->
         <?php if ($active_tab === 'wisdom'): ?>
-            <h2>Wisdom Leaderboard</h2>
-            <p>Ranking by highest wisdom value across party members.</p>
+            <h2><?php echo t('lb.wisdom.title'); ?></h2>
+            <p><?php echo t('lb.wisdom.desc'); ?></p>
 
             <?php if (empty($wisdom_leaderboard)): ?>
-                <p><em>No data available yet.</em></p>
+                <p><em><?php echo t('common.no_data'); ?></em></p>
             <?php else: ?>
                 <table>
                     <thead>
                         <tr>
-                            <th>Rank</th>
-                            <th>Player</th>
-                            <th>Max Wisdom</th>
+                            <th><?php echo t('common.rank'); ?></th>
+                            <th><?php echo t('common.player'); ?></th>
+                            <th><?php echo t('lb.wisdom.col'); ?></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -197,18 +197,18 @@
 
         <!-- Arena Floor Leaderboard -->
         <?php if ($active_tab === 'arena'): ?>
-            <h2>Arena Floor Leaderboard</h2>
-            <p>Ranking by highest arena floor reached.</p>
+            <h2><?php echo t('lb.arena.title'); ?></h2>
+            <p><?php echo t('lb.arena.desc'); ?></p>
 
             <?php if (empty($arena_leaderboard)): ?>
-                <p><em>No data available yet.</em></p>
+                <p><em><?php echo t('common.no_data'); ?></em></p>
             <?php else: ?>
                 <table>
                     <thead>
                         <tr>
-                            <th>Rank</th>
-                            <th>Player</th>
-                            <th>Arena Floor</th>
+                            <th><?php echo t('common.rank'); ?></th>
+                            <th><?php echo t('common.player'); ?></th>
+                            <th><?php echo t('lb.arena.col'); ?></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -226,18 +226,18 @@
 
         <!-- Highest Rift Leaderboard -->
         <?php if ($active_tab === 'rift'): ?>
-            <h2>Highest Rift Leaderboard</h2>
-            <p>Ranking by highest rift level completed.</p>
+            <h2><?php echo t('lb.rift.title'); ?></h2>
+            <p><?php echo t('lb.rift.desc'); ?></p>
 
             <?php if (empty($rift_leaderboard)): ?>
-                <p><em>No data available yet.</em></p>
+                <p><em><?php echo t('common.no_data'); ?></em></p>
             <?php else: ?>
                 <table>
                     <thead>
                         <tr>
-                            <th>Rank</th>
-                            <th>Player</th>
-                            <th>Rift Level</th>
+                            <th><?php echo t('common.rank'); ?></th>
+                            <th><?php echo t('common.player'); ?></th>
+                            <th><?php echo t('lb.rift.col'); ?></th>
                         </tr>
                     </thead>
                     <tbody>

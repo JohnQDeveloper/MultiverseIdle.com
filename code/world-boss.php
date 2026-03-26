@@ -5,9 +5,9 @@ if(isset($_POST['join_queue'])) {
     // Check if already queued
     if($Character->Data['world_boss_queued'] != 1) {
         $Character->Data['world_boss_queued'] = 1;
-        $alert_success = 'You have joined the World Boss queue!';
+        $alert_success = t('world_boss.alert.joined');
     } else {
-        $alert_danger = 'You are already in the queue.';
+        $alert_danger = t('world_boss.alert.already');
     }
 }
 
@@ -15,9 +15,9 @@ if(isset($_POST['join_queue'])) {
 if(isset($_POST['leave_queue'])) {
     if($Character->Data['world_boss_queued'] == 1) {
         $Character->Data['world_boss_queued'] = 0;
-        $alert_success = 'You have left the World Boss queue.';
+        $alert_success = t('world_boss.alert.left');
     } else {
-        $alert_danger = 'You are not in the queue.';
+        $alert_danger = t('world_boss.alert.not_in_queue');
     }
 }
 

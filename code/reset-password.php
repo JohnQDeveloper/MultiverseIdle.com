@@ -15,16 +15,16 @@ if ($selector !== '' && $token !== '') {
         $auth->canResetPasswordOrThrow($selector, $token);
         $valid_token = true;
     } catch (\Delight\Auth\InvalidSelectorTokenPairException $e) {
-        $alert_danger = 'This reset link is invalid.';
+        $alert_danger = t('auth.reset.alert.invalid_link');
     } catch (\Delight\Auth\TokenExpiredException $e) {
-        $alert_danger = 'This reset link has expired. Please request a new one.';
+        $alert_danger = t('auth.reset.alert.expired');
     } catch (\Delight\Auth\ResetDisabledException $e) {
-        $alert_danger = 'Password reset is not available for this account.';
+        $alert_danger = t('auth.reset.alert.reset_disabled');
     } catch (\Delight\Auth\TooManyRequestsException $e) {
-        $alert_danger = 'Too many requests. Please wait before trying again.';
+        $alert_danger = t('auth.reset.alert.too_many');
     }
 } else {
-    $alert_danger = 'Invalid reset link.';
+    $alert_danger = t('auth.reset.alert.invalid_request');
 }
 
 if (isset($_POST['new_password'], $_POST['confirm_password']) && $valid_token) {
@@ -32,24 +32,24 @@ if (isset($_POST['new_password'], $_POST['confirm_password']) && $valid_token) {
     $confirm_password = $_POST['confirm_password'];
 
     if ($new_password !== $confirm_password) {
-        $alert_danger = 'Passwords do not match.';
+        $alert_danger = t('auth.reset.alert.mismatch');
     } elseif (strlen($new_password) < 8) {
-        $alert_danger = 'Password must be at least 8 characters long.';
+        $alert_danger = t('auth.reset.alert.short_password');
     } else {
         try {
             $auth->resetPassword($selector, $token, $new_password);
-            $alert_success = 'Your password has been reset. You can now log in with your new password.';
+            $alert_success = t('auth.reset.alert.success');
             $valid_token = false; // Hide the form after success
         } catch (\Delight\Auth\InvalidSelectorTokenPairException $e) {
-            $alert_danger = 'This reset link is invalid.';
+            $alert_danger = t('auth.reset.alert.invalid_link');
         } catch (\Delight\Auth\TokenExpiredException $e) {
-            $alert_danger = 'This reset link has expired. Please request a new one.';
+            $alert_danger = t('auth.reset.alert.expired');
         } catch (\Delight\Auth\ResetDisabledException $e) {
-            $alert_danger = 'Password reset is not available for this account.';
+            $alert_danger = t('auth.reset.alert.reset_disabled');
         } catch (\Delight\Auth\InvalidPasswordException $e) {
-            $alert_danger = 'Invalid password. Please choose a stronger password.';
+            $alert_danger = t('auth.reset.alert.invalid_password');
         } catch (\Delight\Auth\TooManyRequestsException $e) {
-            $alert_danger = 'Too many requests. Please wait before trying again.';
+            $alert_danger = t('auth.reset.alert.too_many');
         }
     }
 }

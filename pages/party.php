@@ -9,32 +9,32 @@
     ?>
     <div class="wrapper">
     <article class="main">
-        <h1>Party Management</h1>
+        <h1><?php echo t('party.title'); ?></h1>
 
-        <h3>Frontline Character</h3>
+        <h3><?php echo t('party.frontline'); ?></h3>
         <div class="grid">
             <div>
-                Level: <?php echo $Character->Data['party_json']['members']['frontline']['level']; ?> <br />
-                Strength: <?php echo $Character->Data['party_json']['members']['frontline']['strength']; ?> <br />
-                Dexterity: <?php echo $Character->Data['party_json']['members']['frontline']['dexterity']; ?> <br />
-                Health: <?php echo $Character->Data['party_json']['members']['frontline']['health']; ?> <br />
-                Wisdom: <?php echo $Character->Data['party_json']['members']['frontline']['wisdom']; ?> <br />
+                <?php echo t('common.level'); ?>: <?php echo $Character->Data['party_json']['members']['frontline']['level']; ?> <br />
+                <?php echo t('party.strength'); ?>: <?php echo $Character->Data['party_json']['members']['frontline']['strength']; ?> <br />
+                <?php echo t('party.dexterity'); ?>: <?php echo $Character->Data['party_json']['members']['frontline']['dexterity']; ?> <br />
+                <?php echo t('party.health'); ?>: <?php echo $Character->Data['party_json']['members']['frontline']['health']; ?> <br />
+                <?php echo t('party.wisdom'); ?>: <?php echo $Character->Data['party_json']['members']['frontline']['wisdom']; ?> <br />
                 <form>
                 <br />
                 <select name="class">
                     <option value="<?php echo $Character->Data['party_json']['members']['frontline']['class']; ?>">
-                        <?php echo $Character->Data['party_json']['members']['frontline']['class']; ?>
+                        <?php echo t('party.class.' . $Character->Data['party_json']['members']['frontline']['class']); ?>
                     </option>
                 </select>
                  <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
-                 <input type="submit" value="Update Class" />
+                 <input type="submit" value="<?php echo t('party.update_class'); ?>" />
                 </form>
             </div>
             <div>
                 <form method="POST" action="/party?update=frontline_gear">
-                Weapon Slot:
+                <?php echo t('party.weapon_slot'); ?>
                 <select name="weapon_slot">
-                    <option value="0">-- None --</option>
+                    <option value="0"><?php echo t('party.none'); ?></option>
                     <?php
                     foreach ($favorite_weapons as $weapon):
                         // Skip if equipped by backline
@@ -45,9 +45,9 @@
                     <?php endforeach; ?>
                 </select>
 
-                Armor Slot:
+                <?php echo t('party.armor_slot'); ?>
                 <select name="armor_slot">
-                    <option value="0">-- None --</option>
+                    <option value="0"><?php echo t('party.none'); ?></option>
                     <?php
                     foreach ($favorite_armors as $armor):
                         // Skip if equipped by backline
@@ -59,51 +59,51 @@
                 </select>
                 <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
 
-                 <input type="submit" value="Update Gear" />
+                 <input type="submit" value="<?php echo t('party.update_gear'); ?>" />
                 </form>
-                <small><a href="/inventory">Favorite items in Inventory to equip them</a></small>
+                <small><a href="/inventory"><?php echo t('party.favorite_hint'); ?></a></small>
             </div>
             <div>
                 <form method="POST" action="/party?update=frontline_skills">
-                1st Skill Gem:
+                <?php echo t('party.skill_gem_1'); ?>
                 <?php echo Controls::SkillGemSelectBox("skill_gem_1",
                 $Character->Data['party_json']['members']['frontline']['skills'][0]); ?>
 
-                2nd Skill Gem:
+                <?php echo t('party.skill_gem_2'); ?>
                 <?php echo Controls::SkillGemSelectBox("skill_gem_2",
                 $Character->Data['party_json']['members']['frontline']['skills'][1]); ?>
 
                  <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
-                 <input type="submit" value="Update Skills" />
+                 <input type="submit" value="<?php echo t('party.update_skills'); ?>" />
                 </form>
             </div>
         </div>
 
-        <h3>Backline Character</h3>
+        <h3><?php echo t('party.backline'); ?></h3>
         <div class="grid">
 <div>
-                Level: <?php echo $Character->Data['party_json']['members']['backline']['level']; ?> <br />
-                Strength: <?php echo $Character->Data['party_json']['members']['backline']['strength']; ?> <br />
-                Dexterity: <?php echo $Character->Data['party_json']['members']['backline']['dexterity']; ?> <br />
-                Health: <?php echo $Character->Data['party_json']['members']['backline']['health']; ?> <br />
-                Wisdom: <?php echo $Character->Data['party_json']['members']['backline']['wisdom']; ?> <br />
+                <?php echo t('common.level'); ?>: <?php echo $Character->Data['party_json']['members']['backline']['level']; ?> <br />
+                <?php echo t('party.strength'); ?>: <?php echo $Character->Data['party_json']['members']['backline']['strength']; ?> <br />
+                <?php echo t('party.dexterity'); ?>: <?php echo $Character->Data['party_json']['members']['backline']['dexterity']; ?> <br />
+                <?php echo t('party.health'); ?>: <?php echo $Character->Data['party_json']['members']['backline']['health']; ?> <br />
+                <?php echo t('party.wisdom'); ?>: <?php echo $Character->Data['party_json']['members']['backline']['wisdom']; ?> <br />
                 <form>
                 <br />
                 <select name="class">
                     <option value="<?php echo $Character->Data['party_json']['members']['backline']['class']; ?>">
-                        <?php echo $Character->Data['party_json']['members']['backline']['class']; ?>
+                        <?php echo t('party.class.' . $Character->Data['party_json']['members']['backline']['class']); ?>
                     </option>
                 </select>
 
                  <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
-                 <input type="submit" value="Update Class" />
+                 <input type="submit" value="<?php echo t('party.update_class'); ?>" />
                 </form>
             </div>
             <div>
                 <form method="POST" action="/party?update=backline_gear">
-                Weapon Slot:
+                <?php echo t('party.weapon_slot'); ?>
                 <select name="weapon_slot">
-                    <option value="0">-- None --</option>
+                    <option value="0"><?php echo t('party.none'); ?></option>
                     <?php
                     foreach ($favorite_weapons as $weapon):
                         // Skip if equipped by frontline
@@ -114,9 +114,9 @@
                     <?php endforeach; ?>
                 </select>
 
-                Armor Slot:
+                <?php echo t('party.armor_slot'); ?>
                 <select name="armor_slot">
-                    <option value="0">-- None --</option>
+                    <option value="0"><?php echo t('party.none'); ?></option>
                     <?php
                     foreach ($favorite_armors as $armor):
                         // Skip if equipped by frontline
@@ -128,22 +128,22 @@
                 </select>
 
                 <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
-                 <input type="submit" value="Update Gear" />
+                 <input type="submit" value="<?php echo t('party.update_gear'); ?>" />
                 </form>
-                <small><a href="/inventory">Favorite items in Inventory to equip them</a></small>
+                <small><a href="/inventory"><?php echo t('party.favorite_hint'); ?></a></small>
             </div>
             <div>
                 <form method="POST" action="/party?update=backline_skills">
-                1st Skill Gem:
+                <?php echo t('party.skill_gem_1'); ?>
                 <?php echo Controls::SkillGemSelectBox("skill_gem_1",
                 $Character->Data['party_json']['members']['backline']['skills'][0]); ?>
 
-                2nd Skill Gem:
+                <?php echo t('party.skill_gem_2'); ?>
                 <?php echo Controls::SkillGemSelectBox("skill_gem_2",
                 $Character->Data['party_json']['members']['backline']['skills'][1]); ?>
 
                  <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
-                 <input type="submit" value="Update Skills" />
+                 <input type="submit" value="<?php echo t('party.update_skills'); ?>" />
                 </form>
             </div>
         </div>

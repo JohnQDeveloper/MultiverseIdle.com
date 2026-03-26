@@ -1,19 +1,16 @@
     <main class="container">
         <div class="wrapper">
         <article class="main">
-          <h1>Multiverse Idle vAlpha</h1>
-            <p>Welcome to Multiverse Idle, an idle/incremental game where you explore multiple universes, gather resources,
-                and unlock new dimensions of gameplay. This is an early alpha version, so expect bugs and incomplete features.
-                Your feedback is invaluable as we continue to develop and improve the game.</p>
-            <p>Please use the Feedback link in the game to report bugs and make suggestions. We use GitHub issues as this is
-                an open source project.</p>
+          <h1><?php echo t('index.title'); ?></h1>
+            <p><?php echo t('index.welcome'); ?></p>
+            <p><?php echo t('index.feedback'); ?></p>
 
-            <a href="/register" class="button">Create an Account</a>
+            <a href="/register" class="button"><?php echo t('index.create_acct'); ?></a>
             <BR />
-            <a href="/login" class="button">Login to Play</a>
+            <a href="/login" class="button"><?php echo t('index.login'); ?></a>
             <BR />
-            <a href="/guest" class="button outline">Play as Guest</a>
-            <p><small>Guest progress is saved in your browser session. <a href="/register">Register</a> to keep your progress permanently.</small></p>
+            <a href="/guest" class="button outline"><?php echo t('index.guest'); ?></a>
+            <p><small><?php echo t('index.guest_note', ['register_link' => '<a href="/register">' . t('index.register') . '</a>']); ?></small></p>
 
         </article>
         </div>

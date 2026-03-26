@@ -16,13 +16,13 @@ if (isset($_POST['donate_to_bank'])) {
 
     $validCommodities = ['gold', 'iron', 'herbs', 'gems'];
     if (!in_array($commodity, $validCommodities, true)) {
-        $alert_danger = 'Invalid resource.';
+        $alert_danger = t('guild_bank.alert.invalid_res');
     } elseif ($amount <= 0) {
-        $alert_danger = 'Amount must be greater than 0.';
+        $alert_danger = t('guild_bank.alert.amount_zero');
     } elseif ((int)($Character->Data[$commodity] ?? 0) < $amount) {
-        $alert_danger = 'You don\'t have enough ' . ucfirst($commodity) . '.';
+        $alert_danger = t('guild_bank.alert.no_resource', ['resource' => t('res.' . strtolower($commodity))]);
     } elseif ($user_guild_id === null) {
-        $alert_danger = 'You are not in a guild.';
+        $alert_danger = t('guild_bank.alert.not_in_guild');
     } else {
         // Deduct from in-memory character data; index.php dirty-check saves it at end of request
         $Character->Data[$commodity] -= $amount;
@@ -33,7 +33,7 @@ if (isset($_POST['donate_to_bank'])) {
              ON DUPLICATE KEY UPDATE `{$commodity}` = `{$commodity}` + :amount2",
             [':guild_id' => $user_guild_id, ':amount' => $amount, ':amount2' => $amount]
         );
-        $alert_success = 'Donated ' . number_format($amount) . ' ' . $commodity . ' to the guild bank.';
+        $alert_success = t('guild_bank.alert.donated', ['amount' => number_format($amount), 'resource' => t('res.' . strtolower($commodity))]);
     }
 }
 
@@ -42,11 +42,11 @@ if (isset($_POST['set_tax_rate'])) {
     $tax_rate = (int)($_POST['tax_rate'] ?? 0);
 
     if (!in_array($user_role, ['guild_master', 'officer'], true)) {
-        $alert_danger = 'Only guild masters and officers can set the tax rate.';
+        $alert_danger = t('guild_bank.alert.no_tax_perm');
     } elseif ($Guild->SetTaxRate($tax_rate, $current_user_id)) {
-        $alert_success = 'Tax rate updated to ' . max(0, min(20, $tax_rate)) . '%.';
+        $alert_success = t('guild_bank.alert.tax_updated', ['rate' => max(0, min(20, $tax_rate))]);
     } else {
-        $alert_danger = 'Failed to update tax rate.';
+        $alert_danger = t('guild_bank.alert.tax_fail');
     }
 }
 

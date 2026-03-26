@@ -28,6 +28,7 @@ if (!in_array($item_type_filter, $valid_item_types, true)) {
 }
 $valid_affixes = array_keys(Gear::getAffixDefinitions());
 $affix_filter  = array_values(array_filter($affix_filter, fn($a) => in_array($a, $valid_affixes, true)));
+$resource_label = static fn (string $resource): string => t('res.' . strtolower($resource));
 
 // CSRF validation for all POST actions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -44,17 +45,17 @@ if (isset($_POST['post_order'])) {
     $price_per_unit = (int)$_POST['price_per_unit'];
 
     if (!in_array($order_type, ['buy', 'sell'], true)) {
-        $alert_danger = 'Invalid order type.';
+        $alert_danger = t('market.alert.invalid_order_type');
     } elseif (!in_array($resource, $valid_resources, true)) {
-        $alert_danger = 'Invalid resource.';
+        $alert_danger = t('market.alert.invalid_resource');
     } elseif ($amount <= 0) {
-        $alert_danger = 'Amount must be greater than 0.';
+        $alert_danger = t('market.alert.amount_zero');
     } elseif ($price_per_unit <= 0) {
-        $alert_danger = 'Price per unit must be greater than 0.';
+        $alert_danger = t('market.alert.price_zero');
     } elseif ($order_type === 'sell') {
         $player_resource = (int)($Character->Data[$resource] ?? 0);
         if ($player_resource < $amount) {
-            $alert_danger = 'Not enough ' . ucfirst($resource) . '. You have ' . human_num($player_resource) . '.';
+            $alert_danger = t('market.alert.no_resource', ['resource' => $resource_label($resource), 'amount' => human_num($player_resource)]);
         } else {
             $Character->Data[$resource] = $player_resource - $amount;
             $inserted = $DAL->w(
@@ -63,11 +64,11 @@ if (isset($_POST['post_order'])) {
                 ['cid' => $character_id, 'season_id' => $market_season_id, 'resource' => $resource, 'amount' => $amount, 'amount2' => $amount, 'ppu' => $price_per_unit]
             );
             if ($inserted) {
-                $alert_success = 'Sell order posted: ' . human_num($amount) . ' ' . ucfirst($resource) . ' at ' . human_num($price_per_unit) . ' Gold each.';
+                $alert_success = t('market.alert.sell_posted', ['amount' => human_num($amount), 'resource' => $resource_label($resource), 'price' => human_num($price_per_unit)]);
                 $active_tab = 'my_orders';
             } else {
                 $Character->Data[$resource] = $player_resource;
-                $alert_danger = 'Failed to post order. Please try again.';
+                $alert_danger = t('market.alert.post_fail');
             }
         }
     } else {
@@ -75,7 +76,7 @@ if (isset($_POST['post_order'])) {
         $total_gold  = $amount * $price_per_unit;
         $player_gold = (int)$Character->Data['gold'];
         if ($player_gold < $total_gold) {
-            $alert_danger = 'Not enough Gold. Need ' . human_num($total_gold) . ', have ' . human_num($player_gold) . '.';
+            $alert_danger = t('market.alert.no_gold', ['need' => human_num($total_gold), 'have' => human_num($player_gold)]);
         } else {
             $Character->Data['gold'] = $player_gold - $total_gold;
             $inserted = $DAL->w(
@@ -84,11 +85,11 @@ if (isset($_POST['post_order'])) {
                 ['cid' => $character_id, 'season_id' => $market_season_id, 'resource' => $resource, 'amount' => $amount, 'amount2' => $amount, 'ppu' => $price_per_unit]
             );
             if ($inserted) {
-                $alert_success = 'Buy order posted: ' . human_num($amount) . ' ' . ucfirst($resource) . ' at ' . human_num($price_per_unit) . ' Gold each.';
+                $alert_success = t('market.alert.buy_posted', ['amount' => human_num($amount), 'resource' => $resource_label($resource), 'price' => human_num($price_per_unit)]);
                 $active_tab = 'my_orders';
             } else {
                 $Character->Data['gold'] = $player_gold;
-                $alert_danger = 'Failed to post order. Please try again.';
+                $alert_danger = t('market.alert.post_fail');
             }
         }
     }
@@ -102,11 +103,11 @@ if (isset($_POST['fill_order'])) {
     $fill_resource   = $_POST['fill_resource'] ?? '';
 
     if ($fill_price <= 0 || $fill_amount_req <= 0) {
-        $alert_danger = 'Invalid fill parameters.';
+        $alert_danger = t('market.alert.invalid_fill');
     } elseif (!in_array($fill_order_type, ['sell', 'buy'], true)) {
-        $alert_danger = 'Invalid order type.';
+        $alert_danger = t('market.alert.invalid_order_type');
     } elseif (!in_array($fill_resource, $valid_resources, true)) {
-        $alert_danger = 'Invalid resource.';
+        $alert_danger = t('market.alert.invalid_resource');
     } else {
         // Fetch all open orders at this price point, oldest first (FIFO), excluding own, same market pool
         $orders_at_price = $DAL->r(
@@ -118,7 +119,7 @@ if (isset($_POST['fill_order'])) {
         ) ?: [];
 
         if (empty($orders_at_price)) {
-            $alert_danger = 'No orders available at that price.';
+            $alert_danger = t('market.alert.no_orders');
         } else {
             $total_available = (int)array_sum(array_column($orders_at_price, 'amount_remaining'));
             $actual_fill     = min($fill_amount_req, $total_available);
@@ -129,7 +130,7 @@ if (isset($_POST['fill_order'])) {
                 $gold_needed = $actual_fill * $fill_price;
                 $player_gold = (int)$Character->Data['gold'];
                 if ($player_gold < $gold_needed) {
-                    $alert_danger = 'Not enough Gold. Need ' . human_num($gold_needed) . '.';
+                    $alert_danger = t('market.alert.no_gold_buy', ['need' => human_num($gold_needed)]);
                 } else {
                     $Character->Data['gold'] -= $gold_needed;
                     $filled_total = 0;
@@ -168,17 +169,17 @@ if (isset($_POST['fill_order'])) {
                     }
 
                     if ($filled_total > 0) {
-                        $alert_success = 'Purchased ' . human_num($filled_total) . ' ' . ucfirst($fill_resource) . ' for ' . human_num($filled_total * $fill_price) . ' Gold.';
+                        $alert_success = t('market.alert.purchased', ['amount' => human_num($filled_total), 'resource' => $resource_label($fill_resource), 'total' => human_num($filled_total * $fill_price)]);
                     } else {
                         $Character->Data['gold'] += $gold_needed;
-                        $alert_danger = 'Orders no longer available. Refresh and try again.';
+                        $alert_danger = t('market.alert.orders_gone');
                     }
                 }
             } else {
                 // Player sells: provides resource, receives Gold from escrow
                 $player_resource = (int)($Character->Data[$fill_resource] ?? 0);
                 if ($player_resource < $actual_fill) {
-                    $alert_danger = 'Not enough ' . ucfirst($fill_resource) . '. Have ' . human_num($player_resource) . '.';
+                    $alert_danger = t('market.alert.no_resource_sell', ['resource' => $resource_label($fill_resource), 'amount' => human_num($player_resource)]);
                 } else {
                     $Character->Data[$fill_resource] = $player_resource - $actual_fill;
                     $col          = $col_map[$fill_resource];
@@ -218,10 +219,10 @@ if (isset($_POST['fill_order'])) {
                     }
 
                     if ($filled_total > 0) {
-                        $alert_success = 'Sold ' . human_num($filled_total) . ' ' . ucfirst($fill_resource) . ' for ' . human_num($filled_total * $fill_price) . ' Gold.';
+                        $alert_success = t('market.alert.sold', ['amount' => human_num($filled_total), 'resource' => $resource_label($fill_resource), 'total' => human_num($filled_total * $fill_price)]);
                     } else {
                         $Character->Data[$fill_resource] = $player_resource;
-                        $alert_danger = 'Orders no longer available. Refresh and try again.';
+                        $alert_danger = t('market.alert.orders_gone');
                     }
                 }
             }
@@ -238,12 +239,12 @@ if (isset($_POST['cancel_order'])) {
     );
 
     if (!$order_row) {
-        $alert_danger = 'Order not found.';
+        $alert_danger = t('market.alert.order_not_found');
     } else {
         $order    = $order_row[0];
         $resource = $order['resource'];
         if (!in_array($resource, $valid_resources, true)) {
-            $alert_danger = 'Invalid order.';
+            $alert_danger = t('market.alert.invalid_order');
         } else {
             $DAL->w(
                 "UPDATE market_orders SET status = 'cancelled' WHERE id = :id AND character_id = :cid",
@@ -252,14 +253,14 @@ if (isset($_POST['cancel_order'])) {
             if ($DAL->rows_affected() > 0) {
                 if ($order['order_type'] === 'sell') {
                     $Character->Data[$resource] = ((int)($Character->Data[$resource] ?? 0)) + (int)$order['amount_remaining'];
-                    $alert_success = 'Order cancelled. ' . human_num((int)$order['amount_remaining']) . ' ' . ucfirst($resource) . ' returned to inventory.';
+                    $alert_success = t('market.alert.cancelled_sell', ['amount' => human_num((int)$order['amount_remaining']), 'resource' => $resource_label($resource)]);
                 } else {
                     $refund = (int)$order['amount_remaining'] * (int)$order['price_per_unit'];
                     $Character->Data['gold'] = ((int)$Character->Data['gold']) + $refund;
-                    $alert_success = 'Order cancelled. ' . human_num($refund) . ' Gold returned to account.';
+                    $alert_success = t('market.alert.cancelled_buy', ['amount' => human_num($refund)]);
                 }
             } else {
-                $alert_danger = 'Failed to cancel order.';
+                $alert_danger = t('market.alert.cancel_fail');
             }
         }
     }
@@ -272,18 +273,18 @@ if (isset($_POST['list_item'])) {
     $list_price = (int)$_POST['list_price'];
 
     if (!in_array($item_type, $valid_item_types, true)) {
-        $alert_danger = 'Invalid item type.';
+        $alert_danger = t('market.alert.invalid_item_type');
     } elseif ($item_id <= 0) {
-        $alert_danger = 'Invalid item.';
+        $alert_danger = t('market.alert.invalid_item');
     } elseif ($list_price <= 0) {
-        $alert_danger = 'List price must be greater than 0.';
+        $alert_danger = t('market.alert.price_zero_list');
     } elseif ($item_type === 'gear' && in_array($item_id, array_filter([
         (int)($Character->Data['party_json']['members']['frontline']['equipped_weapon'] ?? 0),
         (int)($Character->Data['party_json']['members']['frontline']['equipped_armor'] ?? 0),
         (int)($Character->Data['party_json']['members']['backline']['equipped_weapon'] ?? 0),
         (int)($Character->Data['party_json']['members']['backline']['equipped_armor'] ?? 0),
     ]))) {
-        $alert_danger = 'Cannot list equipped gear. Unequip it first.';
+        $alert_danger = t('market.alert.equipped_gear');
     } else {
         $table = $item_table_map[$item_type];
         // Set season_id on the item when listing so it remains in the correct market pool
@@ -292,10 +293,10 @@ if (isset($_POST['list_item'])) {
             ['price' => $list_price, 'season_id' => $market_season_id, 'id' => $item_id, 'uid' => $user_id]
         );
         if ($DAL->rows_affected() > 0) {
-            $alert_success = 'Item listed for ' . human_num($list_price) . ' Gold.';
+            $alert_success = t('market.alert.item_listed', ['price' => human_num($list_price)]);
             $active_tab = 'my_orders';
         } else {
-            $alert_danger = 'Failed to list item. It may already be listed or you do not own it.';
+            $alert_danger = t('market.alert.list_fail');
         }
     }
 }
@@ -306,9 +307,9 @@ if (isset($_POST['unlist_item'])) {
     $item_id   = (int)$_POST['item_id'];
 
     if (!in_array($item_type, $valid_item_types, true)) {
-        $alert_danger = 'Invalid item type.';
+        $alert_danger = t('market.alert.invalid_item_type');
     } elseif ($item_id <= 0) {
-        $alert_danger = 'Invalid item.';
+        $alert_danger = t('market.alert.invalid_item');
     } else {
         $table = $item_table_map[$item_type];
         $DAL->w(
@@ -316,10 +317,10 @@ if (isset($_POST['unlist_item'])) {
             ['id' => $item_id, 'uid' => $user_id]
         );
         if ($DAL->rows_affected() > 0) {
-            $alert_success = 'Item unlisted and returned to your inventory.';
+            $alert_success = t('market.alert.unlisted');
             $active_tab = 'my_orders';
         } else {
-            $alert_danger = 'Failed to unlist item.';
+            $alert_danger = t('market.alert.unlist_fail');
         }
     }
 }
@@ -331,9 +332,9 @@ if (isset($_POST['buy_item'])) {
     $expected_price = (int)$_POST['expected_price'];
 
     if (!in_array($item_type, $valid_item_types, true)) {
-        $alert_danger = 'Invalid item type.';
+        $alert_danger = t('market.alert.invalid_item_type');
     } elseif ($item_id <= 0 || $expected_price <= 0) {
-        $alert_danger = 'Invalid purchase parameters.';
+        $alert_danger = t('market.alert.invalid_buy_params');
     } else {
         $table    = $item_table_map[$item_type];
         $item_row = $DAL->r(
@@ -342,7 +343,7 @@ if (isset($_POST['buy_item'])) {
         );
 
         if (!$item_row) {
-            $alert_danger = 'Item not available or price has changed. Please refresh.';
+            $alert_danger = t('market.alert.not_available');
         } else {
             $item        = $item_row[0];
             $price       = (int)$item['market_price'];
@@ -350,9 +351,9 @@ if (isset($_POST['buy_item'])) {
             $item_season = isset($item['season_id']) ? (int)$item['season_id'] : null;
 
             if ($item_season !== $market_season_id) {
-                $alert_danger = 'This item is not available in your current league.';
+                $alert_danger = t('market.alert.wrong_league');
             } elseif ((int)$Character->Data['gold'] < $price) {
-                $alert_danger = 'Not enough Gold. Need ' . human_num($price) . '.';
+                $alert_danger = t('market.alert.no_gold_item', ['price' => human_num($price)]);
             } else {
                 // Atomic ownership transfer — reset favorite on gear, enforce season on write
                 $extra = ($item_type === 'gear') ? ', favorite = 0' : '';
@@ -361,7 +362,7 @@ if (isset($_POST['buy_item'])) {
                     ['buyer' => $user_id, 'id' => $item_id, 'seller' => $seller_uid, 'price' => $price, 'season_id' => $market_season_id]
                 );
                 if ($DAL->rows_affected() === 0) {
-                    $alert_danger = 'Item no longer available. Refresh and try again.';
+                    $alert_danger = t('market.alert.item_gone');
                 } else {
                     $Character->Data['gold'] -= $price;
                     // Credit the seller's character in the same market pool (season or perpetual)
@@ -374,11 +375,11 @@ if (isset($_POST['buy_item'])) {
                         $item_name = htmlspecialchars($item['name']);
                     } elseif ($item_type === 'rift_stone') {
                         $details   = json_decode($item['details'], true);
-                        $item_name = htmlspecialchars($details['name'] ?? 'Rift Stone');
+                        $item_name = htmlspecialchars($details['name'] ?? t('market.items.tab.rifts'));
                     } else {
                         $item_name = htmlspecialchars($item['name']);
                     }
-                    $alert_success = 'Purchased ' . $item_name . ' for ' . human_num($price) . ' Gold.';
+                    $alert_success = t('market.alert.item_bought', ['name' => $item_name, 'price' => human_num($price)]);
                 }
             }
         }

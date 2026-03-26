@@ -2,16 +2,13 @@
     <!-- Page Details -->
     <div class="wrapper">
     <article class="main">
-        <h1>Workers Management</h1>
+        <h1><?php echo t('workers.title'); ?></h1>
 
-        <p>
-        Here you can manage your workers. Assign them to different tasks, upgrade their skills, and monitor their progress.
-        Efficient worker management is key to maximizing your resource production and overall game success.
-        </p>
+        <p><?php echo t('workers.desc'); ?></p>
 
         <form method="POST">
 
-        <b>Yield</b>:<BR />
+        <b><?php echo t('workers.yield'); ?></b>:<BR />
         <?php
             $resource = $Character->Data['worker_json']['resource'];
             $skill_level = $Character->Data['worker_json']['skills'][$resource];
@@ -27,10 +24,10 @@
 
             $harvests = 10;
             $total = worker_yield($harvests, $speed_upgrades, $skill_level, $num_workers, $potion_bonus);
-            echo human_num($total) . ' ' . htmlspecialchars(ucfirst($resource)) . ' every minute.';
+            echo t('workers.every_minute', ['amount' => human_num($total), 'resource' => htmlspecialchars(t('res.' . strtolower($resource)))]);
 
             if ($potion_bonus > 0) {
-                echo ' <span class="text--success">(+' . $potion_bonus . '% from potion)</span>';
+                echo ' <span class="text--success">' . t('workers.from_potion', ['pct' => $potion_bonus]) . '</span>';
             }
         ?>
         <br />
@@ -39,26 +36,12 @@
 
         <?php if ($active_potion): ?>
             <div class="potion-effect-box">
-                <b class="potion-effect-box__title">Active Potion Effects:</b>
+                <b class="potion-effect-box__title"><?php echo t('common.active_effects'); ?></b>
                 <ul class="potion-effect-box__list">
                     <?php
                         # Potion definitions for display
-                        $potion_prefix_definitions = [
-                            'herb_worker_yield' => ['name' => 'Herb Worker Yield', 'per_level' => 1],
-                            'gold_worker_yield' => ['name' => 'Gold Worker Yield', 'per_level' => 1],
-                            'iron_worker_yield' => ['name' => 'Iron Worker Yield', 'per_level' => 1],
-                            'gems_worker_yield' => ['name' => 'Gems Worker Yield', 'per_level' => 1],
-                            'arena_resource_drops' => ['name' => 'Arena Resource Drops', 'per_level' => 1],
-                            'rift_drops' => ['name' => 'Rift Drops', 'per_level' => 1],
-                        ];
-
-                        $potion_suffix_definitions = [
-                            'arena_xp' => ['name' => 'Arena XP', 'per_level' => 1],
-                            'arena_stat_gains' => ['name' => 'Arena Stat Gains', 'per_level' => 1],
-                            'rift_xp' => ['name' => 'Rift XP', 'per_level' => 1],
-                            'rift_stat_gains' => ['name' => 'Rift Stat Gains', 'per_level' => 1],
-                            'world_boss_xp' => ['name' => 'World Boss XP', 'per_level' => 100],
-                        ];
+                        $potion_prefix_definitions = Potion::getPrefixDefinitions();
+                        $potion_suffix_definitions = Potion::getSuffixDefinitions();
 
                         $prefix_value = $active_potion['level'] * $potion_prefix_definitions[$active_potion['prefix']]['per_level'];
                         $suffix_value = $active_potion['level'] * $potion_suffix_definitions[$active_potion['suffix']]['per_level'];
@@ -67,58 +50,58 @@
                         $hours_remaining = floor($time_remaining / 3600);
                         $minutes_remaining = floor(($time_remaining % 3600) / 60);
                     ?>
-                    <li>+<?php echo $prefix_value; ?>% <?php echo htmlspecialchars($potion_prefix_definitions[$active_potion['prefix']]['name']); ?></li>
-                    <li>+<?php echo $suffix_value; ?>% <?php echo htmlspecialchars($potion_suffix_definitions[$active_potion['suffix']]['name']); ?></li>
+                    <li>+<?php echo $prefix_value; ?>% <?php echo htmlspecialchars(t('potion.affix.' . $active_potion['prefix'])); ?></li>
+                    <li>+<?php echo $suffix_value; ?>% <?php echo htmlspecialchars(t('potion.affix.' . $active_potion['suffix'])); ?></li>
                 </ul>
-                <small>Expires in: <?php echo $hours_remaining; ?>h <?php echo $minutes_remaining; ?>m</small>
+                <small><?php echo t('common.expires_in', ['h' => $hours_remaining, 'm' => $minutes_remaining]); ?></small>
             </div>
         <?php endif; ?>
         <br />
 
-        <b>Workers:</b>
+        <b><?php echo t('workers.count'); ?></b>
         <?php echo $Character->Data['worker_json']['workers']; ?><br />  <br />
 
-        <b>Worker Speed:</b>
+        <b><?php echo t('workers.speed'); ?></b>
         <?php echo $Character->Data['worker_json']['speed_upgrades'] ?? 0; ?>%<br />  <br />
-        <b>Worker Intelligence:</b>
+        <b><?php echo t('workers.intelligence'); ?></b>
         <?php echo $Character->Data['worker_json']['intelligence_upgrades'] ?? 0; ?>%<br />  <br />
 
-        <b>Worker Skill Level</b><br />
+        <b><?php echo t('workers.skill_level'); ?></b><br />
         <?php
         echo '<div class="worker-skill-level">';
         foreach (RESOURCES as $resource) {
-            echo '' . htmlspecialchars($resource) . ': '.
+            echo '' . htmlspecialchars(t('res.' . strtolower($resource))) . ': '.
             $Character->Data['worker_json']['skills'][strtolower($resource)].'<BR />';
         }
         echo '</div>';
         ?>
         <br />
 
-        <b>Select Resource to Assign Workers:</b><br />
+        <b><?php echo t('workers.select_resource'); ?></b><br />
         <?php echo Controls::ResourceSelectBox($Character->Data['worker_json']['resource']); ?>
-        <input type="submit" role="button" class="contrast" name="change_resource" value="Change Resource"><br /><br />
+        <input type="submit" role="button" class="contrast" name="change_resource" value="<?php echo t('workers.change_resource'); ?>"><br /><br />
 
         <div class="grid">
             <div>
-                <b>#% of Speed Upgrades:</b><br />
+                <b><?php echo t('workers.speed_upgrades'); ?></b><br />
                 <input type="text" name="worker_speed" value="1">
                 <input type="submit" role="button" name="upgrade_speed"
                 class="<?php echo affordable_button($Character->Data['gold'], $next_speed_upgrade_cost); ?>"
-                value="Upgrade Speed for <?php echo human_num($next_speed_upgrade_cost); ?> gold">
+                value="<?php echo t('workers.upgrade_speed', ['cost' => human_num($next_speed_upgrade_cost)]); ?>">
             </div>
             <div>
-                <b>#% of XP Gain Upgrades aka Worker Intelligence:</b><br />
+                <b><?php echo t('workers.int_upgrades'); ?></b><br />
                 <input type="text" name="worker_intelligence" value="1">
                 <input type="submit" role="button" name="upgrade_intelligence"
                 class="<?php echo affordable_button($Character->Data['gold'], $next_intelligence_upgrade_cost); ?>"
-                value="Upgrade Intelligence for <?php echo human_num($next_intelligence_upgrade_cost); ?> gold">
+                value="<?php echo t('workers.upgrade_int', ['cost' => human_num($next_intelligence_upgrade_cost)]); ?>">
             </div>
         </div>
 
 
         <input type="submit" role="button" name="hire_workers"
         class="<?php echo affordable_button($Character->Data['gold'], $new_worker_cost); ?>"
-        value="Hire +1 Worker for <?php echo human_num($new_worker_cost); ?> gold"><br /><br />
+        value="<?php echo t('workers.hire', ['cost' => human_num($new_worker_cost)]); ?>"><br /><br />
 
         <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
         </form>

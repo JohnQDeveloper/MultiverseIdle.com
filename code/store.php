@@ -6,10 +6,10 @@ $alert_success = '';
 $alert_danger = '';
 
 $subscription_plans = [
-    1  => ['months' => 1,  'credits' => 100,  'label' => '1 Month'],
-    3  => ['months' => 3,  'credits' => 250,  'label' => '3 Months'],
-    6  => ['months' => 6,  'credits' => 450,  'label' => '6 Months'],
-    12 => ['months' => 12, 'credits' => 800,  'label' => '12 Months'],
+    1  => ['months' => 1,  'credits' => 100,  'label' => t('store.plan.1_month')],
+    3  => ['months' => 3,  'credits' => 250,  'label' => t('store.plan.3_months')],
+    6  => ['months' => 6,  'credits' => 450,  'label' => t('store.plan.6_months')],
+    12 => ['months' => 12, 'credits' => 800,  'label' => t('store.plan.12_months')],
 ];
 
 $free_credits_enabled = in_array(ENVIRONMENT, ['Dev', 'QA'], true);
@@ -22,13 +22,13 @@ $can_claim = $free_credits_enabled && $next_claim_time <= time();
 // Handle free credits claim
 if ($free_credits_enabled && isset($_POST['claim_free_credits'])) {
     if ($next_claim_time > time()) {
-        $alert_danger = 'You already claimed your free credits today. Next claim available at ' . date('Y-m-d H:i:s', $next_claim_time) . '.';
+        $alert_danger = t('store.alert.already_claimed', ['time' => date('Y-m-d H:i:s', $next_claim_time)]);
     } else {
         $Character->Data['credits'] = ((int)($Character->Data['credits'] ?? 0)) + 100;
         $Character->Data['last_free_credits_claim'] = date('Y-m-d H:i:s');
         $can_claim = false;
         $next_claim_time = time() + 86400;
-        $alert_success = 'You claimed 100 free credits!';
+        $alert_success = t('store.alert.claimed');
     }
 }
 
@@ -37,13 +37,13 @@ if (isset($_POST['buy_subscription'])) {
     $duration = (int)$_POST['duration_months'];
 
     if (!isset($subscription_plans[$duration])) {
-        $alert_danger = 'Invalid subscription option.';
+        $alert_danger = t('store.alert.invalid_plan');
     } else {
         $plan = $subscription_plans[$duration];
         $current_credits = (int)($Character->Data['credits'] ?? 0);
 
         if ($current_credits < $plan['credits']) {
-            $alert_danger = 'Not enough credits. You need ' . $plan['credits'] . ' credits but only have ' . $current_credits . '.';
+            $alert_danger = t('store.alert.no_credits', ['need' => $plan['credits'], 'have' => $current_credits]);
         } else {
             $Character->Data['credits'] = $current_credits - $plan['credits'];
 
@@ -57,7 +57,7 @@ if (isset($_POST['buy_subscription'])) {
             $base->modify('+' . $plan['months'] . ' months');
             $Character->Data['subscription_expires'] = $base->format('Y-m-d H:i:s');
 
-            $alert_success = 'QoL subscription activated for ' . $plan['label'] . '! Expires: ' . date('F j, Y', strtotime($Character->Data['subscription_expires']));
+            $alert_success = t('store.alert.subscribed', ['label' => $plan['label'], 'date' => date('Y-m-d', strtotime($Character->Data['subscription_expires']))]);
         }
     }
 }

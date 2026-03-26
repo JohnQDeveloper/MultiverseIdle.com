@@ -31,21 +31,21 @@ if(isset($_GET['update']) && $_GET['update'] == 'frontline_gear') {
 
     // Verify ownership before equipping
     if ($weapon_id > 0 && !$gear->VerifyOwnership($weapon_id, $owner_id)) {
-        $alert_danger = 'You do not own that weapon.';
+        $alert_danger = t('party.alert.no_weapon');
     } elseif ($armor_id > 0 && !$gear->VerifyOwnership($armor_id, $owner_id)) {
-        $alert_danger = 'You do not own that armor.';
+        $alert_danger = t('party.alert.no_armor');
     } elseif ($weapon_id > 0 && $gear->GetItemLevelByID($weapon_id) > $party_level) {
-        $alert_danger = 'Your party level is too low to equip that weapon.';
+        $alert_danger = t('party.alert.level_too_low_wpn');
     } elseif ($armor_id > 0 && $gear->GetItemLevelByID($armor_id) > $party_level) {
-        $alert_danger = 'Your party level is too low to equip that armor.';
+        $alert_danger = t('party.alert.level_too_low_arm');
     } elseif ($weapon_id > 0 && $weapon_id == $backline_weapon) {
-        $alert_danger = 'That weapon is already equipped by your backline character.';
+        $alert_danger = t('party.alert.wpn_backline');
     } elseif ($armor_id > 0 && $armor_id == $backline_armor) {
-        $alert_danger = 'That armor is already equipped by your backline character.';
+        $alert_danger = t('party.alert.arm_backline');
     } else {
         $Character->Data['party_json']['members']['frontline']['equipped_weapon'] = $weapon_id;
         $Character->Data['party_json']['members']['frontline']['equipped_armor'] = $armor_id;
-        $alert_success = 'Frontline gear updated.';
+        $alert_success = t('party.alert.frontline_updated');
     }
 }
 
@@ -62,21 +62,21 @@ if(isset($_GET['update']) && $_GET['update'] == 'backline_gear') {
 
     // Verify ownership before equipping
     if ($weapon_id > 0 && !$gear->VerifyOwnership($weapon_id, $owner_id)) {
-        $alert_danger = 'You do not own that weapon.';
+        $alert_danger = t('party.alert.no_weapon');
     } elseif ($armor_id > 0 && !$gear->VerifyOwnership($armor_id, $owner_id)) {
-        $alert_danger = 'You do not own that armor.';
+        $alert_danger = t('party.alert.no_armor');
     } elseif ($weapon_id > 0 && $gear->GetItemLevelByID($weapon_id) > $party_level) {
-        $alert_danger = 'Your party level is too low to equip that weapon.';
+        $alert_danger = t('party.alert.level_too_low_wpn');
     } elseif ($armor_id > 0 && $gear->GetItemLevelByID($armor_id) > $party_level) {
-        $alert_danger = 'Your party level is too low to equip that armor.';
+        $alert_danger = t('party.alert.level_too_low_arm');
     } elseif ($weapon_id > 0 && $weapon_id == $frontline_weapon) {
-        $alert_danger = 'That weapon is already equipped by your frontline character.';
+        $alert_danger = t('party.alert.wpn_frontline');
     } elseif ($armor_id > 0 && $armor_id == $frontline_armor) {
-        $alert_danger = 'That armor is already equipped by your frontline character.';
+        $alert_danger = t('party.alert.arm_frontline');
     } else {
         $Character->Data['party_json']['members']['backline']['equipped_weapon'] = $weapon_id;
         $Character->Data['party_json']['members']['backline']['equipped_armor'] = $armor_id;
-        $alert_success = 'Backline gear updated.';
+        $alert_success = t('party.alert.backline_updated');
     }
 }
 

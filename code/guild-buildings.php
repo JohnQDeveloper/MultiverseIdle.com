@@ -10,34 +10,26 @@ $user_guild_id = $Guild->GetUserGuildId($current_user_id);
 $user_role     = $Guild->GetUserRole($current_user_id);
 
 $valid_buildings = ['farm', 'iron_mine', 'gem_mine', 'market', 'gym', 'tavern'];
-$building_labels = [
-    'farm'      => 'Farm',
-    'iron_mine' => 'Iron Mine',
-    'gem_mine'  => 'Gem Mine',
-    'market'    => 'Market',
-    'gym'       => 'Gym',
-    'tavern'    => 'Tavern',
-];
 
 // Upgrade a building
 if (isset($_POST['upgrade_building'])) {
     $building = trim($_POST['building'] ?? '');
 
     if (!in_array($building, $valid_buildings, true)) {
-        $alert_danger = 'Invalid building.';
+        $alert_danger = t('guild_buildings.alert.invalid');
     } elseif (!in_array($user_role, ['guild_master', 'officer'], true)) {
-        $alert_danger = 'Only guild masters and officers can upgrade buildings.';
+        $alert_danger = t('guild_buildings.alert.no_perm');
     } elseif ($user_guild_id === null) {
-        $alert_danger = 'You are not in a guild.';
+        $alert_danger = t('guild_buildings.alert.not_in_guild');
     } else {
         // Resource is determined server-side from Redis — not from user input
         $resource = getOrAssignBuildingResource($user_guild_id, $building);
         if ($Guild->UpgradeBuilding($building, $resource, $current_user_id)) {
             // Clear so the next upgrade draws a fresh random resource
             $redis->del("guild_building_resource:{$user_guild_id}:{$building}");
-            $alert_success = $building_labels[$building] . ' upgraded successfully!';
+            $alert_success = t('guild_buildings.alert.upgraded', ['building' => t('guild_buildings.' . $building)]);
         } else {
-            $alert_danger = 'Upgrade failed. The guild bank may not have enough ' . $resource . '.';
+            $alert_danger = t('guild_buildings.alert.fail', ['resource' => t('res.' . strtolower($resource))]);
         }
     }
 }

@@ -5,6 +5,11 @@ declare(strict_types=1);
 $alert_success = '';
 $alert_danger = '';
 
+if (isset($_POST['change_language'])) {
+    init_language();
+    $alert_success = t('settings.alert.language_updated');
+}
+
 // Referral data (registered users only)
 $referral_code  = '';
 $referral_count = 0;
@@ -20,7 +25,7 @@ if (isset($_POST['change_email']) && isset($_POST['email'], $_POST['email_passwo
 
     // Validate email
     if (!Controls::validateEmail($new_email)) {
-        $alert_danger = 'Invalid email address';
+        $alert_danger = t('settings.alert.invalid_email');
     } else {
         try {
             // Reconfirm password before changing email
@@ -40,20 +45,20 @@ if (isset($_POST['change_email']) && isset($_POST['email'], $_POST['email_passwo
                                    <p>If you did not request this change, please ignore this email.</p>'
                     ]);
                 });
-                $alert_success = 'Verification email sent to your new address. Please check your email to complete the change.';
+                $alert_success = t('settings.alert.email_sent');
             }
         } catch (\Delight\Auth\InvalidPasswordException $e) {
-            $alert_danger = 'Incorrect password';
+            $alert_danger = t('settings.alert.wrong_password');
         } catch (\Delight\Auth\InvalidEmailException $e) {
-            $alert_danger = 'Invalid email address';
+            $alert_danger = t('settings.alert.invalid_email');
         } catch (\Delight\Auth\UserAlreadyExistsException $e) {
-            $alert_danger = 'This email is already in use';
+            $alert_danger = t('settings.alert.email_taken');
         } catch (\Delight\Auth\EmailNotVerifiedException $e) {
-            $alert_danger = 'Your current email is not verified';
+            $alert_danger = t('settings.alert.email_unverified');
         } catch (\Delight\Auth\NotLoggedInException $e) {
-            $alert_danger = 'Not logged in';
+            $alert_danger = t('settings.alert.not_logged_in');
         } catch (\Delight\Auth\TooManyRequestsException $e) {
-            $alert_danger = 'Too many requests. Please try again later';
+            $alert_danger = t('settings.alert.too_many_requests');
         }
     }
 }
@@ -66,19 +71,19 @@ if (isset($_POST['change_password']) && isset($_POST['current_password'], $_POST
 
     // Validate passwords match
     if ($new_password !== $confirm_new_password) {
-        $alert_danger = 'New passwords do not match';
+        $alert_danger = t('settings.alert.passwords_mismatch');
     } elseif (strlen($new_password) < 8) {
-        $alert_danger = 'Password must be at least 8 characters long';
+        $alert_danger = t('settings.alert.password_short');
     } else {
         try {
             $auth->changePassword($current_password, $new_password);
-            $alert_success = 'Password updated successfully';
+            $alert_success = t('settings.alert.password_updated');
         } catch (\Delight\Auth\NotLoggedInException $e) {
-            $alert_danger = 'Not logged in';
+            $alert_danger = t('settings.alert.not_logged_in');
         } catch (\Delight\Auth\InvalidPasswordException $e) {
-            $alert_danger = 'Current password is incorrect';
+            $alert_danger = t('settings.alert.wrong_current_pw');
         } catch (\Delight\Auth\TooManyRequestsException $e) {
-            $alert_danger = 'Too many requests. Please try again later';
+            $alert_danger = t('settings.alert.too_many_requests');
         }
     }
 }

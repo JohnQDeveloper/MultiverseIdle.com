@@ -1,20 +1,20 @@
 <?php require_once('../templates/game-header.php'); ?>
     <div class="wrapper">
     <article class="main">
-        <h1>Game Log</h1>
+        <h1><?php echo t('log.title'); ?></h1>
 
-        <h3>Wire Transfers</h3>
+        <h3><?php echo t('log.wire_title'); ?></h3>
         <?php if (empty($wireLog)): ?>
-        <p>No wire transfers yet.</p>
+        <p><?php echo t('log.no_wires'); ?></p>
         <?php else: ?>
         <table class="log-table">
             <thead>
                 <tr>
-                    <th>Date</th>
-                    <th>From</th>
-                    <th>To</th>
-                    <th>Amount</th>
-                    <th>Commodity</th>
+                    <th><?php echo t('log.col.date'); ?></th>
+                    <th><?php echo t('log.col.from'); ?></th>
+                    <th><?php echo t('log.col.to'); ?></th>
+                    <th><?php echo t('log.col.amount'); ?></th>
+                    <th><?php echo t('log.col.commodity'); ?></th>
                 </tr>
             </thead>
             <tbody>
