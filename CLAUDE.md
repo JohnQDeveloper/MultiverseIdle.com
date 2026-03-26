@@ -20,6 +20,8 @@ Requires `env.sh` to be sourced with `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `RESEN
 docker exec multiverse-idle-cron php /app/crons/run_all.php
 docker exec multiverse-idle-cron php /app/crons/arena.php   # individual cron
 ```
+# Design
+The design should be mobile first/mobile friendly.
 
 # Architecture
 
