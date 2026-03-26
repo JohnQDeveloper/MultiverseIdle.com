@@ -45,10 +45,10 @@
               <li><a href="/pvp"><?php echo t('nav.pvp'); ?></a></li>
 
               <li class="dropdown">
-                <a href="#">Misc</a>
+                <a href="#"><?php echo t('nav.misc'); ?></a>
                 <ul class="dropdown-content">
                     <li><a href="/leaderboard"><?php echo t('nav.leaderboard'); ?></a></li>
-                    <li><a href="/season-select">League Swap</a></li>
+                    <li><a href="/season-select"><?php echo t('nav.league_swap'); ?></a></li>
                     <li><a href="/log"><?php echo t('nav.log'); ?></a></li>
                 </ul>
             </li>
