@@ -60,7 +60,7 @@
         isOpen = true;
         body.hidden = false;
         toggleBtn.setAttribute('aria-expanded', 'true');
-        toggleBtn.querySelector('.chat-toggle-arrow').textContent = '\u25BC'; // ▼
+        toggleBtn.querySelector('.chat-toggle-arrow').textContent = '▼';
         sessionStorage.setItem(STORAGE_KEY, '1');
         clearUnread();
         if (!pollTimer && currentChannel !== 'dm') {
@@ -73,7 +73,7 @@
         isOpen = false;
         body.hidden = true;
         toggleBtn.setAttribute('aria-expanded', 'false');
-        toggleBtn.querySelector('.chat-toggle-arrow').textContent = '\u25B2'; // ▲
+        toggleBtn.querySelector('.chat-toggle-arrow').textContent = '▲';
         sessionStorage.setItem(STORAGE_KEY, '0');
         stopPolling();
     }
@@ -137,7 +137,7 @@
         msgArea.style.display = '';
         if (form) form.style.display = '';
 
-        msgArea.innerHTML = '<div class="chat-loading">Loading\u2026</div>';
+        msgArea.innerHTML = '<div class="chat-loading">Loading…</div>';
         stopPolling();
         fetchMessages();
         startPolling();
@@ -162,7 +162,7 @@
                 showChannelView();
                 currentChannel = channel;
                 lastId = 0;
-                msgArea.innerHTML = '<div class="chat-loading">Loading\u2026</div>';
+                msgArea.innerHTML = '<div class="chat-loading">Loading…</div>';
                 stopPolling();
                 fetchMessages();
                 startPolling();
@@ -191,7 +191,7 @@
     // -----------------------------------------------------------------------
     function fetchDMConversations() {
         if (dmConvList) {
-            dmConvList.innerHTML = '<div class="chat-loading">Loading\u2026</div>';
+            dmConvList.innerHTML = '<div class="chat-loading">Loading…</div>';
         }
 
         fetch('/api/chat_dm_conversations', { credentials: 'same-origin' })
@@ -304,7 +304,7 @@
             ? '<span class="chat-badge chat-badge--mod">[Staff]</span>'
             : '';
         const modBtn = (isMod && msg.user_id !== userId && msg.user_id > 0)
-            ? '<button class="chat-mod-quick" data-uid="' + msg.user_id + '" title="Moderate">\u22EE</button>'
+            ? '<button class="chat-mod-quick" data-uid="' + msg.user_id + '" title="Moderate">⋮</button>'
             : '';
 
         div.innerHTML =
@@ -366,7 +366,7 @@
                     const until = data.muted.until;
                     let label = until === -1 ? '(permanent)' :
                         'until ' + new Date(until * 1000).toLocaleString();
-                    if (data.muted.reason) label += ' \u2014 ' + escHtml(data.muted.reason);
+                    if (data.muted.reason) label += ' — ' + escHtml(data.muted.reason);
                     if (muteReason) muteReason.innerHTML = label;
                     if (muteBanner) muteBanner.style.display = '';
                     if (input) input.disabled = true;
