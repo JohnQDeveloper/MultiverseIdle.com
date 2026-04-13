@@ -1063,3 +1063,140 @@ input.danger-button {
     font-size: 0.8em;
     color: #999;
 }
+
+/* ============================================================
+   Tutorial System
+   ============================================================ */
+
+/* Transparent click-blocker overlay; spotlight effect comes from
+   box-shadow on the highlighted element (.tutorial-spotlight).
+   When no element is targeted (centered modal), we add the --dim
+   modifier to give the overlay its own dark background. */
+#tutorial-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9490;
+}
+
+#tutorial-overlay.tutorial-overlay--dim {
+    background: rgba(0, 0, 0, 0.78);
+}
+
+/* The spotlighted element rises above the overlay and casts a large
+   box-shadow that darkens everything else on the page. */
+.tutorial-spotlight {
+    position: relative !important;
+    z-index: 9491 !important;
+    border-radius: 4px;
+    box-shadow:
+        0 0 0 9999px rgba(0, 0, 0, 0.72),
+        0 0 0 3px #8EFAD5,
+        0 0 14px rgba(142, 250, 213, 0.35) !important;
+    outline: none !important;
+}
+
+/* Tooltip card */
+#tutorial-tooltip {
+    display: none;
+    position: fixed;
+    z-index: 9492;
+    background: #1e1e1e !important;
+    background-color: #1e1e1e !important;
+    border: 1px solid #8EFAD5 !important;
+    border-radius: 6px;
+    padding: 16px 18px;
+    max-width: 360px;
+    width: 90vw;
+    box-shadow: 0 6px 28px rgba(0, 0, 0, 0.85);
+    font-size: 0.9em;
+    box-sizing: border-box;
+    color: #ccc;
+}
+
+.tutorial-tooltip__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+    gap: 8px;
+}
+
+.tutorial-tooltip__title {
+    font-weight: bold;
+    color: #8EFAD5;
+    font-size: 1.05em;
+    flex: 1;
+}
+
+.tutorial-tooltip__progress {
+    color: #555;
+    font-size: 0.78em;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.tutorial-tooltip__body {
+    color: #ccc;
+    line-height: 1.55;
+    margin-bottom: 14px;
+}
+
+.tutorial-tooltip__body b {
+    color: #fff;
+}
+
+.tutorial-tooltip__actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+}
+
+.tutorial-btn {
+    padding: 7px 16px;
+    border-radius: 4px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    font-size: 0.85em;
+    font-weight: bold;
+    line-height: 1;
+    box-shadow: none;
+    margin: 0;
+}
+
+.tutorial-btn--skip {
+    background: transparent;
+    border-color: #444;
+    color: #666;
+}
+
+.tutorial-btn--skip:hover {
+    color: #aaa;
+    border-color: #666;
+    background: transparent;
+}
+
+.tutorial-btn--next {
+    background: #8EFAD5;
+    color: #000;
+    margin-left: auto;
+}
+
+.tutorial-btn--next:hover {
+    background: #a5fce0;
+}
+
+/* On very small screens pin the tooltip above the chat bar */
+@media (max-width: 519px) {
+    #tutorial-tooltip {
+        position: fixed !important;
+        bottom: 50px !important;
+        top: auto !important;
+        left: 12px !important;
+        right: 12px !important;
+        width: auto !important;
+        max-width: none !important;
+        transform: none !important;
+    }
+}

@@ -196,8 +196,20 @@ if ($_chatIsLoggedIn) {
 
 <script>
 window.MI_LANG = <?php echo t_json(); ?>;
+<?php
+// Derive current page name for the tutorial system
+$_tutorialPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '/';
+$_tutorialPage = trim($_tutorialPath, '/');
+if ($_tutorialPage === '') {
+    $_tutorialPage = 'arena';
+}
+$_tutorialUserId = (int)($_SESSION['auth_user_id'] ?? 0);
+?>
+window.MI_TUTORIAL_PAGE = <?php echo json_encode($_tutorialPage); ?>;
+window.MI_TUTORIAL_USER = <?php echo $_tutorialUserId; ?>;
 </script>
 <script src="/js/chat.js?v=<?php echo (string)filemtime(__DIR__ . '/../public/js/chat.js'); ?>"></script>
+<script src="/js/tutorial.js?v=<?php echo (string)filemtime(__DIR__ . '/../public/js/tutorial.js'); ?>"></script>
 
 <main class="container">
     <div class="wrapper">
@@ -262,3 +274,10 @@ window.MI_LANG = <?php echo t_json(); ?>;
 
     ?>
     <BR />
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    if (window.MITutorial) {
+        MITutorial.init(window.MI_TUTORIAL_USER, window.MI_TUTORIAL_PAGE);
+    }
+});
+</script>
