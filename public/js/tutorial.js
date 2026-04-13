@@ -6,6 +6,14 @@
 (function () {
     'use strict';
 
+    function lang(key) {
+        if (window.MI_LANG && window.MI_LANG[key]) {
+            return window.MI_LANG[key];
+        }
+
+        return key;
+    }
+
     // ----------------------------------------------------------------
     // Step definitions per page
     // target: CSS selector to spotlight, or null for a centered modal
@@ -15,206 +23,206 @@
         welcome: [
             {
                 target: null,
-                title: 'Welcome to MultiverseIdle!',
-                body: 'Your party automatically fights monsters every minute — even when you\'re offline! This quick tour covers the main features. Click <b>Next</b> to step through, or <b>Skip</b> to dismiss.',
+                title: lang('tutorial.welcome.1.title'),
+                body: lang('tutorial.welcome.1.body'),
                 position: 'center'
             },
             {
                 target: '.navbar',
-                title: 'Navigation',
-                body: '<b>Actions</b> leads to combat pages (Arena, Rifts, World Boss, Workers). <b>Items</b> covers gear management. Use the hamburger menu on mobile.',
+                title: lang('tutorial.welcome.2.title'),
+                body: lang('tutorial.welcome.2.body'),
                 position: 'bottom'
             },
             {
                 target: '.resources',
-                title: 'Your Resources',
-                body: 'Track your party <b>Level</b>, current <b>Arena Floor</b>, and four resources: Gold, Iron, Herbs, and Gems. Credits are the premium currency.',
+                title: lang('tutorial.welcome.3.title'),
+                body: lang('tutorial.welcome.3.body'),
                 position: 'bottom'
             },
             {
                 target: '#chat-toggle',
-                title: 'Community Chat',
-                body: 'Click to open the live chat. Join <b>Global</b>, ask questions in <b>Help</b>, or talk to your guild. Chat is read-only for guests.',
+                title: lang('tutorial.welcome.4.title'),
+                body: lang('tutorial.welcome.4.body'),
                 position: 'top'
             }
         ],
         arena: [
             {
                 target: 'article.main h1',
-                title: 'The Arena',
-                body: 'Your party automatically battles monsters on your set floor <b>every minute</b>. Win fights to earn XP, Gold, and other resources.',
+                title: lang('tutorial.arena.1.title'),
+                body: lang('tutorial.arena.1.body'),
                 position: 'bottom'
             },
             {
                 target: 'input[name="new_floor"]',
-                title: 'Arena Floor',
-                body: 'Enter the floor you want to fight on. Higher floors have stronger enemies — and much better loot! Raise the floor as your party gets stronger.',
+                title: lang('tutorial.arena.2.title'),
+                body: lang('tutorial.arena.2.body'),
                 position: 'bottom'
             },
             {
                 target: 'input[name="update_floor"]',
-                title: 'Update Floor',
-                body: 'Click here to save your new floor choice. Your party will start battling there on the next tick.',
+                title: lang('tutorial.arena.3.title'),
+                body: lang('tutorial.arena.3.body'),
                 position: 'bottom'
             },
             {
                 target: '.grid > div:last-child',
-                title: 'Battle Log',
-                body: 'Check here after battles to see what happened — wins, losses, and resource drops from your most recent fight.',
+                title: lang('tutorial.arena.4.title'),
+                body: lang('tutorial.arena.4.body'),
                 position: 'top'
             }
         ],
         workers: [
             {
                 target: 'article.main h1',
-                title: 'Workers',
-                body: 'Workers passively harvest resources every minute, even while you\'re away. The more you upgrade them, the more they produce.',
+                title: lang('tutorial.workers.1.title'),
+                body: lang('tutorial.workers.1.body'),
                 position: 'bottom'
             },
             {
                 target: 'select[name="resource"]',
-                title: 'Choose a Resource',
-                body: 'Pick which resource your workers harvest: <b>Gold, Iron, Herbs,</b> or <b>Gems</b>. You can change this any time.',
+                title: lang('tutorial.workers.2.title'),
+                body: lang('tutorial.workers.2.body'),
                 position: 'bottom'
             },
             {
                 target: 'input[name="hire_workers"]',
-                title: 'Hire Workers',
-                body: 'Spend Gold to hire more workers. More workers = higher yield per tick. This is one of the best early investments.',
+                title: lang('tutorial.workers.3.title'),
+                body: lang('tutorial.workers.3.body'),
                 position: 'top'
             },
             {
                 target: 'input[name="upgrade_speed"]',
-                title: 'Speed Upgrades',
-                body: 'Upgrade worker speed to increase how many harvests occur per tick. Costs Gold.',
+                title: lang('tutorial.workers.4.title'),
+                body: lang('tutorial.workers.4.body'),
                 position: 'top'
             },
             {
                 target: 'input[name="upgrade_intelligence"]',
-                title: 'Intelligence Upgrades',
-                body: 'Boost worker intelligence to accelerate their skill experience, unlocking higher yields over time.',
+                title: lang('tutorial.workers.5.title'),
+                body: lang('tutorial.workers.5.body'),
                 position: 'top'
             }
         ],
         party: [
             {
                 target: 'article.main h1',
-                title: 'Your Party',
-                body: 'Your party has two members: a <b>Frontline</b> fighter who faces enemies head-on, and a <b>Backline</b> supporter. Both level up through combat.',
+                title: lang('tutorial.party.1.title'),
+                body: lang('tutorial.party.1.body'),
                 position: 'bottom'
             },
             {
                 target: 'article.main h3:first-of-type',
-                title: 'Frontline Member',
-                body: 'Your primary combat unit. Stats grow every level based on their class. Keep their gear and skill gems updated!',
+                title: lang('tutorial.party.2.title'),
+                body: lang('tutorial.party.2.body'),
                 position: 'bottom'
             },
             {
                 target: 'select[name="class"]',
-                title: 'Class Selection',
-                body: 'Choose a class for your party member. Each class distributes stat points differently across <b>Strength</b>, <b>Dexterity</b>, <b>Health</b>, and <b>Wisdom</b> as they level up.',
+                title: lang('tutorial.party.3.title'),
+                body: lang('tutorial.party.3.body'),
                 position: 'right'
             },
             {
                 target: 'form[action="/party?update=frontline_gear"]',
-                title: 'Equip Gear',
-                body: 'Assign crafted weapons and armor to your party. Head to <b>Items → Craft</b> to make gear first, then favorite the pieces you want to equip here.',
+                title: lang('tutorial.party.4.title'),
+                body: lang('tutorial.party.4.body'),
                 position: 'right'
             },
             {
                 target: 'form[action="/party?update=frontline_skills"]',
-                title: 'Skill Gems',
-                body: 'Socket skill gems to grant your frontline special combat abilities. Gems are crafted under <b>Items → Craft</b>.',
+                title: lang('tutorial.party.5.title'),
+                body: lang('tutorial.party.5.body'),
                 position: 'right'
             }
         ],
         craft: [
             {
                 target: 'article.main h1',
-                title: 'Crafting',
-                body: 'Turn your gathered resources into powerful gear, useful potions, and rift stones. Crafted item power scales with your party level.',
+                title: lang('tutorial.craft.1.title'),
+                body: lang('tutorial.craft.1.body'),
                 position: 'bottom'
             },
             {
                 target: '.tab-nav',
-                title: 'Crafting Tabs',
-                body: 'Switch between three crafting categories: <b>Gear</b> for equipment, <b>Potions</b> for temporary buffs, and <b>Rift Stones</b> to unlock special dungeons.',
+                title: lang('tutorial.craft.2.title'),
+                body: lang('tutorial.craft.2.body'),
                 position: 'bottom'
             },
             {
                 target: '.tab-nav-item:nth-child(1)',
-                title: 'Gear Tab',
-                body: 'Craft weapons and armor. Pick an item type and two affixes — the gear\'s stat values scale with your current party level.',
+                title: lang('tutorial.craft.3.title'),
+                body: lang('tutorial.craft.3.body'),
                 position: 'bottom'
             },
             {
                 target: '.tab-nav-item:nth-child(2)',
-                title: 'Potions Tab',
-                body: 'Brew potions for temporary bonuses: boosted resource yields, extra XP, or faster stat gains. Only one potion can be active at a time.',
+                title: lang('tutorial.craft.4.title'),
+                body: lang('tutorial.craft.4.body'),
                 position: 'bottom'
             },
             {
                 target: '.tab-nav-item:nth-child(3)',
-                title: 'Rift Stones Tab',
-                body: 'Craft rift stones to queue up Rift delves — challenging multi-battle dungeons with big rewards if you survive.',
+                title: lang('tutorial.craft.5.title'),
+                body: lang('tutorial.craft.5.body'),
                 position: 'bottom'
             }
         ],
         rifts: [
             {
                 target: 'article.main h1',
-                title: 'Rifts',
-                body: 'Rifts are special dungeons that offer far better rewards than normal arena battles — but they\'re much harder. Prepare before diving in!',
+                title: lang('tutorial.rifts.1.title'),
+                body: lang('tutorial.rifts.1.body'),
                 position: 'bottom'
             },
             {
                 target: '.info-box',
-                title: 'How Rifts Work',
-                body: 'Your party runs 10 battles in sequence with full heals between each. Win enough to claim rewards — but it\'s <b>all-or-nothing</b> if you fail the run.',
+                title: lang('tutorial.rifts.2.title'),
+                body: lang('tutorial.rifts.2.body'),
                 position: 'bottom'
             },
             {
                 target: 'h2:first-of-type',
-                title: 'Rift Queue',
-                body: 'Queued rift stones are processed automatically by the hourly cron. You can queue multiple stones up to your slot limit.',
+                title: lang('tutorial.rifts.3.title'),
+                body: lang('tutorial.rifts.3.body'),
                 position: 'bottom'
             },
             {
                 target: 'h2:nth-of-type(2)',
-                title: 'Available Rift Stones',
-                body: 'Stones you\'ve crafted and are ready to queue. Head to <b>Items → Craft → Rift Stones</b> to make more.',
+                title: lang('tutorial.rifts.4.title'),
+                body: lang('tutorial.rifts.4.body'),
                 position: 'bottom'
             }
         ],
         pvp: [
             {
                 target: 'article.main h1',
-                title: 'PvP — Player vs. Player',
-                body: 'Challenge other players\' parties. Place wagers and fight for their resources. Your party fights automatically using current stats and gear.',
+                title: lang('tutorial.pvp.1.title'),
+                body: lang('tutorial.pvp.1.body'),
                 position: 'bottom'
             }
         ],
         'world-boss': [
             {
                 target: 'article.main h1',
-                title: 'World Boss',
-                body: 'Join server-wide raid battles against a massive boss. Contribute damage, earn rare rewards, and compete for top spots on the damage leaderboard.',
+                title: lang('tutorial.world_boss.1.title'),
+                body: lang('tutorial.world_boss.1.body'),
                 position: 'bottom'
             }
         ],
         inventory: [
             {
                 target: 'article.main h1',
-                title: 'Inventory',
-                body: 'View all your crafted gear here. <b>Favorite</b> items to make them available in the Party gear selection. Sell or discard what you no longer need.',
+                title: lang('tutorial.inventory.1.title'),
+                body: lang('tutorial.inventory.1.body'),
                 position: 'bottom'
             }
         ],
         market: [
             {
                 target: 'article.main h1',
-                title: 'The Market',
-                body: 'Buy and sell resources with other players. Post buy or sell orders and the market will match them automatically.',
+                title: lang('tutorial.market.1.title'),
+                body: lang('tutorial.market.1.body'),
                 position: 'bottom'
             }
         ]
@@ -290,8 +298,8 @@
             '</div>',
             '<div class="tutorial-tooltip__body"></div>',
             '<div class="tutorial-tooltip__actions">',
-            '  <button class="tutorial-btn tutorial-btn--skip" id="tutorial-skip">Skip Tutorial</button>',
-            '  <button class="tutorial-btn tutorial-btn--next" id="tutorial-next">Next &#8250;</button>',
+            '  <button class="tutorial-btn tutorial-btn--skip" id="tutorial-skip">' + lang('tutorial.button.skip') + '</button>',
+            '  <button class="tutorial-btn tutorial-btn--next" id="tutorial-next">' + lang('tutorial.button.next') + ' &#8250;</button>',
             '</div>'
         ].join('');
         document.body.appendChild(tooltip);
@@ -329,7 +337,9 @@
         titleEl.textContent = step.title;
         bodyEl.innerHTML    = step.body;
         progressEl.textContent = (index + 1) + ' / ' + currentSteps.length;
-        nextBtn.innerHTML = isLast ? 'Done &#10003;' : 'Next &#8250;';
+        nextBtn.innerHTML = isLast
+            ? lang('tutorial.button.done') + ' &#10003;'
+            : lang('tutorial.button.next') + ' &#8250;';
 
         // Show overlay + tooltip
         overlay.style.display = 'block';

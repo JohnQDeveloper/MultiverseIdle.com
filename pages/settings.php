@@ -67,10 +67,10 @@
         <input type="submit" name="change_password" value="<?php echo t('settings.password.submit'); ?>" />
         </form>
 
-        <h3>Tutorial</h3>
-        <p>Replay the new-player tutorial that explains each page's features.</p>
+        <h3><?php echo t('settings.tutorial.title'); ?></h3>
+        <p><?php echo t('settings.tutorial.desc'); ?></p>
         <button type="button" onclick="MITutorial.reset(window.MI_TUTORIAL_USER); window.location.href='/arena';">
-            Restart Tutorial
+            <?php echo t('settings.tutorial.restart'); ?>
         </button>
 
     </article>
