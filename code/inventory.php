@@ -3,6 +3,7 @@
     $gear = new Gear();
     $potion = new Potion();
     $rift_stone = new RiftStone();
+    $skill_gem = new SkillGem();
 
     # Destroy Item
     if (isset($_POST['destroy_item'])) {
@@ -83,10 +84,35 @@
         }
     }
 
+    # Destroy Skill Gem
+    if (isset($_POST['destroy_skill_gem'])) {
+        $gem_id = intval($_POST['gem_id']);
+        $owner_id = $_SESSION['auth_user_id'];
+
+        if ($skill_gem->DestroyItem($gem_id, $owner_id)) {
+            $alert_success = t('inventory.alert.gem_destroyed');
+        } else {
+            $alert_danger = t('inventory.alert.gem_destroy_fail');
+        }
+    }
+
+    # Toggle Skill Gem Favorite
+    if (isset($_POST['toggle_gem_favorite'])) {
+        $gem_id = intval($_POST['gem_id']);
+        $owner_id = $_SESSION['auth_user_id'];
+
+        if ($skill_gem->ToggleFavorite($gem_id, $owner_id)) {
+            $alert_success = t('inventory.alert.gem_fav_updated');
+        } else {
+            $alert_danger = t('inventory.alert.gem_fav_fail');
+        }
+    }
+
     # Load all player's items, potions, and rift stones
     $player_items = $gear->GetAllItemsByOwner($_SESSION['auth_user_id']);
     $player_potions = $potion->GetAllPotionsByOwner($_SESSION['auth_user_id']);
     $player_rift_stones = $rift_stone->GetAllRiftStonesByOwner($_SESSION['auth_user_id']);
+    $player_skill_gems = $skill_gem->GetAllItemsByOwner($_SESSION['auth_user_id']);
 
     # Load active potion if any
     $active_potion = $potion->GetActivePotion($Character->Data['id']);
@@ -99,3 +125,18 @@
         $Character->Data['party_json']['members']['backline']['equipped_armor'] ?? 0,
     ];
     $equipped_gear_ids = array_filter($equipped_gear_ids); # Remove zeros
+
+    # Get equipped skill gem IDs and their positions for display
+    $equipped_skill_gem_map = []; // gem_id => ['side' => ..., 'skill' => ...]
+    foreach (['frontline', 'backline'] as $side) {
+        $skills = $Character->Data['party_json']['members'][$side]['skills'] ?? [];
+        $gems   = $Character->Data['party_json']['members'][$side]['equipped_skill_gems'] ?? [];
+        foreach ($gems as $slot_idx => $gem_id) {
+            if ($gem_id > 0) {
+                $equipped_skill_gem_map[$gem_id] = [
+                    'side'  => $side,
+                    'skill' => $skills[$slot_idx] ?? '',
+                ];
+            }
+        }
+    }

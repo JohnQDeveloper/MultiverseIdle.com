@@ -9,3 +9,6 @@
         'Flaming Blades' => ["Name" => "Flaming Blades",],
         'Firestorm' => ["Name" => "Firestorm",],
     ]);
+
+    // Valid skill names for validation (derived from SKILL_GEMS keys)
+    define('SKILL_GEM_NAMES', array_keys(SKILL_GEMS));

@@ -1079,4 +1079,58 @@ return [
     'guild_quests.alert.invalid_grade'      => 'Invalid quest grade.',
     'guild_quests.alert.no_permission'      => 'Only officers and guild masters can add quests.',
 
+    // -------------------------------------------------------------------------
+    // Skill Gems
+    // -------------------------------------------------------------------------
+    'craft.tab.skill_gems'                  => 'Skill Gems',
+
+    'craft.skill_gem.title'                 => 'Skill Gem Crafting',
+    'craft.skill_gem.desc'                  => 'Forge skill gems to enhance your equipped abilities. Each gem is tied to a specific skill and grants one bonus that scales with its tier.',
+    'craft.skill_gem.select_skill'          => 'Select Skill:',
+    'craft.skill_gem.select_bonus'          => 'Select Bonus Type:',
+    'craft.skill_gem.potential'             => 'Potential: {level} (100% of Party Level {level})',
+    'craft.skill_gem.potential_note'        => 'Each tier costs 1-5 potential and 2,500 Iron. Forging continues until potential or Iron is exhausted.',
+    'craft.skill_gem.use_lucky_wyrdstone'   => 'Use 1 lucky wyrdstone on this craft',
+    'craft.skill_gem.submit'                => 'Forge Gem',
+
+    'craft.alert.invalid_skill'             => 'Invalid skill selected.',
+    'craft.alert.invalid_bonus_type'        => 'Invalid bonus type selected.',
+    'craft.alert.crafted_skill_gem'         => 'Forged {name} (Tier {tier}) — {bonus}.',
+
+    'inventory.tab.skill_gems'              => 'Skill Gems',
+
+    'inventory.skill_gems.title'            => 'Skill Gem Inventory',
+    'inventory.skill_gems.desc'             => 'Favorite gems to equip them from the Party page, or destroy gems you no longer need.',
+    'inventory.skill_gems.empty'            => 'You don\'t have any skill gems yet. Visit the {craft_link} page to forge some!',
+    'inventory.skill_gems.craft_link'       => 'Craft',
+    'inventory.skill_gems.total'            => 'Total Gems: {count}',
+    'inventory.skill_gems.equipped'         => 'EQUIPPED',
+    'inventory.skill_gems.equipped_by'      => 'Equipped by:',
+    'inventory.skill_gems.frontline'        => 'Frontline',
+    'inventory.skill_gems.backline'         => 'Backline',
+    'inventory.skill_gems.favorite'         => 'Favorite',
+    'inventory.skill_gems.unfavorite'       => 'Unfavorite',
+    'inventory.skill_gems.tier'             => 'Tier {tier}',
+    'inventory.skill_gems.skill'            => 'Skill: {skill}',
+    'inventory.skill_gems.bonus_value'      => '+{value}{unit} {name}',
+
+    'inventory.alert.gem_destroyed'         => 'Skill gem destroyed.',
+    'inventory.alert.gem_destroy_fail'      => 'Failed to destroy skill gem.',
+    'inventory.alert.gem_fav_updated'       => 'Skill gem favorite updated.',
+    'inventory.alert.gem_fav_fail'          => 'Failed to update skill gem favorite.',
+
+    'party.no_gem'                          => '-- No Gem --',
+    'party.update_skill_gems'               => 'Update Skill Gems',
+    'party.skill_gem_hint'                  => 'Favorite skill gems in Inventory to equip them',
+
+    'party.alert.invalid_gem'               => 'You do not own that skill gem.',
+    'party.alert.gem_wrong_skill'           => 'That gem does not match the equipped skill.',
+    'party.alert.gem_duplicate'             => 'That gem is already equipped by your other character.',
+    'party.alert.skill_gems_updated'        => 'Skill gems updated.',
+
+    'skill_gem.bonus.wisdom_cast'           => 'Attunement',
+    'skill_gem.bonus.effect'                => 'Empowerment',
+    'skill_gem.bonus.echo'                  => 'Resonance',
+    'skill_gem.bonus.triple_cast'           => 'Instability',
+
 ];

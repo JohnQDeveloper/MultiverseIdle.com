@@ -36,6 +36,7 @@
             <a href="/craft?tab=gear" class="tab-nav-item <?php echo $active_tab === 'gear' ? 'active' : ''; ?>"><?php echo t('craft.tab.gear'); ?></a>
             <a href="/craft?tab=potions" class="tab-nav-item <?php echo $active_tab === 'potions' ? 'active' : ''; ?>"><?php echo t('craft.tab.potions'); ?></a>
             <a href="/craft?tab=rift_stones" class="tab-nav-item <?php echo $active_tab === 'rift_stones' ? 'active' : ''; ?>"><?php echo t('craft.tab.rift_stones'); ?></a>
+            <a href="/craft?tab=skill_gems" class="tab-nav-item <?php echo $active_tab === 'skill_gems' ? 'active' : ''; ?>"><?php echo t('craft.tab.skill_gems'); ?></a>
         </div>
 
         <?php if ($active_tab === 'gear'): ?>
@@ -249,6 +250,53 @@
             <br />
             <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
             <input type="submit" role="button" name="craft_rift_stone" value="<?php echo t('craft.rift.submit'); ?>">
+        </form>
+
+        <?php elseif ($active_tab === 'skill_gems'): ?>
+        <!-- Skill Gem Crafting Tab -->
+        <?php
+            $skill_gem_bonus_definitions = SkillGem::getBonusTypeDefinitions();
+        ?>
+        <h2><?php echo t('craft.skill_gem.title'); ?></h2>
+        <p><?php echo t('craft.skill_gem.desc'); ?></p>
+
+        <p>
+            <b><?php echo t('craft.gear.lucky_wyrdstone_owned', ['amount' => number_format($lucky_wyrdstone)]); ?></b><br />
+            <small><?php echo t('craft.gear.lucky_wyrdstone_note'); ?></small>
+        </p>
+
+        <form method="POST" action="/craft?tab=skill_gems">
+            <b><?php echo t('craft.skill_gem.select_skill'); ?></b><br />
+            <select name="skill_name">
+                <?php foreach (SKILL_GEMS as $skill_key => $skill): ?>
+                    <option value="<?php echo htmlspecialchars($skill_key); ?>"><?php echo htmlspecialchars($skill['Name']); ?></option>
+                <?php endforeach; ?>
+            </select>
+            <br /><br />
+
+            <b><?php echo t('craft.skill_gem.select_bonus'); ?></b><br />
+            <select name="bonus_type">
+                <?php foreach ($skill_gem_bonus_definitions as $bonus_key => $bonus): ?>
+                    <option value="<?php echo htmlspecialchars($bonus_key); ?>">
+                        <?php echo htmlspecialchars($bonus['name']); ?> — <?php echo htmlspecialchars($bonus['description']); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <br /><br />
+
+            <p>
+                <b><?php echo t('craft.skill_gem.potential', ['level' => $party_level]); ?></b><br />
+                <small><?php echo t('craft.skill_gem.potential_note'); ?></small>
+            </p>
+
+            <label>
+                <input type="checkbox" name="use_lucky_wyrdstone" value="1" <?php echo $lucky_wyrdstone <= 0 ? 'disabled' : ''; ?>>
+                <?php echo t('craft.skill_gem.use_lucky_wyrdstone'); ?>
+            </label>
+            <br /><br />
+
+            <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
+            <input type="submit" role="button" name="craft_skill_gem" value="<?php echo t('craft.skill_gem.submit'); ?>">
         </form>
 
         <?php endif; ?>

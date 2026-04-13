@@ -4,6 +4,10 @@ declare(strict_types=1);
 
     $lucky_wyrdstone = (int)($Character->Data['inventory_json']['special_resources']['lucky_wyrdstone'] ?? 0);
 
+    # Skill gem bonus type definitions
+    $skill_gem_bonus_definitions = SkillGem::getBonusTypeDefinitions();
+    $valid_skill_gem_bonus_types  = array_keys($skill_gem_bonus_definitions);
+
     # Gear affix and item type definitions (from Gear class)
     $affix_definitions = Gear::getAffixDefinitions();
     $item_type_definitions = Gear::getItemTypeDefinitions();
@@ -261,6 +265,83 @@ declare(strict_types=1);
                 # Save the crafted rift stone
                 $rift_stone = new RiftStone();
                 $new_rift_stone_id = $rift_stone->CreateRiftStone($rift_stone_details);
+            }
+        }
+    }
+
+    # Craft Skill Gem
+    if (isset($_POST['craft_skill_gem'])) {
+        $skill_name = $_POST['skill_name'] ?? '';
+        $bonus_type = $_POST['bonus_type'] ?? '';
+
+        # Validate inputs
+        if (!in_array($skill_name, SKILL_GEM_NAMES, true)) {
+            $alert_danger = t('craft.alert.invalid_skill');
+        } elseif (!in_array($bonus_type, $valid_skill_gem_bonus_types, true)) {
+            $alert_danger = t('craft.alert.invalid_bonus_type');
+        } else {
+            $party_level = $Character->Data['party_json']['members']['frontline']['level'];
+            $potential = floor($party_level * 1);
+
+            $use_lucky_wyrdstone = isset($_POST['use_lucky_wyrdstone']);
+            if ($use_lucky_wyrdstone && $lucky_wyrdstone <= 0) {
+                $alert_danger = t('craft.alert.no_lucky_wyrdstone');
+            } else {
+                $tier = 0;
+
+                # Consume potential, each iteration increases tier by 1
+                while ($potential > 0) {
+                    if ($Character->Data['iron'] < 2500) {
+                        break;
+                    }
+
+                    $consumed = rand(1, 5);
+                    if ($use_lucky_wyrdstone) {
+                        $consumed = min($consumed, rand(1, 5));
+                    }
+                    $consumed = min($consumed, $potential);
+
+                    $tier++;
+                    $potential -= $consumed;
+                    $Character->Data['iron'] -= 2500;
+                }
+
+                if ($use_lucky_wyrdstone) {
+                    $Character->Data['inventory_json']['special_resources']['lucky_wyrdstone'] = $lucky_wyrdstone - 1;
+                    $lucky_wyrdstone--;
+                }
+
+                # Generate gem name: "[prefix] [skill] Gem"
+                $bonus_prefix = $skill_gem_bonus_definitions[$bonus_type]['gem_prefix'];
+                $gem_name = $bonus_prefix . ' ' . $skill_name . ' Gem';
+
+                # Build details
+                $gem_details = [
+                    'skill_name'          => $skill_name,
+                    'bonus_type'          => $bonus_type,
+                    'tier'                => $tier,
+                    'party_level_at_craft' => $party_level,
+                ];
+
+                # Calculate bonus value for display
+                $per_tier   = $skill_gem_bonus_definitions[$bonus_type]['per_tier'];
+                $bonus_unit = $skill_gem_bonus_definitions[$bonus_type]['unit'];
+                $bonus_value = $tier * $per_tier;
+                $bonus_name  = $skill_gem_bonus_definitions[$bonus_type]['name'];
+
+                $alert_success = t('craft.alert.crafted_skill_gem', [
+                    'name'  => htmlspecialchars($gem_name),
+                    'tier'  => $tier,
+                    'bonus' => '+' . $bonus_value . $bonus_unit . ' ' . htmlspecialchars($bonus_name),
+                ]);
+
+                if ($use_lucky_wyrdstone) {
+                    $alert_success .= ' ' . t('craft.alert.used_lucky_wyrdstone');
+                }
+
+                # Save the crafted gem
+                $skill_gem = new SkillGem();
+                $skill_gem->CreateItem($gem_name, $gem_details);
             }
         }
     }

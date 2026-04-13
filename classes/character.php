@@ -601,6 +601,13 @@ class Character
                 unset($this->Data['worker_json']['special_resources']);
             }
         }
+
+        // Ensure equipped_skill_gems is initialized for both party members
+        foreach (['frontline', 'backline'] as $position) {
+            if (!isset($this->Data['party_json']['members'][$position]['equipped_skill_gems'])) {
+                $this->Data['party_json']['members'][$position]['equipped_skill_gems'] = [0, 0];
+            }
+        }
     }
 
     private function hasInventoryJsonColumn(): bool

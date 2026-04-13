@@ -81,6 +81,30 @@
                  <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
                  <input type="submit" value="<?php echo t('party.update_skills'); ?>" />
                 </form>
+
+                <form method="POST" action="/party?update=frontline_skill_gems">
+                <?php
+                    $fl_skills = $Character->Data['party_json']['members']['frontline']['skills'] ?? [];
+                    $fl_equipped_gems = $Character->Data['party_json']['members']['frontline']['equipped_skill_gems'] ?? [0, 0];
+                    foreach ([0, 1] as $slot_idx):
+                        $slot_skill = $fl_skills[$slot_idx] ?? '';
+                        $slot_gem_id = $fl_equipped_gems[$slot_idx] ?? 0;
+                ?>
+                <?php echo t('party.skill_gem_slot_1', ['skill' => htmlspecialchars($slot_skill)]); ?><br />
+                <select name="skill_gem_slot_<?php echo $slot_idx; ?>">
+                    <option value="0"><?php echo t('party.no_gem'); ?></option>
+                    <?php foreach ($favorite_skill_gems as $fav_gem):
+                        if ($fav_gem['skill_name'] !== $slot_skill) continue;
+                        $selected = ($fav_gem['id'] == $slot_gem_id) ? 'selected' : '';
+                    ?>
+                    <option value="<?php echo $fav_gem['id']; ?>" <?php echo $selected; ?>><?php echo htmlspecialchars($fav_gem['name']); ?> (Tier <?php echo $fav_gem['tier']; ?>)</option>
+                    <?php endforeach; ?>
+                </select><br />
+                <?php endforeach; ?>
+                <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
+                <input type="submit" value="<?php echo t('party.update_skill_gems'); ?>" />
+                </form>
+                <small><a href="/inventory?tab=skill_gems"><?php echo t('party.skill_gem_hint'); ?></a></small>
             </div>
         </div>
 
@@ -155,6 +179,30 @@
                  <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
                  <input type="submit" value="<?php echo t('party.update_skills'); ?>" />
                 </form>
+
+                <form method="POST" action="/party?update=backline_skill_gems">
+                <?php
+                    $bl_skills = $Character->Data['party_json']['members']['backline']['skills'] ?? [];
+                    $bl_equipped_gems = $Character->Data['party_json']['members']['backline']['equipped_skill_gems'] ?? [0, 0];
+                    foreach ([0, 1] as $slot_idx):
+                        $slot_skill = $bl_skills[$slot_idx] ?? '';
+                        $slot_gem_id = $bl_equipped_gems[$slot_idx] ?? 0;
+                ?>
+                <?php echo t('party.skill_gem_slot_1', ['skill' => htmlspecialchars($slot_skill)]); ?><br />
+                <select name="skill_gem_slot_<?php echo $slot_idx; ?>">
+                    <option value="0"><?php echo t('party.no_gem'); ?></option>
+                    <?php foreach ($favorite_skill_gems as $fav_gem):
+                        if ($fav_gem['skill_name'] !== $slot_skill) continue;
+                        $selected = ($fav_gem['id'] == $slot_gem_id) ? 'selected' : '';
+                    ?>
+                    <option value="<?php echo $fav_gem['id']; ?>" <?php echo $selected; ?>><?php echo htmlspecialchars($fav_gem['name']); ?> (Tier <?php echo $fav_gem['tier']; ?>)</option>
+                    <?php endforeach; ?>
+                </select><br />
+                <?php endforeach; ?>
+                <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
+                <input type="submit" value="<?php echo t('party.update_skill_gems'); ?>" />
+                </form>
+                <small><a href="/inventory?tab=skill_gems"><?php echo t('party.skill_gem_hint'); ?></a></small>
             </div>
         </div>
 

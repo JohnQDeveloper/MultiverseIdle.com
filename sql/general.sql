@@ -289,3 +289,16 @@ CREATE TABLE `chat_ignores` (
   PRIMARY KEY (`user_id`, `ignored_user_id`),
   KEY `idx_chat_ignores_ignored_user_id` (`ignored_user_id`)
 );
+
+-- skill gems table
+CREATE TABLE `skill_gems` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `created_at` DATETIME DEFAULT NOW(),
+    `owner_id` INT,
+    `skill_name` VARCHAR(100),
+    `details` JSON,
+    `name` VARCHAR(255),
+    `favorite` TINYINT(1) DEFAULT 0,
+    `season_id` INT DEFAULT NULL,
+    `market_price` INT DEFAULT 0
+);

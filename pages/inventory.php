@@ -18,6 +18,7 @@
             <a href="/inventory?tab=gear" class="tab-nav-item <?php echo $active_tab === 'gear' ? 'active' : ''; ?>"><?php echo t('inventory.tab.gear'); ?></a>
             <a href="/inventory?tab=potions" class="tab-nav-item <?php echo $active_tab === 'potions' ? 'active' : ''; ?>"><?php echo t('inventory.tab.potions'); ?></a>
             <a href="/inventory?tab=rift_stones" class="tab-nav-item <?php echo $active_tab === 'rift_stones' ? 'active' : ''; ?>"><?php echo t('inventory.tab.rift_stones'); ?></a>
+            <a href="/inventory?tab=skill_gems" class="tab-nav-item <?php echo $active_tab === 'skill_gems' ? 'active' : ''; ?>"><?php echo t('inventory.tab.skill_gems'); ?></a>
         </div>
 
         <?php if ($active_tab === 'gear'): ?>
@@ -286,6 +287,85 @@
                 </div>
             <?php endforeach; ?>
         <?php endif; ?> <!-- end of empty check for rift stones -->
+
+        <?php elseif ($active_tab === 'skill_gems'): ?>
+        <!-- Skill Gems Tab -->
+        <?php $skill_gem_bonus_definitions = SkillGem::getBonusTypeDefinitions(); ?>
+        <h2><?php echo t('inventory.skill_gems.title'); ?></h2>
+        <p><?php echo t('inventory.skill_gems.desc'); ?></p>
+
+        <?php if (empty($player_skill_gems)): ?>
+            <p><em><?php echo t('inventory.skill_gems.empty', ['craft_link' => '<a href="/craft?tab=skill_gems">' . t('inventory.skill_gems.craft_link') . '</a>']); ?></em></p>
+        <?php else: ?>
+            <p><b><?php echo t('inventory.skill_gems.total', ['count' => count($player_skill_gems)]); ?></b></p>
+
+            <?php foreach ($player_skill_gems as $gem): ?>
+                <?php
+                    $is_equipped = isset($equipped_skill_gem_map[$gem['id']]);
+                    $card_class  = 'card';
+                    if ($is_equipped) {
+                        $card_class .= ' card--equipped';
+                    } elseif ($gem['favorite']) {
+                        $card_class .= ' card--favorite';
+                    }
+                    $bonus_def   = $skill_gem_bonus_definitions[$gem['bonus_type']] ?? null;
+                    $per_tier    = $bonus_def ? $bonus_def['per_tier'] : 0;
+                    $bonus_unit  = $bonus_def ? $bonus_def['unit'] : '';
+                    $bonus_name  = $bonus_def ? $bonus_def['name'] : $gem['bonus_type'];
+                    $bonus_value = $gem['tier'] * $per_tier;
+                ?>
+                <div class="<?php echo $card_class; ?>">
+                    <div class="grid">
+                        <div>
+                            <h3>
+                                <?php if ($gem['favorite']): ?>
+                                    <span class="text--gold">&#9733;</span>
+                                <?php endif; ?>
+                                <?php if ($is_equipped): ?>
+                                    <span class="badge"><?php echo t('inventory.skill_gems.equipped'); ?></span>
+                                <?php endif; ?>
+                                <?php echo htmlspecialchars($gem['name']); ?>
+                            </h3>
+                            <p>
+                                <b><?php echo t('inventory.skill_gems.skill', ['skill' => htmlspecialchars($gem['skill_name'])]); ?></b>
+                                | <b><?php echo t('inventory.skill_gems.tier', ['tier' => $gem['tier']]); ?></b>
+                                <?php if ($is_equipped): ?>
+                                    | <b class="text--primary"><?php echo t('inventory.skill_gems.equipped_by'); ?></b>
+                                    <?php echo htmlspecialchars(t('inventory.skill_gems.' . $equipped_skill_gem_map[$gem['id']]['side'])); ?>
+                                <?php endif; ?>
+                            </p>
+                            <?php if ($bonus_def): ?>
+                                <p>
+                                    <?php echo t('inventory.skill_gems.bonus_value', [
+                                        'value' => $bonus_value,
+                                        'unit'  => $bonus_unit,
+                                        'name'  => htmlspecialchars($bonus_name),
+                                    ]); ?>
+                                    <small>(<?php echo htmlspecialchars($bonus_def['description']); ?>)</small>
+                                </p>
+                            <?php endif; ?>
+                            <p><small><?php echo t('common.crafted_at', ['level' => $gem['party_level_at_craft'] ?? t('common.n_a')]); ?></small></p>
+                        </div>
+                        <div>
+                            <form method="POST" action="/inventory?tab=skill_gems" class="form--inline">
+                                <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
+                                <input type="hidden" name="gem_id" value="<?php echo $gem['id']; ?>">
+                                <input type="submit" role="button" name="toggle_gem_favorite"
+                                    value="<?php echo $gem['favorite'] ? t('inventory.skill_gems.unfavorite') : t('inventory.skill_gems.favorite'); ?>"
+                                    class="<?php echo $gem['favorite'] ? 'secondary' : ''; ?>">
+                            </form>
+                            <?php if (!$is_equipped): ?>
+                            <form method="POST" action="/inventory?tab=skill_gems" class="form--inline" onsubmit="return confirm('<?php echo t('confirm.destroy_item'); ?>');">
+                                <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
+                                <input type="hidden" name="gem_id" value="<?php echo $gem['id']; ?>">
+                                <input type="submit" role="button" name="destroy_skill_gem" value="<?php echo t('common.destroy'); ?>" class="contrast">
+                            </form>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        <?php endif; ?> <!-- end of empty check for skill gems -->
 
         <?php endif; ?> <!-- end of tab check -->
 

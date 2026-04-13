@@ -62,6 +62,71 @@ class Battle
             return $bonuses;
         }
 
+        /**
+         * Calculates skill gem bonuses for a combatant's skill slots
+         *
+         * @param array<string> $skills Equipped skill names (slot 0, slot 1)
+         * @param array<int> $equipped_gems Equipped skill gem IDs (slot 0, slot 1)
+         * @return array<string, array<string, mixed>> Bonuses indexed by skill name
+         */
+        private function calculateSkillGemBonuses(array $skills, array $equipped_gems): array
+        {
+            $bonuses = [];
+            $gem = new SkillGem();
+
+            foreach ($skills as $slot_idx => $skill_name) {
+                $gem_id = $equipped_gems[$slot_idx] ?? 0;
+                if ($gem_id > 0 && $gem->LoadItemByGemID($gem_id)) {
+                    if ($gem->Data['skill_name'] === $skill_name) {
+                        $bonuses[$skill_name] = [
+                            'type' => $gem->Data['bonus_type'],
+                            'tier' => (int)$gem->Data['tier'],
+                        ];
+                    }
+                }
+            }
+
+            return $bonuses;
+        }
+
+        /**
+         * Returns the effect multiplier for a skill from its equipped gem
+         *
+         * @param string $skill Skill name
+         * @param array<string, array<string, mixed>> $gem_bonuses Gem bonuses for this combatant
+         * @return float Multiplier (1.0 = no bonus)
+         */
+        private function getSkillEffectMultiplier(string $skill, array $gem_bonuses): float
+        {
+            $gem = $gem_bonuses[$skill] ?? null;
+            if ($gem === null || $gem['type'] !== 'effect') {
+                return 1.0;
+            }
+            return 1.0 + ($gem['tier'] * 0.01);
+        }
+
+        /**
+         * Returns how many times a skill casts based on echo/triple_cast gems
+         *
+         * @param string $skill Skill name
+         * @param array<string, array<string, mixed>> $gem_bonuses Gem bonuses for this combatant
+         * @return int 1, 2, or 3
+         */
+        private function getSkillCastCount(string $skill, array $gem_bonuses): int
+        {
+            $gem = $gem_bonuses[$skill] ?? null;
+            if ($gem === null) {
+                return 1;
+            }
+            if ($gem['type'] === 'echo') {
+                return (rand(0, 100) / 100 <= $gem['tier'] * 0.01) ? 2 : 1;
+            }
+            if ($gem['type'] === 'triple_cast') {
+                return (rand(0, 100) / 100 <= $gem['tier'] * 0.005) ? 3 : 1;
+            }
+            return 1;
+        }
+
         // Helper to apply a single gear item's bonuses
         private function applyGearBonuses(array &$bonuses, array $gearData): void
         {
@@ -284,6 +349,7 @@ class Battle
          * @param string $caster_side 'party' or 'monster'
          * @param string $caster_position 'frontline' or 'backline'
          * @param string $enemy_side 'party' or 'monster'
+         * @param array<string, array<string, array<string, mixed>>> $skill_gem_bonuses Skill gem bonuses for both sides
          * @return array<string>
          */
         private function executeAbilities(
@@ -293,11 +359,24 @@ class Battle
             array $gear_bonuses,
             string $caster_side,
             string $caster_position,
-            string $enemy_side
+            string $enemy_side,
+            array $skill_gem_bonuses = []
         ): array
         {
             $logs = [];
             $wis = (int)$caster_config['members'][$caster_position]['wisdom'];
+
+            // Apply wisdom_cast gem bonus: sum of all wisdom_cast tiers for this combatant
+            $caster_gem_bonuses = $skill_gem_bonuses[$caster_side][$caster_position] ?? [];
+            $wisdom_cast_bonus = 0.0;
+            foreach ($caster_gem_bonuses as $gem) {
+                if ($gem['type'] === 'wisdom_cast') {
+                    $wisdom_cast_bonus += $gem['tier'] * 0.005;
+                }
+            }
+            if ($wisdom_cast_bonus > 0.0) {
+                $wis = (int)floor($wis * (1.0 + $wisdom_cast_bonus));
+            }
 
             // Check for Antimagic debuff on caster
             if (isset($status_effects[$caster_side][$caster_position]['Antimagic']) &&
@@ -330,156 +409,169 @@ class Battle
 
                 // Healing Rain
                 if (in_array('Healing Rain', $skills)) {
-                    $heal_amount = (int)floor($wis * self::HEALING_RAIN_PERCENT);
-                    $frontline_max_health = $caster_config['members']['frontline']['health'] * self::HEALTH_MULTIPLIER;
-                    $backline_max_health = $caster_config['members']['backline']['health'] * self::HEALTH_MULTIPLIER;
+                    $cast_count = $this->getSkillCastCount('Healing Rain', $caster_gem_bonuses);
+                    $effect_mult = $this->getSkillEffectMultiplier('Healing Rain', $caster_gem_bonuses);
+                    for ($cast = 0; $cast < $cast_count; $cast++) {
+                        $heal_amount = (int)floor($wis * self::HEALING_RAIN_PERCENT * $effect_mult);
+                        $frontline_max_health = $caster_config['members']['frontline']['health'] * self::HEALTH_MULTIPLIER;
+                        $backline_max_health = $caster_config['members']['backline']['health'] * self::HEALTH_MULTIPLIER;
 
-                    if ($caster_config['members']['frontline']['current_health'] > 0) {
-                        $caster_config['members']['frontline']['current_health'] += $heal_amount;
-                        if ($caster_config['members']['frontline']['current_health'] > $frontline_max_health) {
-                            $caster_config['members']['frontline']['current_health'] = $frontline_max_health;
+                        if ($caster_config['members']['frontline']['current_health'] > 0) {
+                            $caster_config['members']['frontline']['current_health'] += $heal_amount;
+                            if ($caster_config['members']['frontline']['current_health'] > $frontline_max_health) {
+                                $caster_config['members']['frontline']['current_health'] = $frontline_max_health;
+                            }
                         }
-                    }
 
-                    if ($caster_config['members']['backline']['current_health'] > 0) {
-                        $caster_config['members']['backline']['current_health'] += $heal_amount;
-                        if ($caster_config['members']['backline']['current_health'] > $backline_max_health) {
-                            $caster_config['members']['backline']['current_health'] = $backline_max_health;
+                        if ($caster_config['members']['backline']['current_health'] > 0) {
+                            $caster_config['members']['backline']['current_health'] += $heal_amount;
+                            if ($caster_config['members']['backline']['current_health'] > $backline_max_health) {
+                                $caster_config['members']['backline']['current_health'] = $backline_max_health;
+                            }
                         }
-                    }
 
-                    $logs[] = "$caster_name casts Healing Rain, healing all allies for $heal_amount.";
+                        $logs[] = "$caster_name casts Healing Rain, healing all allies for $heal_amount.";
+                    }
                 }
 
                 // Greater Heal
                 if (in_array('Greater Heal', $skills)) {
-                    $heal_amount = (int)floor($wis * self::GREATER_HEAL_PERCENT);
-                    $frontline_max_health = $caster_config['members']['frontline']['health'] * self::HEALTH_MULTIPLIER;
-                    $backline_max_health = $caster_config['members']['backline']['health'] * self::HEALTH_MULTIPLIER;
+                    $cast_count = $this->getSkillCastCount('Greater Heal', $caster_gem_bonuses);
+                    $effect_mult = $this->getSkillEffectMultiplier('Greater Heal', $caster_gem_bonuses);
+                    for ($cast = 0; $cast < $cast_count; $cast++) {
+                        $heal_amount = (int)floor($wis * self::GREATER_HEAL_PERCENT * $effect_mult);
+                        $frontline_max_health = $caster_config['members']['frontline']['health'] * self::HEALTH_MULTIPLIER;
+                        $backline_max_health = $caster_config['members']['backline']['health'] * self::HEALTH_MULTIPLIER;
 
-                    // Find lowest health living ally
-                    $heal_target = null;
-                    $lowest_health = $caster_config['members']['frontline']['current_health'] >
-                        $caster_config['members']['backline']['current_health']
-                        ? $caster_config['members']['backline']['current_health']
-                        : $caster_config['members']['frontline']['current_health'];
+                        // Find lowest health living ally
+                        $heal_target = null;
+                        $lowest_health = $caster_config['members']['frontline']['current_health'] >
+                            $caster_config['members']['backline']['current_health']
+                            ? $caster_config['members']['backline']['current_health']
+                            : $caster_config['members']['frontline']['current_health'];
 
-                    if ($caster_config['members']['frontline']['current_health'] > 0 &&
-                        $caster_config['members']['frontline']['current_health'] <= $lowest_health) {
-                        $lowest_health = $caster_config['members']['frontline']['current_health'];
-                        $heal_target = 'frontline';
-                    }
-                    if ($caster_config['members']['backline']['current_health'] > 0 &&
-                        $caster_config['members']['backline']['current_health'] < $lowest_health) {
-                        $lowest_health = $caster_config['members']['backline']['current_health'];
-                        $heal_target = 'backline';
-                    }
-
-                    if ($heal_target !== null) {
-                        $max_health = ($heal_target === 'frontline') ? $frontline_max_health : $backline_max_health;
-                        $caster_config['members'][$heal_target]['current_health'] += $heal_amount;
-                        if ($caster_config['members'][$heal_target]['current_health'] > $max_health) {
-                            $caster_config['members'][$heal_target]['current_health'] = $max_health;
+                        if ($caster_config['members']['frontline']['current_health'] > 0 &&
+                            $caster_config['members']['frontline']['current_health'] <= $lowest_health) {
+                            $lowest_health = $caster_config['members']['frontline']['current_health'];
+                            $heal_target = 'frontline';
                         }
-                        $logs[] = "$caster_name casts Greater Heal on $heal_target for $heal_amount.";
+                        if ($caster_config['members']['backline']['current_health'] > 0 &&
+                            $caster_config['members']['backline']['current_health'] < $lowest_health) {
+                            $heal_target = 'backline';
+                        }
+
+                        if ($heal_target !== null) {
+                            $max_health = ($heal_target === 'frontline') ? $frontline_max_health : $backline_max_health;
+                            $caster_config['members'][$heal_target]['current_health'] += $heal_amount;
+                            if ($caster_config['members'][$heal_target]['current_health'] > $max_health) {
+                                $caster_config['members'][$heal_target]['current_health'] = $max_health;
+                            }
+                            $logs[] = "$caster_name casts Greater Heal on $heal_target for $heal_amount.";
+                        }
                     }
                 }
 
                 // Firestorm
                 if (in_array('Firestorm', $skills)) {
-                    $base_damage = (int)floor($wis * self::AOE_SPELL_PERCENT);
+                    $cast_count = $this->getSkillCastCount('Firestorm', $caster_gem_bonuses);
+                    $effect_mult = $this->getSkillEffectMultiplier('Firestorm', $caster_gem_bonuses);
+                    for ($cast = 0; $cast < $cast_count; $cast++) {
+                        $base_damage = (int)floor($wis * self::AOE_SPELL_PERCENT * $effect_mult);
 
-                    // Apply Scorched and deal damage to frontline enemy
-                    if ($enemy_config['members']['frontline']['current_health'] > 0) {
-                        $status_effects[$enemy_side]['frontline']['Scorched'] = self::STATUS_EFFECT_DURATION;
-                        $damage = (int)$base_damage;
-                        if ($status_effects[$enemy_side]['frontline']['Scorched'] > 0) {
-                            $damage = (int)floor($damage * self::SCORCHED_DAMAGE_BONUS);
+                        // Apply Scorched and deal damage to frontline enemy
+                        if ($enemy_config['members']['frontline']['current_health'] > 0) {
+                            $status_effects[$enemy_side]['frontline']['Scorched'] = self::STATUS_EFFECT_DURATION;
+                            $damage = (int)$base_damage;
+                            if ($status_effects[$enemy_side]['frontline']['Scorched'] > 0) {
+                                $damage = (int)floor($damage * self::SCORCHED_DAMAGE_BONUS);
+                            }
+                            $damage = $this->applyDamageBonus($damage, ' fire', $gear_bonuses[$caster_side][$caster_position]);
+                            $damage = $this->applyResistance($damage, ' fire', $gear_bonuses[$enemy_side]['frontline']);
+                            $enemy_config['members']['frontline']['current_health'] -= $damage;
+                            if ($enemy_config['members']['frontline']['current_health'] < 0) {
+                                $enemy_config['members']['frontline']['current_health'] = 0;
+                            }
+                            $enemy_name = ucfirst($enemy_side) . " Frontline";
+                            $logs[] = "$caster_name casts Firestorm, scorching and hitting $enemy_name for $damage fire damage.";
                         }
-                        // Apply gear bonuses and resistances
-                        $damage = $this->applyDamageBonus($damage, ' fire', $gear_bonuses[$caster_side][$caster_position]);
-                        $damage = $this->applyResistance($damage, ' fire', $gear_bonuses[$enemy_side]['frontline']);
-                        $enemy_config['members']['frontline']['current_health'] -= $damage;
-                        // Cap health at 0 minimum
-                        if ($enemy_config['members']['frontline']['current_health'] < 0) {
-                            $enemy_config['members']['frontline']['current_health'] = 0;
-                        }
-                        $enemy_name = ucfirst($enemy_side) . " Frontline";
-                        $logs[] = "$caster_name casts Firestorm, scorching and hitting $enemy_name for $damage fire damage.";
-                    }
 
-                    // Apply Scorched and deal damage to backline enemy
-                    if ($enemy_config['members']['backline']['current_health'] > 0) {
-                        $status_effects[$enemy_side]['backline']['Scorched'] = self::STATUS_EFFECT_DURATION;
-                        $damage = (int)$base_damage;
-                        if ($status_effects[$enemy_side]['backline']['Scorched'] > 0) {
-                            $damage = (int)floor($damage * self::SCORCHED_DAMAGE_BONUS);
+                        // Apply Scorched and deal damage to backline enemy
+                        if ($enemy_config['members']['backline']['current_health'] > 0) {
+                            $status_effects[$enemy_side]['backline']['Scorched'] = self::STATUS_EFFECT_DURATION;
+                            $damage = (int)$base_damage;
+                            if ($status_effects[$enemy_side]['backline']['Scorched'] > 0) {
+                                $damage = (int)floor($damage * self::SCORCHED_DAMAGE_BONUS);
+                            }
+                            $damage = $this->applyDamageBonus($damage, ' fire', $gear_bonuses[$caster_side][$caster_position]);
+                            $damage = $this->applyResistance($damage, ' fire', $gear_bonuses[$enemy_side]['backline']);
+                            $enemy_config['members']['backline']['current_health'] -= $damage;
+                            if ($enemy_config['members']['backline']['current_health'] < 0) {
+                                $enemy_config['members']['backline']['current_health'] = 0;
+                            }
+                            $enemy_name = ucfirst($enemy_side) . " Backline";
+                            $logs[] = "$caster_name casts Firestorm, scorching and hitting $enemy_name for $damage fire damage.";
                         }
-                        // Apply gear bonuses and resistances
-                        $damage = $this->applyDamageBonus($damage, ' fire', $gear_bonuses[$caster_side][$caster_position]);
-                        $damage = $this->applyResistance($damage, ' fire', $gear_bonuses[$enemy_side]['backline']);
-                        $enemy_config['members']['backline']['current_health'] -= $damage;
-                        // Cap health at 0 minimum
-                        if ($enemy_config['members']['backline']['current_health'] < 0) {
-                            $enemy_config['members']['backline']['current_health'] = 0;
-                        }
-                        $enemy_name = ucfirst($enemy_side) . " Backline";
-                        $logs[] = "$caster_name casts Firestorm, scorching and hitting $enemy_name for $damage fire damage.";
                     }
                 }
 
                 // Blizzard
                 if (in_array('Blizzard', $skills)) {
-                    $base_damage = (int)floor($wis * self::AOE_SPELL_PERCENT);
+                    $cast_count = $this->getSkillCastCount('Blizzard', $caster_gem_bonuses);
+                    $effect_mult = $this->getSkillEffectMultiplier('Blizzard', $caster_gem_bonuses);
+                    for ($cast = 0; $cast < $cast_count; $cast++) {
+                        $base_damage = (int)floor($wis * self::AOE_SPELL_PERCENT * $effect_mult);
 
-                    // Apply Hypothermia and deal damage to frontline enemy
-                    if ($enemy_config['members']['frontline']['current_health'] > 0) {
-                        $status_effects[$enemy_side]['frontline']['Hypothermia'] = self::STATUS_EFFECT_DURATION;
-                        $damage = (int)$base_damage;
-                        // Apply gear bonuses and resistances
-                        $damage = $this->applyDamageBonus($damage, ' cold', $gear_bonuses[$caster_side][$caster_position]);
-                        $damage = $this->applyResistance($damage, ' cold', $gear_bonuses[$enemy_side]['frontline']);
-                        $enemy_config['members']['frontline']['current_health'] -= $damage;
-                        // Cap health at 0 minimum
-                        if ($enemy_config['members']['frontline']['current_health'] < 0) {
-                            $enemy_config['members']['frontline']['current_health'] = 0;
+                        // Apply Hypothermia and deal damage to frontline enemy
+                        if ($enemy_config['members']['frontline']['current_health'] > 0) {
+                            $status_effects[$enemy_side]['frontline']['Hypothermia'] = self::STATUS_EFFECT_DURATION;
+                            $damage = (int)$base_damage;
+                            $damage = $this->applyDamageBonus($damage, ' cold', $gear_bonuses[$caster_side][$caster_position]);
+                            $damage = $this->applyResistance($damage, ' cold', $gear_bonuses[$enemy_side]['frontline']);
+                            $enemy_config['members']['frontline']['current_health'] -= $damage;
+                            if ($enemy_config['members']['frontline']['current_health'] < 0) {
+                                $enemy_config['members']['frontline']['current_health'] = 0;
+                            }
+                            $enemy_name = ucfirst($enemy_side) . " Frontline";
+                            $logs[] = "$caster_name casts Blizzard, chilling and hitting $enemy_name for $damage cold damage.";
                         }
-                        $enemy_name = ucfirst($enemy_side) . " Frontline";
-                        $logs[] = "$caster_name casts Blizzard, chilling and hitting $enemy_name for $damage cold damage.";
-                    }
 
-                    // Apply Hypothermia and deal damage to backline enemy
-                    if ($enemy_config['members']['backline']['current_health'] > 0) {
-                        $status_effects[$enemy_side]['backline']['Hypothermia'] = self::STATUS_EFFECT_DURATION;
-                        $damage = (int)$base_damage;
-                        // Apply gear bonuses and resistances
-                        $damage = $this->applyDamageBonus($damage, ' cold', $gear_bonuses[$caster_side][$caster_position]);
-                        $damage = $this->applyResistance($damage, ' cold', $gear_bonuses[$enemy_side]['backline']);
-                        $enemy_config['members']['backline']['current_health'] -= $damage;
-                        // Cap health at 0 minimum
-                        if ($enemy_config['members']['backline']['current_health'] < 0) {
-                            $enemy_config['members']['backline']['current_health'] = 0;
+                        // Apply Hypothermia and deal damage to backline enemy
+                        if ($enemy_config['members']['backline']['current_health'] > 0) {
+                            $status_effects[$enemy_side]['backline']['Hypothermia'] = self::STATUS_EFFECT_DURATION;
+                            $damage = (int)$base_damage;
+                            $damage = $this->applyDamageBonus($damage, ' cold', $gear_bonuses[$caster_side][$caster_position]);
+                            $damage = $this->applyResistance($damage, ' cold', $gear_bonuses[$enemy_side]['backline']);
+                            $enemy_config['members']['backline']['current_health'] -= $damage;
+                            if ($enemy_config['members']['backline']['current_health'] < 0) {
+                                $enemy_config['members']['backline']['current_health'] = 0;
+                            }
+                            $enemy_name = ucfirst($enemy_side) . " Backline";
+                            $logs[] = "$caster_name casts Blizzard, chilling and hitting $enemy_name for $damage cold damage.";
                         }
-                        $enemy_name = ucfirst($enemy_side) . " Backline";
-                        $logs[] = "$caster_name casts Blizzard, chilling and hitting $enemy_name for $damage cold damage.";
                     }
                 }
 
-                // Flaming Blades
+                // Flaming Blades (buff: echo/triple_cast extend buff duration)
                 if (in_array('Flaming Blades', $skills)) {
-                    $status_effects[$caster_side][$caster_position]['FlamingBlades'] = self::STATUS_EFFECT_DURATION;
+                    $cast_count = $this->getSkillCastCount('Flaming Blades', $caster_gem_bonuses);
+                    $duration = self::STATUS_EFFECT_DURATION * $cast_count;
+                    $status_effects[$caster_side][$caster_position]['FlamingBlades'] = $duration;
                     $logs[] = "$caster_name activates Flaming Blades!";
                 }
 
-                // Antimage
+                // Antimage (buff: echo/triple_cast extend buff duration)
                 if (in_array('Antimage', $skills)) {
-                    $status_effects[$caster_side][$caster_position]['Antimage'] = self::STATUS_EFFECT_DURATION;
+                    $cast_count = $this->getSkillCastCount('Antimage', $caster_gem_bonuses);
+                    $duration = self::STATUS_EFFECT_DURATION * $cast_count;
+                    $status_effects[$caster_side][$caster_position]['Antimage'] = $duration;
                     $logs[] = "$caster_name activates Antimage!";
                 }
 
-                // Frost Blades
+                // Frost Blades (buff: echo/triple_cast extend buff duration)
                 if (in_array('Frost Blades', $skills)) {
-                    $status_effects[$caster_side][$caster_position]['FrostBlades'] = self::STATUS_EFFECT_DURATION;
+                    $cast_count = $this->getSkillCastCount('Frost Blades', $caster_gem_bonuses);
+                    $duration = self::STATUS_EFFECT_DURATION * $cast_count;
+                    $status_effects[$caster_side][$caster_position]['FrostBlades'] = $duration;
                     $logs[] = "$caster_name activates Frost Blades!";
                 }
             }
@@ -496,6 +588,7 @@ class Battle
          * @param array<string, array<string, array<string, int>>> $gear_bonuses Gear bonuses for both sides
          * @param string $attacker_side 'party' or 'monster'
          * @param string $attacker_position 'frontline' or 'backline'
+         * @param array<string, array<string, array<string, mixed>>> $skill_gem_bonuses Skill gem bonuses
          * @return array<string>
          */
         private function executeCombatantTurn(
@@ -504,7 +597,8 @@ class Battle
             array &$status_effects,
             array $gear_bonuses,
             string $attacker_side,
-            string $attacker_position
+            string $attacker_position,
+            array $skill_gem_bonuses = []
         ): array
         {
             $logs = [];
@@ -552,7 +646,8 @@ class Battle
                 $gear_bonuses,
                 $attacker_side,
                 $attacker_position,
-                $enemy_side
+                $enemy_side,
+                $skill_gem_bonuses
             );
             $logs = array_merge($logs, $ability_logs);
 
@@ -753,6 +848,24 @@ class Battle
               ]
           ];
 
+          // Calculate skill gem bonuses for party members
+          $skill_gem_bonuses = [
+              'party' => [
+                  'frontline' => $this->calculateSkillGemBonuses(
+                      $party_config['members']['frontline']['skills'] ?? [],
+                      $party_config['members']['frontline']['equipped_skill_gems'] ?? []
+                  ),
+                  'backline' => $this->calculateSkillGemBonuses(
+                      $party_config['members']['backline']['skills'] ?? [],
+                      $party_config['members']['backline']['equipped_skill_gems'] ?? []
+                  ),
+              ],
+              'monster' => [
+                  'frontline' => [],
+                  'backline'  => [],
+              ],
+          ];
+
           // Apply stat bonuses from gear to party members
           $this->applyGearToStats($party_config['members']['frontline'], $gear_bonuses['party']['frontline']);
           $this->applyGearToStats($party_config['members']['backline'], $gear_bonuses['party']['backline']);
@@ -804,21 +917,21 @@ class Battle
                // Player turn
                 $return_me_log = array_merge(
                     $return_me_log,
-                    $this->executeCombatantTurn($party_config, $monster_config, $status_effects, $gear_bonuses, 'party', 'frontline')
+                    $this->executeCombatantTurn($party_config, $monster_config, $status_effects, $gear_bonuses, 'party', 'frontline', $skill_gem_bonuses)
                 );
                 $return_me_log = array_merge(
                     $return_me_log,
-                    $this->executeCombatantTurn($party_config, $monster_config, $status_effects, $gear_bonuses, 'party', 'backline')
+                    $this->executeCombatantTurn($party_config, $monster_config, $status_effects, $gear_bonuses, 'party', 'backline', $skill_gem_bonuses)
                 );
 
                // Monster turn
                 $return_me_log = array_merge(
                     $return_me_log,
-                    $this->executeCombatantTurn($party_config, $monster_config, $status_effects, $gear_bonuses, 'monster', 'frontline')
+                    $this->executeCombatantTurn($party_config, $monster_config, $status_effects, $gear_bonuses, 'monster', 'frontline', $skill_gem_bonuses)
                 );
                 $return_me_log = array_merge(
                     $return_me_log,
-                    $this->executeCombatantTurn($party_config, $monster_config, $status_effects, $gear_bonuses, 'monster', 'backline')
+                    $this->executeCombatantTurn($party_config, $monster_config, $status_effects, $gear_bonuses, 'monster', 'backline', $skill_gem_bonuses)
                 );
 
                 // Tick down status effects at end of round
@@ -883,6 +996,18 @@ class Battle
                 ]
             ];
 
+            // Calculate skill gem bonuses for party members
+            $skill_gem_bonuses = [
+                'frontline' => $this->calculateSkillGemBonuses(
+                    $party_config['members']['frontline']['skills'] ?? [],
+                    $party_config['members']['frontline']['equipped_skill_gems'] ?? []
+                ),
+                'backline' => $this->calculateSkillGemBonuses(
+                    $party_config['members']['backline']['skills'] ?? [],
+                    $party_config['members']['backline']['equipped_skill_gems'] ?? []
+                ),
+            ];
+
             // Apply stat bonuses from gear to party members
             $this->applyGearToStats($party_config['members']['frontline'], $gear_bonuses['party']['frontline']);
             $this->applyGearToStats($party_config['members']['backline'], $gear_bonuses['party']['backline']);
@@ -937,7 +1062,8 @@ class Battle
                 $ability_damage = $this->calculateWorldBossAbilityDamage(
                     $party_config,
                     $status_effects,
-                    $gear_bonuses
+                    $gear_bonuses,
+                    $skill_gem_bonuses
                 );
                 $round_damage += $ability_damage;
 
@@ -1026,12 +1152,14 @@ class Battle
          * @param array<string, mixed> $party_config Party configuration
          * @param array<string, array<string, array<string, int>>> $status_effects Status effects tracker
          * @param array<string, array<string, array<string, int>>> $gear_bonuses Gear bonuses
+         * @param array<string, array<string, array<string, mixed>>> $skill_gem_bonuses Skill gem bonuses
          * @return int Total ability damage dealt
          */
         private function calculateWorldBossAbilityDamage(
             array &$party_config,
             array &$status_effects,
-            array $gear_bonuses
+            array $gear_bonuses,
+            array $skill_gem_bonuses = []
         ): int {
             $total_ability_damage = 0;
 
@@ -1041,11 +1169,23 @@ class Battle
                 }
 
                 $wis = (int)$party_config['members'][$position]['wisdom'];
+                $pos_gem_bonuses = $skill_gem_bonuses[$position] ?? [];
 
                 // Apply Antimagic debuff
                 if (isset($status_effects['party'][$position]['Antimagic']) &&
                     $status_effects['party'][$position]['Antimagic'] > 0) {
                     $wis = (int)floor($wis * self::ANTIMAGIC_REDUCTION);
+                }
+
+                // Apply wisdom_cast gem bonus
+                $wisdom_cast_bonus = 0.0;
+                foreach ($pos_gem_bonuses as $gem) {
+                    if ($gem['type'] === 'wisdom_cast') {
+                        $wisdom_cast_bonus += $gem['tier'] * 0.005;
+                    }
+                }
+                if ($wisdom_cast_bonus > 0.0) {
+                    $wis = (int)floor($wis * (1.0 + $wisdom_cast_bonus));
                 }
 
                 // 70% ability success rate against world boss (low wisdom)
@@ -1056,30 +1196,35 @@ class Battle
 
                     // Firestorm damage
                     if (in_array('Firestorm', $skills)) {
-                        $damage = (int)floor($wis * self::AOE_SPELL_PERCENT);
+                        $cast_count = $this->getSkillCastCount('Firestorm', $pos_gem_bonuses);
+                        $effect_mult = $this->getSkillEffectMultiplier('Firestorm', $pos_gem_bonuses);
+                        $damage = (int)floor($wis * self::AOE_SPELL_PERCENT * $effect_mult);
                         $damage = (int)floor($damage * self::SCORCHED_DAMAGE_BONUS);
                         $damage = $this->applyDamageBonus($damage, ' fire', $gear_bonuses['party'][$position]);
-                        // Double damage for hitting both frontline and backline of boss
-                        $total_ability_damage += $damage * 2;
+                        $total_ability_damage += $damage * 2 * $cast_count;
                     }
 
                     // Blizzard damage
                     if (in_array('Blizzard', $skills)) {
-                        $damage = (int)floor($wis * self::AOE_SPELL_PERCENT);
+                        $cast_count = $this->getSkillCastCount('Blizzard', $pos_gem_bonuses);
+                        $effect_mult = $this->getSkillEffectMultiplier('Blizzard', $pos_gem_bonuses);
+                        $damage = (int)floor($wis * self::AOE_SPELL_PERCENT * $effect_mult);
                         $damage = $this->applyDamageBonus($damage, ' cold', $gear_bonuses['party'][$position]);
-                        // Double damage for hitting both frontline and backline of boss
-                        $total_ability_damage += $damage * 2;
+                        $total_ability_damage += $damage * 2 * $cast_count;
                     }
 
-                    // Activate buff abilities
+                    // Activate buff abilities (echo/triple_cast extend duration)
                     if (in_array('Flaming Blades', $skills)) {
-                        $status_effects['party'][$position]['FlamingBlades'] = self::STATUS_EFFECT_DURATION;
+                        $cast_count = $this->getSkillCastCount('Flaming Blades', $pos_gem_bonuses);
+                        $status_effects['party'][$position]['FlamingBlades'] = self::STATUS_EFFECT_DURATION * $cast_count;
                     }
                     if (in_array('Frost Blades', $skills)) {
-                        $status_effects['party'][$position]['FrostBlades'] = self::STATUS_EFFECT_DURATION;
+                        $cast_count = $this->getSkillCastCount('Frost Blades', $pos_gem_bonuses);
+                        $status_effects['party'][$position]['FrostBlades'] = self::STATUS_EFFECT_DURATION * $cast_count;
                     }
                     if (in_array('Antimage', $skills)) {
-                        $status_effects['party'][$position]['Antimage'] = self::STATUS_EFFECT_DURATION;
+                        $cast_count = $this->getSkillCastCount('Antimage', $pos_gem_bonuses);
+                        $status_effects['party'][$position]['Antimage'] = self::STATUS_EFFECT_DURATION * $cast_count;
                     }
                 }
             }
