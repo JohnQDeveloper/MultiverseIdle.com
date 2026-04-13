@@ -90,7 +90,12 @@
                         $slot_skill = $fl_skills[$slot_idx] ?? '';
                         $slot_gem_id = $fl_equipped_gems[$slot_idx] ?? 0;
                 ?>
-                <?php echo t('party.skill_gem_slot_1', ['skill' => htmlspecialchars($slot_skill)]); ?><br />
+                <?php
+                    $slot_translation_key = $slot_idx === 0
+                        ? 'party.skill_gem_slot_1_frontline'
+                        : 'party.skill_gem_slot_2_frontline';
+                ?>
+                <?php echo t($slot_translation_key, ['skill' => htmlspecialchars($slot_skill)]); ?><br />
                 <select name="skill_gem_slot_<?php echo $slot_idx; ?>">
                     <option value="0"><?php echo t('party.no_gem'); ?></option>
                     <?php foreach ($favorite_skill_gems as $fav_gem):
@@ -188,7 +193,12 @@
                         $slot_skill = $bl_skills[$slot_idx] ?? '';
                         $slot_gem_id = $bl_equipped_gems[$slot_idx] ?? 0;
                 ?>
-                <?php echo t('party.skill_gem_slot_1', ['skill' => htmlspecialchars($slot_skill)]); ?><br />
+                <?php
+                    $slot_translation_key = $slot_idx === 0
+                        ? 'party.skill_gem_slot_1_backline'
+                        : 'party.skill_gem_slot_2_backline';
+                ?>
+                <?php echo t($slot_translation_key, ['skill' => htmlspecialchars($slot_skill)]); ?><br />
                 <select name="skill_gem_slot_<?php echo $slot_idx; ?>">
                     <option value="0"><?php echo t('party.no_gem'); ?></option>
                     <?php foreach ($favorite_skill_gems as $fav_gem):

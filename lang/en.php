@@ -482,6 +482,10 @@ return [
     'party.skill_gem_1'     => '1st Skill Gem:',
     'party.skill_gem_2'     => '2nd Skill Gem:',
     'party.update_skills'   => 'Update Skills',
+    'party.skill_gem_slot_1_frontline' => '1st Frontline Skill Gem Slot ({skill}):',
+    'party.skill_gem_slot_2_frontline' => '2nd Frontline Skill Gem Slot ({skill}):',
+    'party.skill_gem_slot_1_backline'  => '1st Backline Skill Gem Slot ({skill}):',
+    'party.skill_gem_slot_2_backline'  => '2nd Backline Skill Gem Slot ({skill}):',
     // Alerts
     'party.alert.no_weapon'         => 'You do not own that weapon.',
     'party.alert.no_armor'          => 'You do not own that armor.',
