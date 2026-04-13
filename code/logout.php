@@ -1,5 +1,9 @@
 <?php
 
-$auth->logOutEverywhere();
+if ($auth->isLoggedIn()) {
+    $auth->logOutEverywhere();
+}
+
+session_destroy();
 
 Header('Location: /');
