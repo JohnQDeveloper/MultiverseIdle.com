@@ -291,7 +291,7 @@ declare(strict_types=1);
 
                 # Consume potential, each iteration increases tier by 1
                 while ($potential > 0) {
-                    if ($Character->Data['iron'] < 2500) {
+                    if ($Character->Data['gems'] < 2500) {
                         break;
                     }
 
@@ -303,7 +303,7 @@ declare(strict_types=1);
 
                     $tier++;
                     $potential -= $consumed;
-                    $Character->Data['iron'] -= 2500;
+                    $Character->Data['gems'] -= 2500;
                 }
 
                 if ($use_lucky_wyrdstone) {

@@ -1093,7 +1093,7 @@ return [
     'craft.skill_gem.select_skill'          => 'Select Skill:',
     'craft.skill_gem.select_bonus'          => 'Select Bonus Type:',
     'craft.skill_gem.potential'             => 'Potential: {level} (100% of Party Level {level})',
-    'craft.skill_gem.potential_note'        => 'Each tier costs 1-5 potential and 2,500 Iron. Forging continues until potential or Iron is exhausted.',
+    'craft.skill_gem.potential_note'        => 'Each tier costs 1-5 potential and 2,500 Gems. Forging continues until potential or Gems are exhausted.',
     'craft.skill_gem.use_lucky_wyrdstone'   => 'Use 1 lucky wyrdstone on this craft',
     'craft.skill_gem.submit'                => 'Forge Gem',
 
