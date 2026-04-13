@@ -35,6 +35,29 @@
             </ul>
         </div>
 
+        <!-- Battle Simulation (QoL sub only) -->
+        <div class="info-box">
+            <h3 class="heading--no-top-margin"><?php echo t('pvp.simulate_title'); ?></h3>
+            <p><?php echo t('pvp.simulate_desc'); ?></p>
+            <div id="pvp-simulate-result" hidden
+                 data-wins-label="<?php echo htmlspecialchars(t('pvp.simulate_wins'), ENT_QUOTES); ?>"
+                 data-losses-label="<?php echo htmlspecialchars(t('pvp.simulate_losses'), ENT_QUOTES); ?>"
+                 data-win-rate-label="<?php echo htmlspecialchars(t('pvp.simulate_win_rate'), ENT_QUOTES); ?>"
+                 data-mirror-note="<?php echo htmlspecialchars(t('pvp.simulate_mirror_note'), ENT_QUOTES); ?>"
+                 data-opponents-note="<?php echo htmlspecialchars(t('pvp.simulate_opponents_note'), ENT_QUOTES); ?>">
+            </div>
+            <input type="button"
+                   id="pvp-simulate-btn"
+                   value="<?php echo htmlspecialchars(t('pvp.simulate_btn'), ENT_QUOTES); ?>"
+                   onclick="simulatePvP(this)"
+                   data-csrf="<?php echo htmlspecialchars($_SESSION['csrf-token'], ENT_QUOTES); ?>"
+                   data-loading="<?php echo htmlspecialchars(t('pvp.simulate_loading'), ENT_QUOTES); ?>"
+                   data-error-text="<?php echo htmlspecialchars(t('pvp.simulate_error'), ENT_QUOTES); ?>"
+                   <?php if (!$has_active_sub): ?>
+                   disabled title="<?php echo htmlspecialchars(t('pvp.simulate_requires_sub'), ENT_QUOTES); ?>"
+                   <?php endif; ?>>
+        </div>
+
         <!-- Active Queue -->
         <h2><?php echo t('pvp.queue_title', ['count' => count($queued_chests), 'max' => $queue_max]); ?></h2>
 
@@ -142,3 +165,4 @@
     </div>
     </div>
 </main>
+<script src="/js/pvp-simulate.js?v=<?php echo (string)filemtime(__DIR__ . '/../public/js/pvp-simulate.js'); ?>"></script>

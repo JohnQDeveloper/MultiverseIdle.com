@@ -1021,6 +1021,18 @@ return [
     'pvp.alert.remove_fail'      => 'Failed to remove queue entry.',
     'pvp.alert.invalid_size'     => 'Invalid chest size.',
     'pvp.alert.invalid_node_size'=> 'Invalid wyrdstone node size.',
+
+    'pvp.simulate_title'          => 'Battle Simulation',
+    'pvp.simulate_desc'           => 'Estimate your odds against the current pool of competitors in your floor range (±15%). Simulates up to 50 real players, or 100 mirror matches if none are found.',
+    'pvp.simulate_btn'            => 'Simulate Battle',
+    'pvp.simulate_loading'        => 'Simulating…',
+    'pvp.simulate_requires_sub'   => 'Requires QoL subscription',
+    'pvp.simulate_error'          => 'Simulation failed. Please try again.',
+    'pvp.simulate_mirror_note'    => 'No opponents found in your floor range — results are based on 100 mirror matches.',
+    'pvp.simulate_opponents_note' => 'Simulated {count} battles against players on floors {min}–{max}.',
+    'pvp.simulate_wins'           => 'Wins',
+    'pvp.simulate_losses'         => 'Losses',
+    'pvp.simulate_win_rate'       => 'Win Rate',
     'craft.alert.no_lucky_wyrdstone' => 'You do not have any lucky wyrdstone.',
     'craft.alert.used_lucky_wyrdstone' => '1 lucky wyrdstone was consumed.',
 
