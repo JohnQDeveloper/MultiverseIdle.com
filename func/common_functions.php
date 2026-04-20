@@ -36,3 +36,52 @@ function isEssenceLeagueAvailable(?array $character_data = null): bool
 
     return ($character_data['season_id'] ?? null) !== null;
 }
+
+function isDelightAdmin(\Delight\Auth\Auth $auth): bool
+{
+    return $auth->hasAnyRole(
+        \Delight\Auth\Role::ADMIN,
+        \Delight\Auth\Role::SUPER_ADMIN
+    );
+}
+
+function getAuthUserStatusById(int $userId): ?int
+{
+    global $DAL;
+
+    if ($userId <= 0) {
+        return null;
+    }
+
+    $rows = $DAL->r(
+        'SELECT status FROM users WHERE id = :id LIMIT 1',
+        [':id' => $userId]
+    );
+
+    if (empty($rows)) {
+        return null;
+    }
+
+    return (int)$rows[0]['status'];
+}
+
+function isBlockedAuthStatus(int $status): bool
+{
+    return in_array(
+        $status,
+        [
+            \Delight\Auth\Status::BANNED,
+            \Delight\Auth\Status::SUSPENDED,
+        ],
+        true
+    );
+}
+
+function getBlockedAuthStatusMessage(int $status): string
+{
+    return match ($status) {
+        \Delight\Auth\Status::BANNED => t('auth.login.alert.banned'),
+        \Delight\Auth\Status::SUSPENDED => t('auth.login.alert.suspended'),
+        default => t('auth.login.alert.blocked'),
+    };
+}

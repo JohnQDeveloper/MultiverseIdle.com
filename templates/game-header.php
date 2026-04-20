@@ -53,6 +53,9 @@
                     <li><a href="/leaderboard"><?php echo t('nav.leaderboard'); ?></a></li>
                     <li><a href="/season-select"><?php echo t('nav.league_swap'); ?></a></li>
                     <li><a href="/log"><?php echo t('nav.log'); ?></a></li>
+                    <?php if (isDelightAdmin($auth)): ?>
+                    <li><a href="/admin"><?php echo t('nav.admin'); ?></a></li>
+                    <?php endif; ?>
                 </ul>
             </li>
 

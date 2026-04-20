@@ -1,8 +1,32 @@
 <?php
     require_once('../config.php');
 
-    // Route API requests before any HTML output
     $rawUri = strtok($_SERVER['REQUEST_URI'], '?');
+
+    if ($auth->isLoggedIn()) {
+        $currentAuthStatus = getAuthUserStatusById((int)($_SESSION['auth_user_id'] ?? 0));
+
+        if ($currentAuthStatus !== null && isBlockedAuthStatus($currentAuthStatus)) {
+            $auth->logOut();
+            $blockedMessage = getBlockedAuthStatusMessage($currentAuthStatus);
+
+            if (str_starts_with(ltrim($rawUri, '/'), 'api/')) {
+                http_response_code(403);
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'error' => $blockedMessage]);
+                exit;
+            }
+
+            $alert_danger = $blockedMessage;
+
+            require_once('../templates/header.php');
+            require_once('../pages/login.php');
+            require_once('../templates/footer.php');
+            exit;
+        }
+    }
+
+    // Route API requests before any HTML output
     if (str_starts_with(ltrim($rawUri, '/'), 'api/')) {
         $endpoint = substr(ltrim($rawUri, '/'), 4); // strip 'api/'
         $apiFile  = __DIR__ . '/../api/' . basename($endpoint) . '.php';
