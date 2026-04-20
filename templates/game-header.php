@@ -232,12 +232,14 @@ window.MI_TUTORIAL_USER = <?php echo $_tutorialUserId; ?>;
         </div>
         <div class="row">
             <?php echo t('res.credits'); ?>: <?php echo human_num($Character->Data['credits'] ?? 0); ?> <BR />
-            <?php echo t('res.qol_sub'); ?>: <?php echo (!empty($Character->Data['subscription_expires']) && strtotime($Character->Data['subscription_expires']) > time()) ? t('res.active') : t('res.none'); ?> <BR />
-            <?php echo t('res.vip_sub'); ?>: <?php echo (!empty($Character->Data['vip_expires']) && strtotime($Character->Data['vip_expires']) > time() && !isset($_SESSION['active_season_id'])) ? t('res.active') : t('res.none'); ?> <BR />
         </div>
         <div class="row">
             <?php echo t('res.rift'); ?>: <?php echo t('res.queued'); ?> <BR />
             <?php echo t('res.boss'); ?>: <?php echo t('res.queued'); ?> <BR />
+        </div>
+        <div class="row">
+            <?php echo t('res.qol_sub'); ?>: <?php echo (!empty($Character->Data['subscription_expires']) && strtotime($Character->Data['subscription_expires']) > time()) ? t('res.active') : t('res.none'); ?> <BR />
+            <?php echo t('res.vip_sub'); ?>: <?php echo (!empty($Character->Data['vip_expires']) && strtotime($Character->Data['vip_expires']) > time() && !isset($_SESSION['active_season_id'])) ? t('res.active') : t('res.none'); ?> <BR />
         </div>
         </div>
     </div>
