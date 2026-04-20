@@ -10,6 +10,10 @@
     define('CORRUPTION_SEASON_ENABLED', true);
     // When true, perpetual characters also have access to Corruption Season content
     define('CORRUPTION_SEASON_PERPETUAL', true);
+    // Monster Harvest / Essence League feature flag — set to false to disable essence drops and crafting
+    define('ESSENCE_LEAGUE_ENABLED', true);
+    // When true, perpetual characters also have access to Essence League content
+    define('ESSENCE_LEAGUE_PERPETUAL', true);
 
     # Determine if running in web context (not CLI/cron)
     define('IS_WEB_CONTEXT', php_sapi_name() !== 'cli');
@@ -65,6 +69,7 @@
     require_once(__DIR__ . '/data/skillgems.php');
     require_once(__DIR__ . '/data/gearnames.php');
     require_once(__DIR__ . '/data/corruption.php');
+    require_once(__DIR__ . '/data/essences.php');
 
     # Web container only - session and CSRF handling
     if (IS_WEB_CONTEXT) {

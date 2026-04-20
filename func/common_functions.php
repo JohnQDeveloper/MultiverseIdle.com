@@ -18,3 +18,21 @@ function ActiveUsers(): array|false
         "SELECT id, user_id FROM characters WHERE last_seen > DATE_SUB(NOW(), INTERVAL 72 HOUR) AND user_id IS NOT NULL"
     );
 }
+
+/**
+ * Whether Essence League systems should be available for the given character.
+ *
+ * @param array<string, mixed>|null $character_data
+ */
+function isEssenceLeagueAvailable(?array $character_data = null): bool
+{
+    if (!ESSENCE_LEAGUE_ENABLED) {
+        return false;
+    }
+
+    if (ESSENCE_LEAGUE_PERPETUAL) {
+        return true;
+    }
+
+    return ($character_data['season_id'] ?? null) !== null;
+}

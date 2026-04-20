@@ -45,6 +45,23 @@ class Character
         return isset($_SESSION['guest_mode']) && $_SESSION['guest_mode'] === true;
     }
 
+    /**
+     * @return array<string, int>
+     */
+    private function getDefaultSpecialResources(): array
+    {
+        $special_resources = [
+            'lucky_wyrdstone' => 0,
+            'corruption_orbs' => 0,
+        ];
+
+        foreach (Gear::getEssenceInventoryKeys() as $inventory_key) {
+            $special_resources[$inventory_key] = 0;
+        }
+
+        return $special_resources;
+    }
+
     private function buildDefaultCharacterData(string $name): array
     {
         $party_json = [
@@ -88,9 +105,7 @@ class Character
         ];
 
         $inventory_json = [
-            "special_resources" => [
-                "lucky_wyrdstone" => 0,
-            ],
+            "special_resources" => $this->getDefaultSpecialResources(),
         ];
 
         return [
@@ -582,7 +597,10 @@ class Character
             $Perpetual->Data[$resource] = ((int)$Perpetual->Data[$resource]) + ((int)($this->Data[$resource] ?? 0));
         }
 
-        foreach (['lucky_wyrdstone', 'corruption_orbs'] as $special) {
+        $special_resources = ['lucky_wyrdstone', 'corruption_orbs'];
+        $special_resources = array_merge($special_resources, array_values(Gear::getEssenceInventoryKeys()));
+
+        foreach ($special_resources as $special) {
             $Perpetual->Data['inventory_json']['special_resources'][$special] =
                 ((int)($Perpetual->Data['inventory_json']['special_resources'][$special] ?? 0))
                 + ((int)($this->Data['inventory_json']['special_resources'][$special] ?? 0));
@@ -619,6 +637,12 @@ class Character
 
         if (!isset($this->Data['inventory_json']['special_resources']['corruption_orbs'])) {
             $this->Data['inventory_json']['special_resources']['corruption_orbs'] = 0;
+        }
+
+        foreach (Gear::getEssenceInventoryKeys() as $inventory_key) {
+            if (!isset($this->Data['inventory_json']['special_resources'][$inventory_key])) {
+                $this->Data['inventory_json']['special_resources'][$inventory_key] = 0;
+            }
         }
 
         // Ensure equipped_skill_gems is initialized for both party members

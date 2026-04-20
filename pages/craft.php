@@ -50,6 +50,34 @@
         </p>
 
         <form method="POST" action="/craft?tab=gear">
+            <?php if ($essence_league_active): ?>
+            <p>
+                <b><?php echo t('craft.gear.essence_title'); ?></b><br />
+                <small><?php echo t('craft.gear.essence_desc'); ?></small>
+            </p>
+
+            <b><?php echo t('craft.gear.select_essence'); ?></b><br />
+            <select name="essence_key">
+                <option value=""><?php echo t('craft.gear.no_essence'); ?></option>
+                <?php foreach ($essence_definitions as $essence_key => $essence_definition): ?>
+                    <?php
+                        $essence_owned = (int)($essence_inventory[$essence_key] ?? 0);
+                        $essence_label = Gear::getEssenceName($essence_key)
+                            . ' ('
+                            . t('craft.gear.essence_owned', ['amount' => number_format($essence_owned)])
+                            . ($essence_definition['rare'] ? '; ' . t('craft.gear.essence_rare') : '')
+                            . ')';
+                    ?>
+                    <option value="<?php echo htmlspecialchars($essence_key); ?>" <?php echo $essence_owned <= 0 ? 'disabled' : ''; ?>>
+                        <?php echo htmlspecialchars($essence_label); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <br />
+            <small><?php echo t('craft.gear.essence_random_affix_note'); ?></small>
+            <br /><br />
+            <?php endif; ?>
+
             <b><?php echo t('craft.gear.select_item'); ?></b><br />
             <select name="item_type">
                 <?php

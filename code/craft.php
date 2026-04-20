@@ -3,6 +3,12 @@
 declare(strict_types=1);
 
     $lucky_wyrdstone = (int)($Character->Data['inventory_json']['special_resources']['lucky_wyrdstone'] ?? 0);
+    $essence_league_active = isEssenceLeagueAvailable($Character->Data);
+    $essence_definitions = Gear::getEssenceDefinitions();
+    $essence_inventory = [];
+    foreach (array_keys($essence_definitions) as $essence_key) {
+        $essence_inventory[$essence_key] = Gear::getEssenceAmount($Character->Data, $essence_key);
+    }
 
     # Skill gem bonus type definitions
     $skill_gem_bonus_definitions = SkillGem::getBonusTypeDefinitions();
@@ -26,6 +32,9 @@ declare(strict_types=1);
     # Rift stone definitions (from RiftStone class)
     $rift_stone_implicit_definitions = RiftStone::getImplicitDefinitions();
     $rift_stone_affix_definitions = RiftStone::getAffixDefinitions();
+    if (!$essence_league_active) {
+        unset($rift_stone_affix_definitions[ESSENCE_RIFT_AFFIX_KEY]);
+    }
 
     $valid_rift_stone_implicits = array_keys($rift_stone_implicit_definitions);
     $valid_rift_stone_affixes = array_keys($rift_stone_affix_definitions);
@@ -35,13 +44,19 @@ declare(strict_types=1);
         $item_type = $_POST['item_type'] ?? '';
         $affix_1 = $_POST['affix_1'] ?? '';
         $affix_2 = $_POST['affix_2'] ?? '';
+        $essence_key = (string)($_POST['essence_key'] ?? '');
+        $using_essence = $essence_key !== '';
 
         # Validate inputs
         if (!in_array($item_type, $valid_item_types)) {
             $alert_danger = t('craft.alert.invalid_type');
-        } elseif (!in_array($affix_1, $valid_affixes)) {
+        } elseif ($using_essence && !$essence_league_active) {
+            $alert_danger = t('craft.alert.invalid_essence');
+        } elseif ($using_essence && !isset($essence_definitions[$essence_key])) {
+            $alert_danger = t('craft.alert.invalid_essence');
+        } elseif (!$using_essence && !in_array($affix_1, $valid_affixes)) {
             $alert_danger = t('craft.alert.invalid_affix1');
-        } elseif (!in_array($affix_2, $valid_affixes)) {
+        } elseif (!$using_essence && !in_array($affix_2, $valid_affixes)) {
             $alert_danger = t('craft.alert.invalid_affix2');
         } else {
             # Calculate potential based on party level
@@ -51,45 +66,129 @@ declare(strict_types=1);
             $use_lucky_wyrdstone = isset($_POST['use_lucky_wyrdstone']);
             if ($use_lucky_wyrdstone && $lucky_wyrdstone <= 0) {
                 $alert_danger = t('craft.alert.no_lucky_wyrdstone');
+            } elseif ($using_essence && ($essence_inventory[$essence_key] ?? 0) <= 0) {
+                $alert_danger = t('craft.alert.no_essence', ['essence' => Gear::getEssenceName($essence_key)]);
             } else {
-                # Initialize affix levels
-                $affix_1_level = 0;
-                $affix_2_level = 0;
-                $current_affix = 1; # Start with first affix
+                $crafted_affixes = [];
+                $success_affix_texts = [];
 
-                # Consume potential by alternating between affixes
-                while ($potential > 0) {
-                    if ($Character->Data['iron'] < 2500) {
-                        break;
+                if ($using_essence) {
+                    $random_affix = $valid_affixes[array_rand($valid_affixes)];
+                    $essence_tier = 0;
+                    $random_affix_level = 0;
+                    $current_affix = 'essence';
+
+                    while ($potential > 0) {
+                        if ($Character->Data['iron'] < 2500) {
+                            break;
+                        }
+
+                        $consumed = rand(1, 5);
+                        if ($use_lucky_wyrdstone) {
+                            $consumed = min($consumed, rand(1, 5));
+                        }
+                        $consumed = min($consumed, $potential);
+
+                        if ($current_affix === 'essence') {
+                            $essence_tier++;
+                            $current_affix = 'regular';
+                        } else {
+                            $random_affix_level++;
+                            $current_affix = 'essence';
+                        }
+
+                        $potential -= $consumed;
+                        $Character->Data['iron'] -= 2500;
                     }
 
-                    # Lucky wyrdstone rolls twice and keeps the more favorable potential cost.
-                    $consumed = rand(1, 5);
-                    if ($use_lucky_wyrdstone) {
-                        $consumed = min($consumed, rand(1, 5));
-                    }
-                    $consumed = min($consumed, $potential); # Don't consume more than available
+                    $Character->Data['inventory_json']['special_resources'][Gear::getEssenceInventoryKey($essence_key)] =
+                        max(0, ($essence_inventory[$essence_key] ?? 0) - 1);
+                    $essence_inventory[$essence_key] = max(0, ($essence_inventory[$essence_key] ?? 0) - 1);
 
-                    if ($current_affix === 1) {
-                        $affix_1_level++;
-                        $current_affix = 2;
-                    } else {
-                        $affix_2_level++;
-                        $current_affix = 1;
+                    $random_affix_value = $random_affix_level * $affix_definitions[$random_affix]['per_level'];
+
+                    $crafted_affixes[] = [
+                        'key' => Gear::getEssenceAffixKey($essence_key),
+                        'essence_key' => $essence_key,
+                        'name' => Gear::getEssenceName($essence_key),
+                        'level' => $essence_tier,
+                        'value' => $essence_tier,
+                        'type' => 'essence',
+                    ];
+                    $crafted_affixes[] = [
+                        'key' => $random_affix,
+                        'name' => t('gear.affix.' . $random_affix),
+                        'level' => $random_affix_level,
+                        'value' => $random_affix_value,
+                        'type' => $affix_definitions[$random_affix]['type'],
+                    ];
+
+                    $random_affix_suffix = $affix_definitions[$random_affix]['type'] === 'percent' ? '%' : '';
+                    $success_affix_texts[] = htmlspecialchars(Gear::getEssenceAffixDisplayText($crafted_affixes[0]));
+                    $success_affix_texts[] = '+' . $random_affix_value . $random_affix_suffix . ' '
+                        . htmlspecialchars(t('gear.affix.' . $random_affix))
+                        . ' ' . t('craft.level_short', ['level' => $random_affix_level]);
+                } else {
+                    $affix_1_level = 0;
+                    $affix_2_level = 0;
+                    $current_affix = 1;
+
+                    # Consume potential by alternating between affixes
+                    while ($potential > 0) {
+                        if ($Character->Data['iron'] < 2500) {
+                            break;
+                        }
+
+                        # Lucky wyrdstone rolls twice and keeps the more favorable potential cost.
+                        $consumed = rand(1, 5);
+                        if ($use_lucky_wyrdstone) {
+                            $consumed = min($consumed, rand(1, 5));
+                        }
+                        $consumed = min($consumed, $potential);
+
+                        if ($current_affix === 1) {
+                            $affix_1_level++;
+                            $current_affix = 2;
+                        } else {
+                            $affix_2_level++;
+                            $current_affix = 1;
+                        }
+
+                        $potential -= $consumed;
+                        $Character->Data['iron'] -= 2500;
                     }
 
-                    $potential -= $consumed;
-                    $Character->Data['iron'] -= 2500; # Deduct iron cost per upgrade
+                    $affix_1_value = $affix_1_level * $affix_definitions[$affix_1]['per_level'];
+                    $affix_2_value = $affix_2_level * $affix_definitions[$affix_2]['per_level'];
+
+                    $crafted_affixes[] = [
+                        'key' => $affix_1,
+                        'name' => t('gear.affix.' . $affix_1),
+                        'level' => $affix_1_level,
+                        'value' => $affix_1_value,
+                        'type' => $affix_definitions[$affix_1]['type'],
+                    ];
+                    $crafted_affixes[] = [
+                        'key' => $affix_2,
+                        'name' => t('gear.affix.' . $affix_2),
+                        'level' => $affix_2_level,
+                        'value' => $affix_2_value,
+                        'type' => $affix_definitions[$affix_2]['type'],
+                    ];
+
+                    $affix_1_suffix = $affix_definitions[$affix_1]['type'] === 'percent' ? '%' : '';
+                    $affix_2_suffix = $affix_definitions[$affix_2]['type'] === 'percent' ? '%' : '';
+
+                    $success_affix_texts[] = '+' . $affix_1_value . $affix_1_suffix . ' ' . htmlspecialchars(t('gear.affix.' . $affix_1)) .
+                        ' ' . t('craft.level_short', ['level' => $affix_1_level]);
+                    $success_affix_texts[] = '+' . $affix_2_value . $affix_2_suffix . ' ' . htmlspecialchars(t('gear.affix.' . $affix_2)) .
+                        ' ' . t('craft.level_short', ['level' => $affix_2_level]);
                 }
 
                 if ($use_lucky_wyrdstone) {
                     $Character->Data['inventory_json']['special_resources']['lucky_wyrdstone'] = $lucky_wyrdstone - 1;
                     $lucky_wyrdstone--;
                 }
-
-                # Calculate final affix values
-                $affix_1_value = $affix_1_level * $affix_definitions[$affix_1]['per_level'];
-                $affix_2_value = $affix_2_level * $affix_definitions[$affix_2]['per_level'];
 
                 # Generate random item name: PREFIX MATERIAL ITEM_TYPE SUFFIX
                 $random_prefix = GEARNAMES_PREFIX[array_rand(GEARNAMES_PREFIX)];
@@ -103,36 +202,14 @@ declare(strict_types=1);
                     'name' => $item_name,
                     'slot' => $item_type_definitions[$item_type]['slot'],
                     'base_bonuses' => $item_type_definitions[$item_type]['bonuses'],
-                    'affixes' => [
-                        [
-                            'key' => $affix_1,
-                            'name' => t('gear.affix.' . $affix_1),
-                            'level' => $affix_1_level,
-                            'value' => $affix_1_value,
-                            'type' => $affix_definitions[$affix_1]['type'],
-                        ],
-                        [
-                            'key' => $affix_2,
-                            'name' => t('gear.affix.' . $affix_2),
-                            'level' => $affix_2_level,
-                            'value' => $affix_2_value,
-                            'type' => $affix_definitions[$affix_2]['type'],
-                        ],
-                    ],
+                    'affixes' => $crafted_affixes,
                     'party_level_at_craft' => $party_level,
                 ];
 
-                # Format success message
-                $affix_1_suffix = $affix_definitions[$affix_1]['type'] === 'percent' ? '%' : '';
-                $affix_2_suffix = $affix_definitions[$affix_2]['type'] === 'percent' ? '%' : '';
-
-                $affix_1_text = '+' . $affix_1_value . $affix_1_suffix . ' ' . htmlspecialchars(t('gear.affix.' . $affix_1)) .
-                    ' ' . t('craft.level_short', ['level' => $affix_1_level]);
-                $affix_2_text = '+' . $affix_2_value . $affix_2_suffix . ' ' . htmlspecialchars(t('gear.affix.' . $affix_2)) .
-                    ' ' . t('craft.level_short', ['level' => $affix_2_level]);
-
-                $alert_success = t('craft.alert.crafted_gear', ['name' => htmlspecialchars($crafted_item['name']), 'affixes' =>
-                    $affix_1_text . ' ' . t('craft.and') . ' ' . $affix_2_text]);
+                $alert_success = t('craft.alert.crafted_gear', [
+                    'name' => htmlspecialchars($crafted_item['name']),
+                    'affixes' => implode(' ' . t('craft.and') . ' ', $success_affix_texts),
+                ]);
 
                 if ($use_lucky_wyrdstone) {
                     $alert_success .= ' ' . t('craft.alert.used_lucky_wyrdstone');

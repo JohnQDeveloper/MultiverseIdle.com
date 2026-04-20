@@ -89,15 +89,19 @@
                                 <p><b><?php echo t('common.affixes'); ?></b></p>
                                 <ul>
                                 <?php foreach ($item['affixes'] as $affix): ?>
-                                    <?php
-                                        $affix_key = $affix['key'] ?? '';
-                                        $affix_name = $affix_key !== '' ? t('gear.affix.' . $affix_key) : (string)($affix['name'] ?? '');
-                                    ?>
-                                    <li>
-                                        +<?php echo $affix['value']; ?><?php echo $affix['type'] === 'percent' ? '%' : ''; ?>
-                                        <?php echo htmlspecialchars($affix_name); ?>
-                                        <?php echo t('inventory.level_short', ['level' => (int)$affix['level']]); ?>
-                                    </li>
+                                    <?php if (Gear::isEssenceAffix($affix)): ?>
+                                        <li><?php echo htmlspecialchars(Gear::getEssenceAffixDisplayText($affix)); ?></li>
+                                    <?php else: ?>
+                                        <?php
+                                            $affix_key = $affix['key'] ?? '';
+                                            $affix_name = $affix_key !== '' ? t('gear.affix.' . $affix_key) : (string)($affix['name'] ?? '');
+                                        ?>
+                                        <li>
+                                            +<?php echo $affix['value']; ?><?php echo $affix['type'] === 'percent' ? '%' : ''; ?>
+                                            <?php echo htmlspecialchars($affix_name); ?>
+                                            <?php echo t('inventory.level_short', ['level' => (int)$affix['level']]); ?>
+                                        </li>
+                                    <?php endif; ?>
                                 <?php endforeach; ?>
                                 </ul>
                             <?php endif; ?>
@@ -256,7 +260,7 @@
                             <p><b><?php echo t('common.diff_affixes'); ?></b></p>
                             <ul>
                                 <?php foreach ($rift_stone['affixes'] as $affix_key): ?>
-                                    <li class="list-item--negative">
+                                    <li class="<?php echo RiftStone::isRewardAffix($affix_key) ? 'list-item--positive' : 'list-item--negative'; ?>">
                                         <?php echo htmlspecialchars(t('riftstone.affix.' . $affix_key . '.description')); ?>
                                     </li>
                                 <?php endforeach; ?>

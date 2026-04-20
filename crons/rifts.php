@@ -80,6 +80,7 @@ foreach ($row as $r) {
     // Load rift stone definitions
     $rift_stone_implicit_definitions = RiftStone::getImplicitDefinitions();
     $rift_stone_affix_definitions = RiftStone::getAffixDefinitions();
+    $essence_league_active = isEssenceLeagueAvailable($Character->Data);
 
     // Initialize rift battle log
     $rift_log = "";
@@ -306,6 +307,38 @@ foreach ($row as $r) {
                 $rift_log .= "<span class='success'>Frontline gained +$frontline_stat_gain $frontline_stat!</span><BR />\n";
                 $rift_log .= "<span class='success'>Backline gained +$backline_stat_gain $backline_stat!</span><BR />\n";
                 break;
+        }
+
+        if ($essence_league_active) {
+            $essence_drops = ESSENCE_RIFT_BASE_DROPS;
+            $extra_essence_rolls = 0;
+            foreach ($current_rift['affixes'] as $affix_key) {
+                if ($affix_key === ESSENCE_RIFT_AFFIX_KEY
+                    && random_int(1, 100) <= ESSENCE_RIFT_EXTRA_DROP_CHANCE_PER_AFFIX) {
+                    $extra_essence_rolls++;
+                }
+            }
+            $essence_drops += $extra_essence_rolls;
+
+            $essence_rewards = [];
+            for ($i = 0; $i < $essence_drops; $i++) {
+                $essence_key = Gear::getRandomEssenceKey();
+                $inventory_key = Gear::getEssenceInventoryKey($essence_key);
+                $Character->Data['inventory_json']['special_resources'][$inventory_key] =
+                    (int)($Character->Data['inventory_json']['special_resources'][$inventory_key] ?? 0) + 1;
+                $essence_rewards[$essence_key] = (int)($essence_rewards[$essence_key] ?? 0) + 1;
+            }
+
+            $essence_reward_parts = [];
+            foreach ($essence_rewards as $essence_key => $amount) {
+                $essence_reward_parts[] = $amount . 'x ' . Gear::getEssenceName($essence_key);
+            }
+
+            $rift_log .= "<span class='success'>Found " . htmlspecialchars(implode(', ', $essence_reward_parts))
+                . " from the rift.</span><BR />\n";
+            if ($extra_essence_rolls > 0) {
+                $rift_log .= "<span class='success'>Essence Drop Chance affixes granted {$extra_essence_rolls} additional essence reward(s).</span><BR />\n";
+            }
         }
     } else {
         echo "Rift failed - no rewards awarded.\n";

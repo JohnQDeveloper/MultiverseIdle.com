@@ -344,6 +344,8 @@ return [
     'riftstone.affix.monster_health.description'=> '+20% Monster Health',
     'riftstone.affix.monster_wisdom.name'      => 'Monster Wisdom',
     'riftstone.affix.monster_wisdom.description'=> '+20% Monster Wisdom',
+    'riftstone.affix.essence_bonus.name'       => 'Essence Drop Chance',
+    'riftstone.affix.essence_bonus.description'=> '+25% chance to find 1 additional random essence on completion',
 
     // -------------------------------------------------------------------------
     // Craft page
@@ -371,6 +373,13 @@ return [
     'craft.gear.lucky_wyrdstone_owned' => 'Lucky Wyrdstone: {amount}',
     'craft.gear.lucky_wyrdstone_note' => 'Lucky wyrdstone comes from PvP wyrdstone nodes. Using one on a craft rolls potential cost twice and keeps the better result.',
     'craft.gear.use_lucky_wyrdstone' => 'Use 1 lucky wyrdstone on this craft',
+    'craft.gear.essence_title'    => 'Monster Harvest Essences',
+    'craft.gear.essence_desc'     => 'Completed rifts can drop crafting essences. Using one on a gear craft consumes the essence, adds its unique modifier, and randomizes the non-essence affix.',
+    'craft.gear.select_essence'   => 'Optional Essence:',
+    'craft.gear.no_essence'       => 'No essence (normal two-affix craft)',
+    'craft.gear.essence_owned'    => 'owned: {amount}',
+    'craft.gear.essence_rare'     => 'rare',
+    'craft.gear.essence_random_affix_note' => 'When an essence is selected, the manual affix picks are ignored and the second affix is rolled at random.',
     'craft.gear.submit'         => 'Craft Item',
 
     'craft.potion.title'        => 'Potion Crafting',
@@ -387,7 +396,7 @@ return [
     'craft.potion.group.stat_gains'    => 'Stat Gains',
 
     'craft.rift.title'          => 'Rift Stone Crafting',
-    'craft.rift.desc'           => 'Craft Rift Stones to unlock challenging 10-battle Rift Delves. Choose one implicit modifier that defines your rewards, and receive 3 random difficulty affixes.',
+    'craft.rift.desc'           => 'Craft Rift Stones to unlock challenging 10-battle Rift Delves. Choose one implicit modifier that defines your rewards, and receive 3 random affixes.',
     'craft.rift.what_title'     => 'What are Rift Delves?',
     'craft.rift.li_battles'     => '<b>10 consecutive battles</b> against random monsters',
     'craft.rift.li_heal'        => '<b>Heal to full</b> before each battle',
@@ -399,7 +408,7 @@ return [
     'craft.rift.no_battles'     => 'You must win at least one arena battle today to craft a rift stone.',
     'craft.rift.level_range'    => 'Choose a rift level between {min} and {max} (80-100% of today\'s highest floor: {floor})',
     'craft.rift.random_affixes' => 'Random Affixes (3 will be rolled automatically):',
-    'craft.rift.affixes_note'   => 'These affixes increase monster difficulty and can appear multiple times on the same stone.',
+    'craft.rift.affixes_note'   => 'Most affixes make monsters tougher, and some can improve your essence rewards. Affixes can appear multiple times on the same stone.',
     'craft.rift.cost'           => 'Crafting Cost: {cost} Gems',
     'craft.rift.generated_name' => 'Level {level} Rift Stone ({implicit})',
     'craft.rift.submit'         => 'Craft Rift Stone',
@@ -407,6 +416,8 @@ return [
     'craft.alert.invalid_type'      => 'Invalid item type selected.',
     'craft.alert.invalid_affix1'    => 'Invalid first affix selected.',
     'craft.alert.invalid_affix2'    => 'Invalid second affix selected.',
+    'craft.alert.invalid_essence'   => 'Invalid essence selected.',
+    'craft.alert.no_essence'        => 'You do not have any {essence}.',
     'craft.alert.crafted_gear'      => 'Crafted {name} with {affixes}.',
     'craft.alert.invalid_prefix'    => 'Invalid prefix affix selected.',
     'craft.alert.invalid_suffix'    => 'Invalid suffix affix selected.',
@@ -1237,6 +1248,27 @@ return [
     'inventory.skill_gems.tier'             => 'Tier {tier}',
     'inventory.skill_gems.skill'            => 'Skill: {skill}',
     'inventory.skill_gems.bonus_value'      => '+{value}{unit} {name}',
+
+    // -------------------------------------------------------------------------
+    // Monster Harvest Essences
+    // -------------------------------------------------------------------------
+    'essence.affix_display'        => '{name} (Tier {tier}) - {summary}',
+    'essence.life.name'            => 'Essence of Life',
+    'essence.life.summary'         => '+1% of Health as Wisdom for cast chance; +{effect_pct}% of Health as Wisdom for spell effects; +{attack_pct}% of Health as Strength for basic attacks',
+    'essence.speed.name'           => 'Essence of Speed',
+    'essence.speed.summary'        => 'Dexterity counts as +{pct}% for hit and dodge checks',
+    'essence.might.name'           => 'Essence of Might',
+    'essence.might.summary'        => 'Basic attacks deal +{pct}% more damage',
+    'essence.wisdom.name'          => 'Essence of Wisdom',
+    'essence.wisdom.summary'       => 'Ability cast chance uses +{cast_pct}% Wisdom; ability effects use +{effect_pct}% Wisdom',
+    'essence.fire.name'            => 'Essence of Fire',
+    'essence.fire.summary'         => 'Fire damage +{pct}%; fire hits apply Ignite for 10% of the hit each round, up to 3 stacks',
+    'essence.cold.name'            => 'Essence of Cold',
+    'essence.cold.summary'         => 'Cold damage +{pct}%; cold hits apply Frostbite for 5% of the hit each round and +20% cold damage taken per stack, up to 3 stacks',
+    'essence.blades.name'          => 'Essence of Blades',
+    'essence.blades.summary'       => 'Basic attacks deal +{pct}% more damage',
+    'essence.restoration.name'     => 'Essence of Restoration',
+    'essence.restoration.summary'  => 'Healing spells use +20% Wisdom; {full_heal_pct}% chance to fully restore the target',
 
     'inventory.alert.gem_destroyed'         => 'Skill gem destroyed.',
     'inventory.alert.gem_destroy_fail'      => 'Failed to destroy skill gem.',

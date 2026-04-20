@@ -52,7 +52,7 @@
                                 <p><b><?php echo t('common.diff_affixes'); ?></b></p>
                                 <ul class="list--compact">
                                     <?php foreach ($rift['affixes'] as $affix_key): ?>
-                                        <li class="list-item--negative">
+                                        <li class="<?php echo RiftStone::isRewardAffix($affix_key) ? 'list-item--positive' : 'list-item--negative'; ?>">
                                             <?php echo htmlspecialchars($rift_stone_affix_definitions[$affix_key]['description']); ?>
                                         </li>
                                     <?php endforeach; ?>
@@ -113,7 +113,7 @@
                             <p><b><?php echo t('common.diff_affixes'); ?></b></p>
                             <ul class="list--compact">
                                 <?php foreach ($rift_stone['affixes'] as $affix_key): ?>
-                                    <li class="list-item--negative">
+                                    <li class="<?php echo RiftStone::isRewardAffix($affix_key) ? 'list-item--positive' : 'list-item--negative'; ?>">
                                         <?php echo htmlspecialchars($rift_stone_affix_definitions[$affix_key]['description']); ?>
                                     </li>
                                 <?php endforeach; ?>

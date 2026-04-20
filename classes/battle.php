@@ -16,6 +16,18 @@ class Battle
     private const AOE_SPELL_PERCENT = 0.2;
     private const STATUS_EFFECT_DURATION = 3;
     private const STATUS_EFFECT_CHANCE = 0.5;
+    private const ESSENCE_LIFE_CAST_HEALTH_RATIO = 0.01;
+    private const ESSENCE_LIFE_EFFECT_HEALTH_RATIO_PER_TIER = 0.005;
+    private const ESSENCE_LIFE_ATTACK_HEALTH_RATIO_PER_TIER = 0.005;
+    private const ESSENCE_SPEED_DEXTERITY_PER_TIER = 0.02;
+    private const ESSENCE_MIGHT_BASIC_ATTACK_PER_TIER = 0.015;
+    private const ESSENCE_WISDOM_CAST_PER_TIER = 0.02;
+    private const ESSENCE_WISDOM_EFFECT_PER_TIER = 0.01;
+    private const ESSENCE_RESTORATION_HEALING_WISDOM_BONUS = 0.20;
+    private const ESSENCE_FROSTBITE_COLD_TAKEN_PER_STACK = 0.20;
+    private const ESSENCE_FIRE_DOT_PERCENT = 0.10;
+    private const ESSENCE_COLD_DOT_PERCENT = 0.05;
+    private const ESSENCE_MAX_DOT_STACKS = 3;
 
     /**
      * Calculates all bonuses from equipped weapon and armor
@@ -48,6 +60,11 @@ class Battle
                 'cold_resistance' => 0,
                 'fire_resistance' => 0,
             ];
+
+            foreach (array_keys(Gear::getEssenceDefinitions()) as $essence_key) {
+                $bonuses['essence_' . $essence_key . '_tier'] = 0;
+                $bonuses['essence_' . $essence_key . '_count'] = 0;
+            }
 
             // Process weapon
             if ($equipped_weapon > 0 && $gear->LoadItemByGearID($equipped_weapon)) {
@@ -127,6 +144,213 @@ class Battle
             return 1;
         }
 
+        private function getEssenceTier(array $bonuses, string $essence_key): int
+        {
+            return (int)($bonuses['essence_' . $essence_key . '_tier'] ?? 0);
+        }
+
+        private function getEssenceCount(array $bonuses, string $essence_key): int
+        {
+            return (int)($bonuses['essence_' . $essence_key . '_count'] ?? 0);
+        }
+
+        private function calculateDexterityForBasicChecks(int $dexterity, array $gear_bonuses): int
+        {
+            $speed_tier = $this->getEssenceTier($gear_bonuses, 'speed');
+            if ($speed_tier > 0) {
+                $dexterity = (int)floor($dexterity * (1 + ($speed_tier * self::ESSENCE_SPEED_DEXTERITY_PER_TIER)));
+            }
+
+            return $dexterity;
+        }
+
+        private function calculateBasicAttackDamage(int $strength, int $health, array $gear_bonuses): int
+        {
+            $life_tier = $this->getEssenceTier($gear_bonuses, 'life');
+            if ($life_tier > 0) {
+                $strength += (int)floor($health * ($life_tier * self::ESSENCE_LIFE_ATTACK_HEALTH_RATIO_PER_TIER));
+            }
+
+            $multiplier = 1.0;
+            $multiplier += $this->getEssenceTier($gear_bonuses, 'might') * self::ESSENCE_MIGHT_BASIC_ATTACK_PER_TIER;
+            $multiplier += $this->getEssenceTier($gear_bonuses, 'blades') * 0.01;
+
+            return max(self::MINIMUM_DAMAGE, (int)floor($strength * $multiplier));
+        }
+
+        private function calculateAbilityChanceWisdom(int $wisdom, int $health, array $gear_bonuses): int
+        {
+            $life_count = $this->getEssenceCount($gear_bonuses, 'life');
+            if ($life_count > 0) {
+                $wisdom += (int)floor($health * ($life_count * self::ESSENCE_LIFE_CAST_HEALTH_RATIO));
+            }
+
+            $wisdom_tier = $this->getEssenceTier($gear_bonuses, 'wisdom');
+            if ($wisdom_tier > 0) {
+                $wisdom = (int)floor($wisdom * (1 + ($wisdom_tier * self::ESSENCE_WISDOM_CAST_PER_TIER)));
+            }
+
+            return $wisdom;
+        }
+
+        private function calculateAbilityEffectWisdom(int $wisdom, int $health, array $gear_bonuses): int
+        {
+            $life_tier = $this->getEssenceTier($gear_bonuses, 'life');
+            if ($life_tier > 0) {
+                $wisdom += (int)floor($health * ($life_tier * self::ESSENCE_LIFE_EFFECT_HEALTH_RATIO_PER_TIER));
+            }
+
+            $wisdom_tier = $this->getEssenceTier($gear_bonuses, 'wisdom');
+            if ($wisdom_tier > 0) {
+                $wisdom = (int)floor($wisdom * (1 + ($wisdom_tier * self::ESSENCE_WISDOM_EFFECT_PER_TIER)));
+            }
+
+            return $wisdom;
+        }
+
+        private function calculateHealingWisdom(int $wisdom, array $gear_bonuses): int
+        {
+            $restoration_count = $this->getEssenceCount($gear_bonuses, 'restoration');
+            if ($restoration_count > 0) {
+                $wisdom = (int)floor($wisdom * (1 + ($restoration_count * self::ESSENCE_RESTORATION_HEALING_WISDOM_BONUS)));
+            }
+
+            return $wisdom;
+        }
+
+        private function calculateRestorationFullHealChance(array $gear_bonuses): float
+        {
+            return min(1.0, $this->getEssenceTier($gear_bonuses, 'restoration') * 0.01);
+        }
+
+        /**
+         * @return array<string, array<string, array<string, array<int, int>>>>
+         */
+        private function buildPersistentEffects(): array
+        {
+            return [
+                'party' => [
+                    'frontline' => ['ignite' => [], 'frostbite' => []],
+                    'backline' => ['ignite' => [], 'frostbite' => []],
+                ],
+                'monster' => [
+                    'frontline' => ['ignite' => [], 'frostbite' => []],
+                    'backline' => ['ignite' => [], 'frostbite' => []],
+                ],
+            ];
+        }
+
+        /**
+         * @param array<string, array<string, array<string, array<int, int>>>> $persistent_effects
+         */
+        private function addPersistentEffectStack(
+            array &$persistent_effects,
+            string $side,
+            string $position,
+            string $effect,
+            int $damage_per_round
+        ): bool {
+            if ($damage_per_round <= 0) {
+                return false;
+            }
+
+            if (!isset($persistent_effects[$side][$position][$effect])) {
+                $persistent_effects[$side][$position][$effect] = [];
+            }
+
+            if (count($persistent_effects[$side][$position][$effect]) >= self::ESSENCE_MAX_DOT_STACKS) {
+                return false;
+            }
+
+            $persistent_effects[$side][$position][$effect][] = $damage_per_round;
+
+            return true;
+        }
+
+        /**
+         * @param array<string, array<string, array<string, array<int, int>>>> $persistent_effects
+         */
+        private function getPersistentEffectStackCount(
+            array $persistent_effects,
+            string $side,
+            string $position,
+            string $effect
+        ): int {
+            return count($persistent_effects[$side][$position][$effect] ?? []);
+        }
+
+        /**
+         * @param array<string, mixed> $config
+         * @param array<string, array<string, array<string, array<int, int>>>> $persistent_effects
+         * @return array<string>
+         */
+        private function applyPersistentEffectsDamage(
+            array &$config,
+            array $persistent_effects,
+            string $side
+        ): array {
+            $logs = [];
+
+            foreach (['frontline', 'backline'] as $position) {
+                if (($config['members'][$position]['current_health'] ?? 0) <= 0) {
+                    continue;
+                }
+
+                $ignite_damage = array_sum($persistent_effects[$side][$position]['ignite'] ?? []);
+                if ($ignite_damage > 0) {
+                    $config['members'][$position]['current_health'] = max(
+                        0,
+                        (int)$config['members'][$position]['current_health'] - $ignite_damage
+                    );
+                    $logs[] = ucfirst($side) . ' ' . ucfirst($position) . " suffers {$ignite_damage} ignite damage.";
+                }
+
+                $frostbite_damage = array_sum($persistent_effects[$side][$position]['frostbite'] ?? []);
+                if ($frostbite_damage > 0 && ($config['members'][$position]['current_health'] ?? 0) > 0) {
+                    $config['members'][$position]['current_health'] = max(
+                        0,
+                        (int)$config['members'][$position]['current_health'] - $frostbite_damage
+                    );
+                    $logs[] = ucfirst($side) . ' ' . ucfirst($position) . " suffers {$frostbite_damage} frostbite damage.";
+                }
+            }
+
+            return $logs;
+        }
+
+        /**
+         * @param array<string, array<string, array<string, array<int, int>>>> $persistent_effects
+         * @return array<string>
+         */
+        private function applyEssenceOnHit(
+            array &$persistent_effects,
+            string $damage_type,
+            int $damage,
+            array $attacker_bonuses,
+            string $target_side,
+            string $target_position
+        ): array {
+            $logs = [];
+
+            if ($damage_type === ' fire' && $this->getEssenceTier($attacker_bonuses, 'fire') > 0) {
+                $ignite_damage = max(self::MINIMUM_DAMAGE, (int)floor($damage * self::ESSENCE_FIRE_DOT_PERCENT));
+                if ($this->addPersistentEffectStack($persistent_effects, $target_side, $target_position, 'ignite', $ignite_damage)) {
+                    $logs[] = ucfirst($target_side) . ' ' . ucfirst($target_position)
+                        . " is ignited for {$ignite_damage} damage per round.";
+                }
+            }
+
+            if ($damage_type === ' cold' && $this->getEssenceTier($attacker_bonuses, 'cold') > 0) {
+                $frostbite_damage = max(self::MINIMUM_DAMAGE, (int)floor($damage * self::ESSENCE_COLD_DOT_PERCENT));
+                if ($this->addPersistentEffectStack($persistent_effects, $target_side, $target_position, 'frostbite', $frostbite_damage)) {
+                    $logs[] = ucfirst($target_side) . ' ' . ucfirst($target_position)
+                        . " is afflicted with Frostbite for {$frostbite_damage} damage per round.";
+                }
+            }
+
+            return $logs;
+        }
+
         // Helper to apply a single gear item's bonuses
         private function applyGearBonuses(array &$bonuses, array $gearData): void
         {
@@ -147,6 +371,15 @@ class Battle
             // Apply affixes
             if (!empty($gearData['affixes'])) {
                 foreach ($gearData['affixes'] as $affix) {
+                    if (Gear::isEssenceAffix($affix)) {
+                        $essence_key = Gear::getEssenceKeyFromAffix($affix);
+                        if ($essence_key !== null) {
+                            $bonuses['essence_' . $essence_key . '_tier'] += (int)round(($affix['level'] ?? 0) * $corruption);
+                            $bonuses['essence_' . $essence_key . '_count']++;
+                        }
+                        continue;
+                    }
+
                     $key = $affix['key'];
                     $value = (int)round($affix['value'] * $corruption);
                     $type = $affix['type'];
@@ -195,8 +428,10 @@ class Battle
                 $bonus_percent = $bonuses['physical_damage'];
             } elseif ($damage_type === ' fire') {
                 $bonus_percent = $bonuses['fire_damage'];
+                $bonus_percent += $this->getEssenceTier($bonuses, 'fire');
             } elseif ($damage_type === ' cold') {
                 $bonus_percent = $bonuses['cold_damage'];
+                $bonus_percent += $this->getEssenceTier($bonuses, 'cold');
             }
 
             if ($bonus_percent > 0) {
@@ -230,6 +465,32 @@ class Battle
         }
 
         /**
+         * @param array<string, array<string, array<string, array<int, int>>>> $persistent_effects
+         */
+        private function applyTakenDamageModifiers(
+            int $damage,
+            string $damage_type,
+            array $persistent_effects,
+            string $target_side,
+            string $target_position
+        ): int {
+            if ($damage_type === ' cold') {
+                $frostbite_stacks = $this->getPersistentEffectStackCount(
+                    $persistent_effects,
+                    $target_side,
+                    $target_position,
+                    'frostbite'
+                );
+
+                if ($frostbite_stacks > 0) {
+                    $damage += (int)floor($damage * ($frostbite_stacks * self::ESSENCE_FROSTBITE_COLD_TAKEN_PER_STACK));
+                }
+            }
+
+            return max($damage, self::MINIMUM_DAMAGE);
+        }
+
+        /**
          * Performs a basic attack from one combatant to another
          *
          * @param array<string, mixed> $attacker_config Config of the attacking side
@@ -240,12 +501,14 @@ class Battle
          * @param string $attacker_position 'frontline' or 'backline'
          * @param string $target_side 'party' or 'monster'
          * @param string $target_position 'frontline' or 'backline'
-         * @return array{hit: bool, damage: int, log: string}
+         * @param array<string, array<string, array<string, array<int, int>>>> $persistent_effects
+         * @return array{hit: bool, damage: int, log: string, extra_logs: array<string>}
          */
         private function performBasicAttack(
             array &$attacker_config,
             array &$target_config,
             array &$status_effects,
+            array &$persistent_effects,
             array $gear_bonuses,
             string $attacker_side,
             string $attacker_position,
@@ -253,10 +516,17 @@ class Battle
             string $target_position
         ): array
         {
+            $attacker_gear_bonuses = $gear_bonuses[$attacker_side][$attacker_position];
+            $target_gear_bonuses = $gear_bonuses[$target_side][$target_position];
+
             // Load stats
             $dex = (int)$attacker_config['members'][$attacker_position]['dexterity'];
             $str = (int)$attacker_config['members'][$attacker_position]['strength'];
+            $health = (int)$attacker_config['members'][$attacker_position]['health'];
             $target_dex = (int)$target_config['members'][$target_position]['dexterity'];
+
+            $dex = $this->calculateDexterityForBasicChecks($dex, $attacker_gear_bonuses);
+            $target_dex = $this->calculateDexterityForBasicChecks($target_dex, $target_gear_bonuses);
 
             // Apply Hypothermia debuff to attacker
             if (isset($status_effects[$attacker_side][$attacker_position]['Hypothermia']) &&
@@ -271,12 +541,12 @@ class Battle
             }
 
             // Calculate hit chance
-            $hit_chance = $dex / ($dex + $target_dex);
+            $hit_chance = $dex / max(1, ($dex + $target_dex));
 
             // Check if attack hits
             if (rand(0, 100) / 100 <= $hit_chance) {
                 // Hit
-                $damage = (int)$str;
+                $damage = $this->calculateBasicAttackDamage($str, $health, $attacker_gear_bonuses);
                 $damage_type = "";
 
                 // Check for Flaming Blades buff
@@ -314,9 +584,16 @@ class Battle
                 }
 
                 // Apply damage bonus from gear
-                $damage = $this->applyDamageBonus($damage, $damage_type, $gear_bonuses[$attacker_side][$attacker_position]);
+                $damage = $this->applyDamageBonus($damage, $damage_type, $attacker_gear_bonuses);
                 // Apply resistance from target's gear
-                $damage = $this->applyResistance($damage, $damage_type, $gear_bonuses[$target_side][$target_position]);
+                $damage = $this->applyResistance($damage, $damage_type, $target_gear_bonuses);
+                $damage = $this->applyTakenDamageModifiers(
+                    $damage,
+                    $damage_type,
+                    $persistent_effects,
+                    $target_side,
+                    $target_position
+                );
 
                 // Apply damage
                 $target_config['members'][$target_position]['current_health'] -= $damage;
@@ -326,10 +603,19 @@ class Battle
                 }
 
                 $attacker_name = ucfirst($attacker_side) . " " . ucfirst($attacker_position);
+                $extra_logs = $this->applyEssenceOnHit(
+                    $persistent_effects,
+                    $damage_type,
+                    $damage,
+                    $attacker_gear_bonuses,
+                    $target_side,
+                    $target_position
+                );
                 return [
                     'hit' => true,
                     'damage' => $damage,
-                    'log' => "$attacker_name hits $target_position for $damage$damage_type damage."
+                    'log' => "$attacker_name hits $target_position for $damage$damage_type damage.",
+                    'extra_logs' => $extra_logs,
                 ];
             } else {
                 // Miss
@@ -337,7 +623,8 @@ class Battle
                 return [
                     'hit' => false,
                     'damage' => 0,
-                    'log' => "$attacker_name misses $target_position."
+                    'log' => "$attacker_name misses $target_position.",
+                    'extra_logs' => [],
                 ];
             }
         }
@@ -348,6 +635,7 @@ class Battle
          * @param array<string, mixed> $caster_config Config of the caster's side
          * @param array<string, mixed> $enemy_config Config of the enemy side
          * @param array<string, array<string, array<string, int>>> $status_effects Status effects tracker
+         * @param array<string, array<string, array<string, array<int, int>>>> $persistent_effects Persistent combat effects
          * @param array<string, array<string, array<string, int>>> $gear_bonuses Gear bonuses for both sides
          * @param string $caster_side 'party' or 'monster'
          * @param string $caster_position 'frontline' or 'backline'
@@ -359,6 +647,7 @@ class Battle
             array &$caster_config,
             array &$enemy_config,
             array &$status_effects,
+            array &$persistent_effects,
             array $gear_bonuses,
             string $caster_side,
             string $caster_position,
@@ -368,6 +657,8 @@ class Battle
         {
             $logs = [];
             $wis = (int)$caster_config['members'][$caster_position]['wisdom'];
+            $health = (int)$caster_config['members'][$caster_position]['health'];
+            $caster_gear_bonuses = $gear_bonuses[$caster_side][$caster_position];
 
             // Apply wisdom_cast gem bonus: sum of all wisdom_cast tiers for this combatant
             $caster_gem_bonuses = $skill_gem_bonuses[$caster_side][$caster_position] ?? [];
@@ -381,10 +672,14 @@ class Battle
                 $wis = (int)floor($wis * (1.0 + $wisdom_cast_bonus));
             }
 
+            $cast_wisdom = $this->calculateAbilityChanceWisdom($wis, $health, $caster_gear_bonuses);
+            $effect_wisdom = $this->calculateAbilityEffectWisdom($wis, $health, $caster_gear_bonuses);
+
             // Check for Antimagic debuff on caster
             if (isset($status_effects[$caster_side][$caster_position]['Antimagic']) &&
                 $status_effects[$caster_side][$caster_position]['Antimagic'] > 0) {
-                $wis = (int)floor($wis * self::ANTIMAGIC_REDUCTION);
+                $cast_wisdom = (int)floor($cast_wisdom * self::ANTIMAGIC_REDUCTION);
+                $effect_wisdom = (int)floor($effect_wisdom * self::ANTIMAGIC_REDUCTION);
             }
 
             // Pick a random living enemy for wisdom check
@@ -404,18 +699,20 @@ class Battle
             $enemy_wis = (int)$enemy_config['members'][$random_enemy]['wisdom'];
 
             // Calculate ability chance
-            $ability_chance = $wis / ($wis + $enemy_wis);
+            $ability_chance = $cast_wisdom / max(1, ($cast_wisdom + $enemy_wis));
 
             if (rand(0, 100) / 100 <= $ability_chance) {
                 $skills = $caster_config['members'][$caster_position]['skills'];
                 $caster_name = ucfirst($caster_side) . " " . ucfirst($caster_position);
+                $healing_wisdom = $this->calculateHealingWisdom($effect_wisdom, $caster_gear_bonuses);
+                $full_heal_chance = $this->calculateRestorationFullHealChance($caster_gear_bonuses);
 
                 // Healing Rain
                 if (in_array('Healing Rain', $skills)) {
                     $cast_count = $this->getSkillCastCount('Healing Rain', $caster_gem_bonuses);
                     $effect_mult = $this->getSkillEffectMultiplier('Healing Rain', $caster_gem_bonuses);
                     for ($cast = 0; $cast < $cast_count; $cast++) {
-                        $heal_amount = (int)floor($wis * self::HEALING_RAIN_PERCENT * $effect_mult);
+                        $heal_amount = (int)floor($healing_wisdom * self::HEALING_RAIN_PERCENT * $effect_mult);
                         $frontline_max_health = $caster_config['members']['frontline']['health'] * self::HEALTH_MULTIPLIER;
                         $backline_max_health = $caster_config['members']['backline']['health'] * self::HEALTH_MULTIPLIER;
 
@@ -424,12 +721,20 @@ class Battle
                             if ($caster_config['members']['frontline']['current_health'] > $frontline_max_health) {
                                 $caster_config['members']['frontline']['current_health'] = $frontline_max_health;
                             }
+                            if ($full_heal_chance > 0 && rand(0, 100) / 100 <= $full_heal_chance) {
+                                $caster_config['members']['frontline']['current_health'] = $frontline_max_health;
+                                $logs[] = "$caster_name fully restores frontline with Restoration.";
+                            }
                         }
 
                         if ($caster_config['members']['backline']['current_health'] > 0) {
                             $caster_config['members']['backline']['current_health'] += $heal_amount;
                             if ($caster_config['members']['backline']['current_health'] > $backline_max_health) {
                                 $caster_config['members']['backline']['current_health'] = $backline_max_health;
+                            }
+                            if ($full_heal_chance > 0 && rand(0, 100) / 100 <= $full_heal_chance) {
+                                $caster_config['members']['backline']['current_health'] = $backline_max_health;
+                                $logs[] = "$caster_name fully restores backline with Restoration.";
                             }
                         }
 
@@ -442,7 +747,7 @@ class Battle
                     $cast_count = $this->getSkillCastCount('Greater Heal', $caster_gem_bonuses);
                     $effect_mult = $this->getSkillEffectMultiplier('Greater Heal', $caster_gem_bonuses);
                     for ($cast = 0; $cast < $cast_count; $cast++) {
-                        $heal_amount = (int)floor($wis * self::GREATER_HEAL_PERCENT * $effect_mult);
+                        $heal_amount = (int)floor($healing_wisdom * self::GREATER_HEAL_PERCENT * $effect_mult);
                         $frontline_max_health = $caster_config['members']['frontline']['health'] * self::HEALTH_MULTIPLIER;
                         $backline_max_health = $caster_config['members']['backline']['health'] * self::HEALTH_MULTIPLIER;
 
@@ -469,6 +774,10 @@ class Battle
                             if ($caster_config['members'][$heal_target]['current_health'] > $max_health) {
                                 $caster_config['members'][$heal_target]['current_health'] = $max_health;
                             }
+                            if ($full_heal_chance > 0 && rand(0, 100) / 100 <= $full_heal_chance) {
+                                $caster_config['members'][$heal_target]['current_health'] = $max_health;
+                                $logs[] = "$caster_name fully restores $heal_target with Restoration.";
+                            }
                             $logs[] = "$caster_name casts Greater Heal on $heal_target for $heal_amount.";
                         }
                     }
@@ -479,7 +788,7 @@ class Battle
                     $cast_count = $this->getSkillCastCount('Firestorm', $caster_gem_bonuses);
                     $effect_mult = $this->getSkillEffectMultiplier('Firestorm', $caster_gem_bonuses);
                     for ($cast = 0; $cast < $cast_count; $cast++) {
-                        $base_damage = (int)floor($wis * self::AOE_SPELL_PERCENT * $effect_mult);
+                        $base_damage = (int)floor($effect_wisdom * self::AOE_SPELL_PERCENT * $effect_mult);
 
                         // Apply Scorched and deal damage to frontline enemy
                         if ($enemy_config['members']['frontline']['current_health'] > 0) {
@@ -488,14 +797,26 @@ class Battle
                             if ($status_effects[$enemy_side]['frontline']['Scorched'] > 0) {
                                 $damage = (int)floor($damage * self::SCORCHED_DAMAGE_BONUS);
                             }
-                            $damage = $this->applyDamageBonus($damage, ' fire', $gear_bonuses[$caster_side][$caster_position]);
+                            $damage = $this->applyDamageBonus($damage, ' fire', $caster_gear_bonuses);
                             $damage = $this->applyResistance($damage, ' fire', $gear_bonuses[$enemy_side]['frontline']);
+                            $damage = $this->applyTakenDamageModifiers($damage, ' fire', $persistent_effects, $enemy_side, 'frontline');
                             $enemy_config['members']['frontline']['current_health'] -= $damage;
                             if ($enemy_config['members']['frontline']['current_health'] < 0) {
                                 $enemy_config['members']['frontline']['current_health'] = 0;
                             }
                             $enemy_name = ucfirst($enemy_side) . " Frontline";
                             $logs[] = "$caster_name casts Firestorm, scorching and hitting $enemy_name for $damage fire damage.";
+                            $logs = array_merge(
+                                $logs,
+                                $this->applyEssenceOnHit(
+                                    $persistent_effects,
+                                    ' fire',
+                                    $damage,
+                                    $caster_gear_bonuses,
+                                    $enemy_side,
+                                    'frontline'
+                                )
+                            );
                         }
 
                         // Apply Scorched and deal damage to backline enemy
@@ -505,14 +826,26 @@ class Battle
                             if ($status_effects[$enemy_side]['backline']['Scorched'] > 0) {
                                 $damage = (int)floor($damage * self::SCORCHED_DAMAGE_BONUS);
                             }
-                            $damage = $this->applyDamageBonus($damage, ' fire', $gear_bonuses[$caster_side][$caster_position]);
+                            $damage = $this->applyDamageBonus($damage, ' fire', $caster_gear_bonuses);
                             $damage = $this->applyResistance($damage, ' fire', $gear_bonuses[$enemy_side]['backline']);
+                            $damage = $this->applyTakenDamageModifiers($damage, ' fire', $persistent_effects, $enemy_side, 'backline');
                             $enemy_config['members']['backline']['current_health'] -= $damage;
                             if ($enemy_config['members']['backline']['current_health'] < 0) {
                                 $enemy_config['members']['backline']['current_health'] = 0;
                             }
                             $enemy_name = ucfirst($enemy_side) . " Backline";
                             $logs[] = "$caster_name casts Firestorm, scorching and hitting $enemy_name for $damage fire damage.";
+                            $logs = array_merge(
+                                $logs,
+                                $this->applyEssenceOnHit(
+                                    $persistent_effects,
+                                    ' fire',
+                                    $damage,
+                                    $caster_gear_bonuses,
+                                    $enemy_side,
+                                    'backline'
+                                )
+                            );
                         }
                     }
                 }
@@ -522,34 +855,58 @@ class Battle
                     $cast_count = $this->getSkillCastCount('Blizzard', $caster_gem_bonuses);
                     $effect_mult = $this->getSkillEffectMultiplier('Blizzard', $caster_gem_bonuses);
                     for ($cast = 0; $cast < $cast_count; $cast++) {
-                        $base_damage = (int)floor($wis * self::AOE_SPELL_PERCENT * $effect_mult);
+                        $base_damage = (int)floor($effect_wisdom * self::AOE_SPELL_PERCENT * $effect_mult);
 
                         // Apply Hypothermia and deal damage to frontline enemy
                         if ($enemy_config['members']['frontline']['current_health'] > 0) {
                             $status_effects[$enemy_side]['frontline']['Hypothermia'] = self::STATUS_EFFECT_DURATION;
                             $damage = (int)$base_damage;
-                            $damage = $this->applyDamageBonus($damage, ' cold', $gear_bonuses[$caster_side][$caster_position]);
+                            $damage = $this->applyDamageBonus($damage, ' cold', $caster_gear_bonuses);
                             $damage = $this->applyResistance($damage, ' cold', $gear_bonuses[$enemy_side]['frontline']);
+                            $damage = $this->applyTakenDamageModifiers($damage, ' cold', $persistent_effects, $enemy_side, 'frontline');
                             $enemy_config['members']['frontline']['current_health'] -= $damage;
                             if ($enemy_config['members']['frontline']['current_health'] < 0) {
                                 $enemy_config['members']['frontline']['current_health'] = 0;
                             }
                             $enemy_name = ucfirst($enemy_side) . " Frontline";
                             $logs[] = "$caster_name casts Blizzard, chilling and hitting $enemy_name for $damage cold damage.";
+                            $logs = array_merge(
+                                $logs,
+                                $this->applyEssenceOnHit(
+                                    $persistent_effects,
+                                    ' cold',
+                                    $damage,
+                                    $caster_gear_bonuses,
+                                    $enemy_side,
+                                    'frontline'
+                                )
+                            );
                         }
 
                         // Apply Hypothermia and deal damage to backline enemy
                         if ($enemy_config['members']['backline']['current_health'] > 0) {
                             $status_effects[$enemy_side]['backline']['Hypothermia'] = self::STATUS_EFFECT_DURATION;
                             $damage = (int)$base_damage;
-                            $damage = $this->applyDamageBonus($damage, ' cold', $gear_bonuses[$caster_side][$caster_position]);
+                            $damage = $this->applyDamageBonus($damage, ' cold', $caster_gear_bonuses);
                             $damage = $this->applyResistance($damage, ' cold', $gear_bonuses[$enemy_side]['backline']);
+                            $damage = $this->applyTakenDamageModifiers($damage, ' cold', $persistent_effects, $enemy_side, 'backline');
                             $enemy_config['members']['backline']['current_health'] -= $damage;
                             if ($enemy_config['members']['backline']['current_health'] < 0) {
                                 $enemy_config['members']['backline']['current_health'] = 0;
                             }
                             $enemy_name = ucfirst($enemy_side) . " Backline";
                             $logs[] = "$caster_name casts Blizzard, chilling and hitting $enemy_name for $damage cold damage.";
+                            $logs = array_merge(
+                                $logs,
+                                $this->applyEssenceOnHit(
+                                    $persistent_effects,
+                                    ' cold',
+                                    $damage,
+                                    $caster_gear_bonuses,
+                                    $enemy_side,
+                                    'backline'
+                                )
+                            );
                         }
                     }
                 }
@@ -598,6 +955,7 @@ class Battle
             array &$party_config,
             array &$monster_config,
             array &$status_effects,
+            array &$persistent_effects,
             array $gear_bonuses,
             string $attacker_side,
             string $attacker_position,
@@ -633,6 +991,7 @@ class Battle
                 $attacker_config,
                 $enemy_config,
                 $status_effects,
+                $persistent_effects,
                 $gear_bonuses,
                 $attacker_side,
                 $attacker_position,
@@ -640,12 +999,14 @@ class Battle
                 $target_position
             );
             $logs[] = $attack_result['log'];
+            $logs = array_merge($logs, $attack_result['extra_logs']);
 
             // Execute abilities
             $ability_logs = $this->executeAbilities(
                 $attacker_config,
                 $enemy_config,
                 $status_effects,
+                $persistent_effects,
                 $gear_bonuses,
                 $attacker_side,
                 $attacker_position,
@@ -895,6 +1256,7 @@ class Battle
                   'backline' => []
               ]
           ];
+          $persistent_effects = $this->buildPersistentEffects();
 
           $running = true;
            while ($running) {
@@ -920,21 +1282,66 @@ class Battle
                // Player turn
                 $return_me_log = array_merge(
                     $return_me_log,
-                    $this->executeCombatantTurn($party_config, $monster_config, $status_effects, $gear_bonuses, 'party', 'frontline', $skill_gem_bonuses)
+                    $this->executeCombatantTurn(
+                        $party_config,
+                        $monster_config,
+                        $status_effects,
+                        $persistent_effects,
+                        $gear_bonuses,
+                        'party',
+                        'frontline',
+                        $skill_gem_bonuses
+                    )
                 );
                 $return_me_log = array_merge(
                     $return_me_log,
-                    $this->executeCombatantTurn($party_config, $monster_config, $status_effects, $gear_bonuses, 'party', 'backline', $skill_gem_bonuses)
+                    $this->executeCombatantTurn(
+                        $party_config,
+                        $monster_config,
+                        $status_effects,
+                        $persistent_effects,
+                        $gear_bonuses,
+                        'party',
+                        'backline',
+                        $skill_gem_bonuses
+                    )
                 );
 
                // Monster turn
                 $return_me_log = array_merge(
                     $return_me_log,
-                    $this->executeCombatantTurn($party_config, $monster_config, $status_effects, $gear_bonuses, 'monster', 'frontline', $skill_gem_bonuses)
+                    $this->executeCombatantTurn(
+                        $party_config,
+                        $monster_config,
+                        $status_effects,
+                        $persistent_effects,
+                        $gear_bonuses,
+                        'monster',
+                        'frontline',
+                        $skill_gem_bonuses
+                    )
                 );
                 $return_me_log = array_merge(
                     $return_me_log,
-                    $this->executeCombatantTurn($party_config, $monster_config, $status_effects, $gear_bonuses, 'monster', 'backline', $skill_gem_bonuses)
+                    $this->executeCombatantTurn(
+                        $party_config,
+                        $monster_config,
+                        $status_effects,
+                        $persistent_effects,
+                        $gear_bonuses,
+                        'monster',
+                        'backline',
+                        $skill_gem_bonuses
+                    )
+                );
+
+                $return_me_log = array_merge(
+                    $return_me_log,
+                    $this->applyPersistentEffectsDamage($party_config, $persistent_effects, 'party')
+                );
+                $return_me_log = array_merge(
+                    $return_me_log,
+                    $this->applyPersistentEffectsDamage($monster_config, $persistent_effects, 'monster')
                 );
 
                 // Tick down status effects at end of round
@@ -1021,9 +1428,6 @@ class Battle
             $party_config['members']['backline']['current_health'] =
                 $party_config['members']['backline']['health'] * self::HEALTH_MULTIPLIER;
 
-            // World boss is a damage sponge - infinite health, no attacks
-            $world_boss_health = PHP_INT_MAX;
-
             // Initialize status effects tracking
             $status_effects = [
                 'party' => [
@@ -1035,6 +1439,7 @@ class Battle
                     'backline' => []
                 ]
             ];
+            $boss_persistent_effects = $this->buildPersistentEffects();
 
             for ($round = 1; $round <= $rounds; $round++) {
                 $round_damage = 0;
@@ -1044,6 +1449,7 @@ class Battle
                     $damage = $this->calculateWorldBossAttackDamage(
                         $party_config['members']['frontline'],
                         $status_effects,
+                        $boss_persistent_effects,
                         $gear_bonuses['party']['frontline'],
                         'frontline'
                     );
@@ -1055,6 +1461,7 @@ class Battle
                     $damage = $this->calculateWorldBossAttackDamage(
                         $party_config['members']['backline'],
                         $status_effects,
+                        $boss_persistent_effects,
                         $gear_bonuses['party']['backline'],
                         'backline'
                     );
@@ -1065,10 +1472,13 @@ class Battle
                 $ability_damage = $this->calculateWorldBossAbilityDamage(
                     $party_config,
                     $status_effects,
+                    $boss_persistent_effects,
                     $gear_bonuses,
                     $skill_gem_bonuses
                 );
                 $round_damage += $ability_damage;
+                $round_damage += array_sum($boss_persistent_effects['monster']['frontline']['ignite'] ?? []);
+                $round_damage += array_sum($boss_persistent_effects['monster']['frontline']['frostbite'] ?? []);
 
                 $total_damage += $round_damage;
 
@@ -1099,6 +1509,7 @@ class Battle
          *
          * @param array<string, mixed> $attacker Party member config
          * @param array<string, array<string, array<string, int>>> $status_effects Status effects tracker
+         * @param array<string, array<string, array<string, array<int, int>>>> $boss_persistent_effects Persistent boss effects
          * @param array<string, int> $gear_bonuses Attacker's gear bonuses
          * @param string $position 'frontline' or 'backline'
          * @return int Damage dealt
@@ -1106,11 +1517,15 @@ class Battle
         private function calculateWorldBossAttackDamage(
             array $attacker,
             array &$status_effects,
+            array &$boss_persistent_effects,
             array $gear_bonuses,
             string $position
         ): int {
             $dex = (int)$attacker['dexterity'];
             $str = (int)$attacker['strength'];
+            $health = (int)$attacker['health'];
+
+            $dex = $this->calculateDexterityForBasicChecks($dex, $gear_bonuses);
 
             // Apply Hypothermia debuff
             if (isset($status_effects['party'][$position]['Hypothermia']) &&
@@ -1123,7 +1538,7 @@ class Battle
             $hit_chance = 0.9; // 90% base hit rate against world boss
 
             if (rand(0, 100) / 100 <= $hit_chance) {
-                $damage = $str;
+                $damage = $this->calculateBasicAttackDamage($str, $health, $gear_bonuses);
                 $damage_type = '';
 
                 // Check for Flaming Blades buff
@@ -1142,6 +1557,21 @@ class Battle
 
                 // Apply damage bonus from gear
                 $damage = $this->applyDamageBonus($damage, $damage_type, $gear_bonuses);
+                $damage = $this->applyTakenDamageModifiers(
+                    $damage,
+                    $damage_type,
+                    $boss_persistent_effects,
+                    'monster',
+                    'frontline'
+                );
+                $this->applyEssenceOnHit(
+                    $boss_persistent_effects,
+                    $damage_type,
+                    $damage,
+                    $gear_bonuses,
+                    'monster',
+                    'frontline'
+                );
 
                 return max($damage, self::MINIMUM_DAMAGE);
             }
@@ -1154,6 +1584,7 @@ class Battle
          *
          * @param array<string, mixed> $party_config Party configuration
          * @param array<string, array<string, array<string, int>>> $status_effects Status effects tracker
+         * @param array<string, array<string, array<string, array<int, int>>>> $boss_persistent_effects Persistent boss effects
          * @param array<string, array<string, array<string, int>>> $gear_bonuses Gear bonuses
          * @param array<string, array<string, array<string, mixed>>> $skill_gem_bonuses Skill gem bonuses
          * @return int Total ability damage dealt
@@ -1161,6 +1592,7 @@ class Battle
         private function calculateWorldBossAbilityDamage(
             array &$party_config,
             array &$status_effects,
+            array &$boss_persistent_effects,
             array $gear_bonuses,
             array $skill_gem_bonuses = []
         ): int {
@@ -1172,13 +1604,8 @@ class Battle
                 }
 
                 $wis = (int)$party_config['members'][$position]['wisdom'];
+                $health = (int)$party_config['members'][$position]['health'];
                 $pos_gem_bonuses = $skill_gem_bonuses[$position] ?? [];
-
-                // Apply Antimagic debuff
-                if (isset($status_effects['party'][$position]['Antimagic']) &&
-                    $status_effects['party'][$position]['Antimagic'] > 0) {
-                    $wis = (int)floor($wis * self::ANTIMAGIC_REDUCTION);
-                }
 
                 // Apply wisdom_cast gem bonus
                 $wisdom_cast_bonus = 0.0;
@@ -1191,6 +1618,14 @@ class Battle
                     $wis = (int)floor($wis * (1.0 + $wisdom_cast_bonus));
                 }
 
+                $effect_wisdom = $this->calculateAbilityEffectWisdom($wis, $health, $gear_bonuses['party'][$position]);
+
+                // Apply Antimagic debuff
+                if (isset($status_effects['party'][$position]['Antimagic']) &&
+                    $status_effects['party'][$position]['Antimagic'] > 0) {
+                    $effect_wisdom = (int)floor($effect_wisdom * self::ANTIMAGIC_REDUCTION);
+                }
+
                 // 70% ability success rate against world boss (low wisdom)
                 $ability_chance = 0.7;
 
@@ -1201,19 +1636,53 @@ class Battle
                     if (in_array('Firestorm', $skills)) {
                         $cast_count = $this->getSkillCastCount('Firestorm', $pos_gem_bonuses);
                         $effect_mult = $this->getSkillEffectMultiplier('Firestorm', $pos_gem_bonuses);
-                        $damage = (int)floor($wis * self::AOE_SPELL_PERCENT * $effect_mult);
-                        $damage = (int)floor($damage * self::SCORCHED_DAMAGE_BONUS);
-                        $damage = $this->applyDamageBonus($damage, ' fire', $gear_bonuses['party'][$position]);
-                        $total_ability_damage += $damage * 2 * $cast_count;
+                        for ($cast = 0; $cast < $cast_count; $cast++) {
+                            $damage = (int)floor($effect_wisdom * self::AOE_SPELL_PERCENT * $effect_mult);
+                            $damage = (int)floor($damage * self::SCORCHED_DAMAGE_BONUS);
+                            $damage = $this->applyDamageBonus($damage, ' fire', $gear_bonuses['party'][$position]);
+                            $damage = $this->applyTakenDamageModifiers(
+                                $damage,
+                                ' fire',
+                                $boss_persistent_effects,
+                                'monster',
+                                'frontline'
+                            );
+                            $total_ability_damage += $damage * 2;
+                            $this->applyEssenceOnHit(
+                                $boss_persistent_effects,
+                                ' fire',
+                                $damage,
+                                $gear_bonuses['party'][$position],
+                                'monster',
+                                'frontline'
+                            );
+                        }
                     }
 
                     // Blizzard damage
                     if (in_array('Blizzard', $skills)) {
                         $cast_count = $this->getSkillCastCount('Blizzard', $pos_gem_bonuses);
                         $effect_mult = $this->getSkillEffectMultiplier('Blizzard', $pos_gem_bonuses);
-                        $damage = (int)floor($wis * self::AOE_SPELL_PERCENT * $effect_mult);
-                        $damage = $this->applyDamageBonus($damage, ' cold', $gear_bonuses['party'][$position]);
-                        $total_ability_damage += $damage * 2 * $cast_count;
+                        for ($cast = 0; $cast < $cast_count; $cast++) {
+                            $damage = (int)floor($effect_wisdom * self::AOE_SPELL_PERCENT * $effect_mult);
+                            $damage = $this->applyDamageBonus($damage, ' cold', $gear_bonuses['party'][$position]);
+                            $damage = $this->applyTakenDamageModifiers(
+                                $damage,
+                                ' cold',
+                                $boss_persistent_effects,
+                                'monster',
+                                'frontline'
+                            );
+                            $total_ability_damage += $damage * 2;
+                            $this->applyEssenceOnHit(
+                                $boss_persistent_effects,
+                                ' cold',
+                                $damage,
+                                $gear_bonuses['party'][$position],
+                                'monster',
+                                'frontline'
+                            );
+                        }
                     }
 
                     // Activate buff abilities (echo/triple_cast extend duration)

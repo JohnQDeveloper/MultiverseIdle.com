@@ -216,11 +216,15 @@
                                 <?php if (!empty($item['affixes'])): ?>
                                     <ul class="list--compact">
                                         <?php foreach ($item['affixes'] as $affix): ?>
-                                            <?php $affix_key = $affix['key'] ?? ($affix['name'] ?? ''); ?>
-                                            <li class="list-item--positive">
-                                                +<?php echo $affix['value']; ?><?php echo $affix['type'] === 'percent' ? '%' : ''; ?>
-                                                <?php echo htmlspecialchars(t('gear.affix.' . $affix_key)); ?>
-                                            </li>
+                                            <?php if (Gear::isEssenceAffix($affix)): ?>
+                                                <li class="list-item--positive"><?php echo htmlspecialchars(Gear::getEssenceAffixDisplayText($affix)); ?></li>
+                                            <?php else: ?>
+                                                <?php $affix_key = $affix['key'] ?? ($affix['name'] ?? ''); ?>
+                                                <li class="list-item--positive">
+                                                    +<?php echo $affix['value']; ?><?php echo $affix['type'] === 'percent' ? '%' : ''; ?>
+                                                    <?php echo htmlspecialchars(t('gear.affix.' . $affix_key)); ?>
+                                                </li>
+                                            <?php endif; ?>
                                         <?php endforeach; ?>
                                     </ul>
                                 <?php endif; ?>
@@ -234,7 +238,7 @@
                                     <ul class="list--compact">
                                         <?php foreach ($item['affixes'] as $affix_key): ?>
                                             <?php if (isset($rift_affix_defs[$affix_key])): ?>
-                                                <li class="list-item--negative"><?php echo htmlspecialchars(t('riftstone.affix.' . $affix_key . '.description')); ?></li>
+                                                <li class="<?php echo RiftStone::isRewardAffix($affix_key) ? 'list-item--positive' : 'list-item--negative'; ?>"><?php echo htmlspecialchars(t('riftstone.affix.' . $affix_key . '.description')); ?></li>
                                             <?php endif; ?>
                                         <?php endforeach; ?>
                                     </ul>
@@ -306,6 +310,11 @@
                                     <p class="market-list-affixes"><?php
                                         $aff = [];
                                         foreach ($item['affixes'] as $affix) {
+                                            if (Gear::isEssenceAffix($affix)) {
+                                                $aff[] = Gear::getEssenceAffixDisplayText($affix);
+                                                continue;
+                                            }
+
                                             $affix_key = $affix['key'] ?? ($affix['name'] ?? '');
                                             $aff[] = '+' . $affix['value'] . ($affix['type'] === 'percent' ? '%' : '') . ' ' . t('gear.affix.' . $affix_key);
                                         }
@@ -462,8 +471,12 @@
                             <?php if (!empty($item['affixes'])): ?>
                                 <ul class="list--compact">
                                     <?php foreach ($item['affixes'] as $affix): ?>
-                                        <?php $affix_key = $affix['key'] ?? ($affix['name'] ?? ''); ?>
-                                        <li class="list-item--positive">+<?php echo $affix['value']; ?><?php echo $affix['type'] === 'percent' ? '%' : ''; ?> <?php echo htmlspecialchars(t('gear.affix.' . $affix_key)); ?></li>
+                                        <?php if (Gear::isEssenceAffix($affix)): ?>
+                                            <li class="list-item--positive"><?php echo htmlspecialchars(Gear::getEssenceAffixDisplayText($affix)); ?></li>
+                                        <?php else: ?>
+                                            <?php $affix_key = $affix['key'] ?? ($affix['name'] ?? ''); ?>
+                                            <li class="list-item--positive">+<?php echo $affix['value']; ?><?php echo $affix['type'] === 'percent' ? '%' : ''; ?> <?php echo htmlspecialchars(t('gear.affix.' . $affix_key)); ?></li>
+                                        <?php endif; ?>
                                     <?php endforeach; ?>
                                 </ul>
                             <?php endif; ?>

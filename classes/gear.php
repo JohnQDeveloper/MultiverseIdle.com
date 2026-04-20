@@ -39,6 +39,153 @@ class Gear
     }
 
     /**
+     * Get Essence League crafting definitions.
+     *
+     * @return array<string, array<string, mixed>>
+     */
+    public static function getEssenceDefinitions(): array
+    {
+        return ESSENCE_DEFINITIONS;
+    }
+
+    /**
+     * Get the special resource key used for an essence stack in inventory_json.
+     */
+    public static function getEssenceInventoryKey(string $essence_key): string
+    {
+        return 'essence_' . $essence_key;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function getEssenceInventoryKeys(): array
+    {
+        $keys = [];
+
+        foreach (array_keys(self::getEssenceDefinitions()) as $essence_key) {
+            $keys[$essence_key] = self::getEssenceInventoryKey($essence_key);
+        }
+
+        return $keys;
+    }
+
+    /**
+     * Returns the affix key persisted on gear details for an essence modifier.
+     */
+    public static function getEssenceAffixKey(string $essence_key): string
+    {
+        return 'essence_' . $essence_key;
+    }
+
+    /**
+     * @param array<string, mixed> $affix
+     */
+    public static function getEssenceKeyFromAffix(array $affix): ?string
+    {
+        $essence_key = $affix['essence_key'] ?? null;
+        if (is_string($essence_key) && isset(self::getEssenceDefinitions()[$essence_key])) {
+            return $essence_key;
+        }
+
+        $affix_key = (string)($affix['key'] ?? '');
+        if (!str_starts_with($affix_key, 'essence_')) {
+            return null;
+        }
+
+        $essence_key = substr($affix_key, strlen('essence_'));
+        return isset(self::getEssenceDefinitions()[$essence_key]) ? $essence_key : null;
+    }
+
+    /**
+     * @param array<string, mixed> $affix
+     */
+    public static function isEssenceAffix(array $affix): bool
+    {
+        return ($affix['type'] ?? '') === 'essence' && self::getEssenceKeyFromAffix($affix) !== null;
+    }
+
+    /**
+     * @param array<string, mixed> $character_data
+     */
+    public static function getEssenceAmount(array $character_data, string $essence_key): int
+    {
+        $inventory_key = self::getEssenceInventoryKey($essence_key);
+
+        return (int)($character_data['inventory_json']['special_resources'][$inventory_key] ?? 0);
+    }
+
+    /**
+     * Roll a weighted random essence key.
+     */
+    public static function getRandomEssenceKey(): string
+    {
+        $definitions = self::getEssenceDefinitions();
+        $total_weight = 0;
+
+        foreach ($definitions as $definition) {
+            $total_weight += (int)($definition['weight'] ?? 0);
+        }
+
+        $roll = random_int(1, max(1, $total_weight));
+        $running_total = 0;
+
+        foreach ($definitions as $essence_key => $definition) {
+            $running_total += (int)($definition['weight'] ?? 0);
+            if ($roll <= $running_total) {
+                return $essence_key;
+            }
+        }
+
+        return array_key_first($definitions) ?? 'speed';
+    }
+
+    public static function getEssenceName(string $essence_key): string
+    {
+        return t('essence.' . $essence_key . '.name');
+    }
+
+    public static function getEssenceSummary(string $essence_key, int $tier): string
+    {
+        return match ($essence_key) {
+            'life' => t('essence.life.summary', [
+                'effect_pct' => number_format($tier * 0.5, 1),
+                'attack_pct' => number_format($tier * 0.5, 1),
+            ]),
+            'speed' => t('essence.speed.summary', ['pct' => $tier * 2]),
+            'might' => t('essence.might.summary', ['pct' => number_format($tier * 1.5, 1)]),
+            'wisdom' => t('essence.wisdom.summary', [
+                'cast_pct' => $tier * 2,
+                'effect_pct' => $tier,
+            ]),
+            'fire' => t('essence.fire.summary', ['pct' => $tier]),
+            'cold' => t('essence.cold.summary', ['pct' => $tier]),
+            'blades' => t('essence.blades.summary', ['pct' => $tier]),
+            'restoration' => t('essence.restoration.summary', ['full_heal_pct' => $tier]),
+            default => '',
+        };
+    }
+
+    /**
+     * @param array<string, mixed> $affix
+     */
+    public static function getEssenceAffixDisplayText(array $affix): string
+    {
+        $essence_key = self::getEssenceKeyFromAffix($affix);
+        if ($essence_key === null) {
+            return '';
+        }
+
+        $tier = (int)($affix['level'] ?? $affix['value'] ?? 0);
+
+        return t('essence.affix_display', [
+            'name' => self::getEssenceName($essence_key),
+            'tier' => $tier,
+            'summary' => self::getEssenceSummary($essence_key, $tier),
+        ]);
+    }
+
+    /**
      * Get gear item type definitions
      *
      * @return array<string, array<string, mixed>>

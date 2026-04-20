@@ -40,13 +40,26 @@ class RiftStone
     public static function getAffixDefinitions(): array
     {
         return [
-            'monster_skill' => ['name' => 'Random Monster Skill', 'bonus' => 1, 'description' => '+1 Random Monster Skill'],
-            'monster_damage' => ['name' => 'Monster Damage', 'bonus' => 20, 'description' => '+20% Monster Damage'],
-            'monster_strength' => ['name' => 'Monster Strength', 'bonus' => 20, 'description' => '+20% Monster Strength'],
-            'monster_dexterity' => ['name' => 'Monster Dexterity', 'bonus' => 20, 'description' => '+20% Monster Dexterity'],
-            'monster_health' => ['name' => 'Monster Health', 'bonus' => 20, 'description' => '+20% Monster Health'],
-            'monster_wisdom' => ['name' => 'Monster Wisdom', 'bonus' => 20, 'description' => '+20% Monster Wisdom'],
+            'monster_skill' => ['name' => 'Random Monster Skill', 'bonus' => 1, 'description' => '+1 Random Monster Skill', 'category' => 'difficulty'],
+            'monster_damage' => ['name' => 'Monster Damage', 'bonus' => 20, 'description' => '+20% Monster Damage', 'category' => 'difficulty'],
+            'monster_strength' => ['name' => 'Monster Strength', 'bonus' => 20, 'description' => '+20% Monster Strength', 'category' => 'difficulty'],
+            'monster_dexterity' => ['name' => 'Monster Dexterity', 'bonus' => 20, 'description' => '+20% Monster Dexterity', 'category' => 'difficulty'],
+            'monster_health' => ['name' => 'Monster Health', 'bonus' => 20, 'description' => '+20% Monster Health', 'category' => 'difficulty'],
+            'monster_wisdom' => ['name' => 'Monster Wisdom', 'bonus' => 20, 'description' => '+20% Monster Wisdom', 'category' => 'difficulty'],
+            ESSENCE_RIFT_AFFIX_KEY => [
+                'name' => 'Essence Drop Chance',
+                'bonus' => ESSENCE_RIFT_EXTRA_DROP_CHANCE_PER_AFFIX,
+                'description' => '+' . ESSENCE_RIFT_EXTRA_DROP_CHANCE_PER_AFFIX . '% chance to find 1 additional random essence on completion',
+                'category' => 'reward',
+            ],
         ];
+    }
+
+    public static function isRewardAffix(string $affix_key): bool
+    {
+        $definitions = self::getAffixDefinitions();
+
+        return ($definitions[$affix_key]['category'] ?? 'difficulty') === 'reward';
     }
 
     /**
