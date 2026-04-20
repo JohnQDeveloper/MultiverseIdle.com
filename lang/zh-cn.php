@@ -1041,4 +1041,40 @@ return [
     'tutorial.market.1.title'               => '市场',
     'tutorial.market.1.body'                => '与其他玩家买卖资源。发布买单或卖单后，市场会自动完成撮合。',
 
+    // -------------------------------------------------------------------------
+    // Season of Corruption
+    // -------------------------------------------------------------------------
+    'corruption.avatar.title'           => '腐化化身',
+    'corruption.avatar.desc'            => '纯粹腐化的化身已现身。只有赛季冒险者才能挑战它。造成伤害以获得腐化宝珠——能永久改变你装备的强力物品。',
+    'corruption.avatar.history'         => '你的腐化化身历史记录',
+    'corruption.avatar.players_queued'  => '队列中的赛季玩家：{count}',
+    'corruption.avatar.join_queue'      => '挑战化身',
+    'corruption.avatar.li_seasonal'     => '仅在腐化赛季期间可用',
+    'corruption.avatar.li_orbs'         => '根据队伍等级获得腐化宝珠（每50点合计队伍等级获得1个宝珠）',
+    'corruption.avatar.alert.joined'    => '你已加入腐化化身队列！',
+
+    'nav.corruption_orb'                => '腐化宝珠',
+
+    'corruption.orb.title'              => '腐化宝珠',
+    'corruption.orb.desc'               => '腐化宝珠是通过击败腐化化身获得的强力消耗品。将其使用在一件装备上以永久腐化它——结果可能好可能坏。',
+    'corruption.orb.owned'              => '拥有的宝珠',
+    'corruption.orb.apply_title'        => '使用腐化宝珠',
+    'corruption.orb.apply_desc'         => '选择一件装备进行腐化。结果是介于 -20% 到 +20% 之间的随机修正值，作用于所有属性。腐化无法撤销。',
+    'corruption.orb.select_gear'        => '选择装备',
+    'corruption.orb.select_placeholder' => '— 选择一件装备 —',
+    'corruption.orb.apply_btn'          => '腐化物品',
+    'corruption.orb.inventory_title'    => '你的装备',
+    'corruption.orb.how_title'          => '如何运作',
+    'corruption.orb.li_source'          => '从腐化化身处获得腐化宝珠（仅限赛季）',
+    'corruption.orb.li_chance'          => '介于 -20% 到 +20% 之间的随机修正值，作用于所有装备属性',
+    'corruption.orb.li_one_use'         => '每件物品只能被腐化一次',
+    'corruption.orb.no_orbs_msg'        => '你没有腐化宝珠。通过与腐化化身战斗来获取它们。',
+    'corruption.orb.no_gear_msg'        => '你所有的装备都已被腐化。',
+    'corruption.orb.tag_corrupted'      => '已腐化',
+    'corruption.orb.alert.invalid_gear'      => '选择了无效的装备物品。',
+    'corruption.orb.alert.no_orbs'           => '你没有任何腐化宝珠。',
+    'corruption.orb.alert.already_corrupted' => '此物品已被腐化，或不属于你。',
+    'corruption.orb.alert.bonus'             => '腐化祝福了此物品！所有属性变化了 {pct}。',
+    'corruption.orb.alert.penalty'           => '腐化诅咒了此物品。所有属性变化了 {pct}。',
+
 ];

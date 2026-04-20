@@ -48,10 +48,15 @@
                 <strong><?php echo htmlspecialchars($item['name']); ?></strong>
                 <span class="gear-slot">(<?php echo htmlspecialchars(ucfirst($item['slot'] ?? '')); ?>)</span>
                 <?php if (isset($item['corruption_modifier'])): ?>
-                    <?php if ($item['corruption_modifier'] > 1.0): ?>
-                        <span class="text--success"><?php echo t('corruption.orb.tag_bonus'); ?></span>
+                    <?php
+                    $mod     = (float)$item['corruption_modifier'];
+                    $pct_int = (int)round(($mod - 1.0) * 100);
+                    $pct_str = ($pct_int >= 0 ? '+' : '') . $pct_int . '%';
+                    ?>
+                    <?php if ($mod > 1.0): ?>
+                        <span class="text--success">✦ <?php echo $pct_str; ?> <?php echo t('corruption.orb.tag_corrupted'); ?></span>
                     <?php else: ?>
-                        <span class="text--danger"><?php echo t('corruption.orb.tag_penalty'); ?></span>
+                        <span class="text--danger">✦ <?php echo $pct_str; ?> <?php echo t('corruption.orb.tag_corrupted'); ?></span>
                     <?php endif; ?>
                 <?php endif; ?>
             </div>

@@ -932,4 +932,40 @@ return [
     'tutorial.market.1.title'               => 'El Mercado',
     'tutorial.market.1.body'                => 'Compra y vende recursos con otros jugadores. Publica órdenes de compra o de venta y el mercado las emparejará automáticamente.',
 
+    // -------------------------------------------------------------------------
+    // Season of Corruption
+    // -------------------------------------------------------------------------
+    'corruption.avatar.title'           => 'Avatar de la Corrupción',
+    'corruption.avatar.desc'            => 'Una manifestación de pura corrupción ha aparecido. Solo los aventureros de temporada pueden desafiarlo. Inflige daño para ganar Orbes de Corrupción, objetos poderosos que alteran permanentemente tu equipo.',
+    'corruption.avatar.history'         => 'Tu historial del Avatar de la Corrupción',
+    'corruption.avatar.players_queued'  => 'Jugadores de temporada en cola: {count}',
+    'corruption.avatar.join_queue'      => 'Desafiar al Avatar',
+    'corruption.avatar.li_seasonal'     => 'Solo disponible durante la Temporada de la Corrupción',
+    'corruption.avatar.li_orbs'         => 'Obtén Orbes de Corrupción según el nivel de tu grupo (1 orbe por cada 50 niveles combinados)',
+    'corruption.avatar.alert.joined'    => '¡Te has unido a la cola del Avatar de la Corrupción!',
+
+    'nav.corruption_orb'                => 'Orbes de Corrupción',
+
+    'corruption.orb.title'              => 'Orbes de Corrupción',
+    'corruption.orb.desc'               => 'Los Orbes de Corrupción son consumibles poderosos obtenidos al derrotar al Avatar de la Corrupción. Aplica uno a una pieza de equipo para corrompérsela permanentemente, para bien o para mal.',
+    'corruption.orb.owned'              => 'Orbes poseídos',
+    'corruption.orb.apply_title'        => 'Aplicar un Orbe de Corrupción',
+    'corruption.orb.apply_desc'         => 'Selecciona una pieza de equipo para corromper. El resultado es un modificador aleatorio entre -20% y +20% aplicado a todos los atributos. La corrupción no puede revertirse.',
+    'corruption.orb.select_gear'        => 'Seleccionar equipo',
+    'corruption.orb.select_placeholder' => '— elige un objeto de equipo —',
+    'corruption.orb.apply_btn'          => 'Corromper objeto',
+    'corruption.orb.inventory_title'    => 'Tu equipo',
+    'corruption.orb.how_title'          => 'Cómo funciona',
+    'corruption.orb.li_source'          => 'Obtén Orbes de Corrupción del Avatar de la Corrupción (solo de temporada)',
+    'corruption.orb.li_chance'          => 'Modificador aleatorio entre -20% y +20% aplicado a todos los atributos del equipo',
+    'corruption.orb.li_one_use'         => 'Cada objeto solo puede corromperse una vez',
+    'corruption.orb.no_orbs_msg'        => 'No tienes Orbes de Corrupción. Consíguelos luchando contra el Avatar de la Corrupción.',
+    'corruption.orb.no_gear_msg'        => 'Todo tu equipo ya ha sido corrompido.',
+    'corruption.orb.tag_corrupted'      => 'Corrompido',
+    'corruption.orb.alert.invalid_gear'      => 'Objeto de equipo no válido seleccionado.',
+    'corruption.orb.alert.no_orbs'           => 'No tienes ningún Orbe de Corrupción.',
+    'corruption.orb.alert.already_corrupted' => 'Este objeto ya ha sido corrompido o no te pertenece.',
+    'corruption.orb.alert.bonus'             => '¡La corrupción bendijo el objeto! Todos los atributos modificados en {pct}.',
+    'corruption.orb.alert.penalty'           => 'La corrupción maldijo el objeto. Todos los atributos modificados en {pct}.',
+
 ];

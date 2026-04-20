@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-// Corruption Orb modifiers — applied to all stats on a gear item
-const CORRUPTION_ORB_BONUS     = 1.20; // +20% to all gear stats
-const CORRUPTION_ORB_PENALTY   = 0.80; // -20% to all gear stats
+// Corruption Orb modifier range — roll is uniform between min and max in 1% increments
+const CORRUPTION_ORB_MIN = 0.80; // -20% floor
+const CORRUPTION_ORB_MAX = 1.20; // +20% ceiling
 
 // Orb drop rate: 1 orb per this many combined party levels
 const CORRUPTION_ORBS_PER_LEVELS = 50;

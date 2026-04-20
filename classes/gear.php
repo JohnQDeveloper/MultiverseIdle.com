@@ -211,12 +211,12 @@ class Gear
     /**
      * Apply a Corruption Orb to a gear item.
      *
-     * Randomly applies +20% or -20% to all gear stats via a corruption_modifier stored in details JSON.
-     * Returns 'bonus', 'penalty', or false if already corrupted or not owned.
+     * Rolls a random modifier uniformly between CORRUPTION_ORB_MIN and CORRUPTION_ORB_MAX
+     * in 1% increments and stores it in the item's details JSON.
      *
-     * @return string|false 'bonus'|'penalty' on success, false on failure
+     * @return float|false The rolled modifier (e.g. 1.12 or 0.87) on success, false if already corrupted or not owned
      */
-    public function ApplyCorruptionOrb(int $gear_id, int $owner_id): string|false
+    public function ApplyCorruptionOrb(int $gear_id, int $owner_id): float|false
     {
         $gear_record = $this->DAL->r(
             "SELECT id, details FROM gear WHERE id=:id AND owner_id=:owner_id",
@@ -233,15 +233,18 @@ class Gear
             return false; // already corrupted
         }
 
-        $result = (random_int(0, 1) === 1) ? 'bonus' : 'penalty';
-        $details['corruption_modifier'] = ($result === 'bonus') ? CORRUPTION_ORB_BONUS : CORRUPTION_ORB_PENALTY;
+        $min_int = (int)round(CORRUPTION_ORB_MIN * 100);
+        $max_int = (int)round(CORRUPTION_ORB_MAX * 100);
+        $modifier = round(random_int($min_int, $max_int) / 100, 2);
+
+        $details['corruption_modifier'] = $modifier;
 
         $this->DAL->w(
             "UPDATE gear SET details=:details WHERE id=:id AND owner_id=:owner_id",
             [':details' => json_encode($details), ':id' => $gear_id, ':owner_id' => $owner_id]
         );
 
-        return $this->DAL->rows_affected() > 0 ? $result : false;
+        return $this->DAL->rows_affected() > 0 ? $modifier : false;
     }
 
     /**

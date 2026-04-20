@@ -29,12 +29,14 @@ if (isset($_POST['apply_orb'])) {
             $Character->Data['inventory_json']['special_resources']['corruption_orbs'] =
                 max(0, (int)($Character->Data['inventory_json']['special_resources']['corruption_orbs']) - 1);
 
-            $orb_result  = $result;
+            $pct_int    = (int)round(($result - 1.0) * 100);
+            $pct_signed = ($pct_int >= 0 ? '+' : '') . $pct_int . '%';
+            $orb_result  = $result > 1.0 ? 'bonus' : 'penalty';
             $orb_gear_id = $gear_id;
 
-            $alert_success = ($result === 'bonus')
-                ? t('corruption.orb.alert.bonus')
-                : t('corruption.orb.alert.penalty');
+            $alert_success = $result > 1.0
+                ? t('corruption.orb.alert.bonus', ['pct' => $pct_signed])
+                : t('corruption.orb.alert.penalty', ['pct' => $pct_signed]);
         }
     }
 }

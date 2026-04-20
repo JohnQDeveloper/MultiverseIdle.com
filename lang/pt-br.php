@@ -1003,4 +1003,40 @@ return [
     'tutorial.market.1.title'               => 'O Mercado',
     'tutorial.market.1.body'                => 'Compre e venda recursos com outros jogadores. Publique ordens de compra ou venda e o mercado fará a correspondência automaticamente.',
 
+    // -------------------------------------------------------------------------
+    // Season of Corruption
+    // -------------------------------------------------------------------------
+    'corruption.avatar.title'           => 'Avatar da Corrupção',
+    'corruption.avatar.desc'            => 'Uma manifestação de pura corrupção surgiu. Apenas aventureiros sazonais podem desafiá-la. Cause dano para ganhar Orbes de Corrupção — itens poderosos que alteram permanentemente seu equipamento.',
+    'corruption.avatar.history'         => 'Seu histórico do Avatar da Corrupção',
+    'corruption.avatar.players_queued'  => 'Jogadores sazonais na fila: {count}',
+    'corruption.avatar.join_queue'      => 'Desafiar o Avatar',
+    'corruption.avatar.li_seasonal'     => 'Disponível apenas durante a Temporada da Corrupção',
+    'corruption.avatar.li_orbs'         => 'Ganhe Orbes de Corrupção com base no nível do seu grupo (1 orbe a cada 50 níveis combinados)',
+    'corruption.avatar.alert.joined'    => 'Você entrou na fila do Avatar da Corrupção!',
+
+    'nav.corruption_orb'                => 'Orbes de Corrupção',
+
+    'corruption.orb.title'              => 'Orbes de Corrupção',
+    'corruption.orb.desc'               => 'Orbes de Corrupção são consumíveis poderosos obtidos derrotando o Avatar da Corrupção. Aplique um em um equipamento para corrompê-lo permanentemente — para o bem ou para o mal.',
+    'corruption.orb.owned'              => 'Orbes possuídos',
+    'corruption.orb.apply_title'        => 'Aplicar um Orbe de Corrupção',
+    'corruption.orb.apply_desc'         => 'Selecione um equipamento para corromper. O resultado é um modificador aleatório entre -20% e +20% aplicado a todos os atributos. A corrupção não pode ser revertida.',
+    'corruption.orb.select_gear'        => 'Selecionar equipamento',
+    'corruption.orb.select_placeholder' => '— escolha um item de equipamento —',
+    'corruption.orb.apply_btn'          => 'Corromper item',
+    'corruption.orb.inventory_title'    => 'Seu equipamento',
+    'corruption.orb.how_title'          => 'Como funciona',
+    'corruption.orb.li_source'          => 'Ganhe Orbes de Corrupção do Avatar da Corrupção (apenas sazonal)',
+    'corruption.orb.li_chance'          => 'Modificador aleatório entre -20% e +20% aplicado a todos os atributos do equipamento',
+    'corruption.orb.li_one_use'         => 'Cada item só pode ser corrompido uma vez',
+    'corruption.orb.no_orbs_msg'        => 'Você não tem Orbes de Corrupção. Ganhe-os lutando contra o Avatar da Corrupção.',
+    'corruption.orb.no_gear_msg'        => 'Todo o seu equipamento já foi corrompido.',
+    'corruption.orb.tag_corrupted'      => 'Corrompido',
+    'corruption.orb.alert.invalid_gear'      => 'Item de equipamento inválido selecionado.',
+    'corruption.orb.alert.no_orbs'           => 'Você não tem nenhum Orbe de Corrupção.',
+    'corruption.orb.alert.already_corrupted' => 'Este item já foi corrompido ou não pertence a você.',
+    'corruption.orb.alert.bonus'             => 'A corrupção abençoou o item! Todos os atributos modificados em {pct}.',
+    'corruption.orb.alert.penalty'           => 'A corrupção amaldiçoou o item. Todos os atributos modificados em {pct}.',
+
 ];
