@@ -25,6 +25,9 @@
                   <li><a href="/craft"><?php echo t('nav.craft'); ?></a></li>
                   <li><a href="/inventory"><?php echo t('nav.inventory'); ?></a></li>
                   <li><a href="/party"><?php echo t('nav.party'); ?></a></li>
+                  <?php if (defined('CORRUPTION_SEASON_ENABLED') && CORRUPTION_SEASON_ENABLED && (CORRUPTION_SEASON_PERPETUAL || isset($_SESSION['active_season_id']))): ?>
+                  <li><a href="/corruption-orb"><?php echo t('nav.corruption_orb'); ?></a></li>
+                  <?php endif; ?>
                 </ul>
               </li>
               <?php if (!isset($_SESSION['guest_mode']) || $_SESSION['guest_mode'] !== true): ?>

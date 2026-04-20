@@ -130,13 +130,16 @@ class Battle
         // Helper to apply a single gear item's bonuses
         private function applyGearBonuses(array &$bonuses, array $gearData): void
         {
+            $corruption = (float)($gearData['corruption_modifier'] ?? 1.0);
+
             // Apply base bonuses (these are percentage bonuses to stats)
             if (!empty($gearData['base_bonuses'])) {
                 foreach ($gearData['base_bonuses'] as $stat => $value) {
+                    $scaled = (int)round($value * $corruption);
                     if ($stat === 'resistances') {
-                        $bonuses['resistances_percent'] += $value;
+                        $bonuses['resistances_percent'] += $scaled;
                     } elseif (isset($bonuses[$stat . '_percent'])) {
-                        $bonuses[$stat . '_percent'] += $value;
+                        $bonuses[$stat . '_percent'] += $scaled;
                     }
                 }
             }
@@ -145,7 +148,7 @@ class Battle
             if (!empty($gearData['affixes'])) {
                 foreach ($gearData['affixes'] as $affix) {
                     $key = $affix['key'];
-                    $value = $affix['value'];
+                    $value = (int)round($affix['value'] * $corruption);
                     $type = $affix['type'];
 
                     // Flat stat bonuses

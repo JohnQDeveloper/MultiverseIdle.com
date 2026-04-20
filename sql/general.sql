@@ -42,6 +42,9 @@ ADD COLUMN `inventory_json` JSON DEFAULT NULL AFTER `worker_json`;
 
 ALTER TABLE `characters` ADD COLUMN `vip_expires` DATETIME DEFAULT NULL;
 
+ALTER TABLE characters
+  ADD COLUMN avatar_corruption_queued TINYINT(1) NOT NULL DEFAULT 0,
+  ADD COLUMN avatar_corruption_log TEXT DEFAULT NULL;
 
 /* RIFT QUEUE TABLE */
 CREATE TABLE

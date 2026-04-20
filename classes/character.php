@@ -110,6 +110,8 @@ class Character
             'rift_queued' => null,
             'world_boss_queued' => null,
             'world_boss_log' => null,
+            'avatar_corruption_queued' => 0,
+            'avatar_corruption_log' => null,
             'credits' => 0,
             'subscription_expires' => null,
             'vip_expires' => null,
@@ -490,6 +492,8 @@ class Character
             '`rift_queued` = :rift_queued',
             '`world_boss_queued` = :world_boss_queued',
             '`world_boss_log` = :world_boss_log',
+            '`avatar_corruption_queued` = :avatar_corruption_queued',
+            '`avatar_corruption_log` = :avatar_corruption_log',
             '`last_save` = NOW()',
             '`last_arena_time` = :last_arena_time',
             '`last_arena_log` = :last_arena_log',
@@ -522,6 +526,8 @@ class Character
             'rift_queued' => $this->Data['rift_queued'],
             'world_boss_queued' => $this->Data['world_boss_queued'],
             'world_boss_log' => $this->Data['world_boss_log'] ?? '',
+            'avatar_corruption_queued' => $this->Data['avatar_corruption_queued'] ?? 0,
+            'avatar_corruption_log' => $this->Data['avatar_corruption_log'] ?? null,
             'last_arena_time' => $this->Data['last_arena_time'],
             'last_arena_log' => $this->Data['last_arena_log'],
             'last_rift_time' => $this->Data['last_rift_time'] ?? null,
@@ -576,9 +582,11 @@ class Character
             $Perpetual->Data[$resource] = ((int)$Perpetual->Data[$resource]) + ((int)($this->Data[$resource] ?? 0));
         }
 
-        $Perpetual->Data['inventory_json']['special_resources']['lucky_wyrdstone'] =
-            ((int)($Perpetual->Data['inventory_json']['special_resources']['lucky_wyrdstone'] ?? 0))
-            + ((int)($this->Data['inventory_json']['special_resources']['lucky_wyrdstone'] ?? 0));
+        foreach (['lucky_wyrdstone', 'corruption_orbs'] as $special) {
+            $Perpetual->Data['inventory_json']['special_resources'][$special] =
+                ((int)($Perpetual->Data['inventory_json']['special_resources'][$special] ?? 0))
+                + ((int)($this->Data['inventory_json']['special_resources'][$special] ?? 0));
+        }
 
         $Perpetual->Data['last_seen'] = date('Y-m-d H:i:s');
         return $Perpetual->SaveByUserId($user_id);
@@ -607,6 +615,10 @@ class Character
             if ($this->Data['worker_json']['special_resources'] === []) {
                 unset($this->Data['worker_json']['special_resources']);
             }
+        }
+
+        if (!isset($this->Data['inventory_json']['special_resources']['corruption_orbs'])) {
+            $this->Data['inventory_json']['special_resources']['corruption_orbs'] = 0;
         }
 
         // Ensure equipped_skill_gems is initialized for both party members

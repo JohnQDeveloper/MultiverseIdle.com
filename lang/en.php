@@ -853,6 +853,45 @@ return [
     'world_boss.alert.not_in_queue' => 'You are not in the queue.',
 
     // -------------------------------------------------------------------------
+    // Season of Corruption
+    // -------------------------------------------------------------------------
+    // Avatar of Corruption (world boss page)
+    'corruption.avatar.title'           => 'Avatar of Corruption',
+    'corruption.avatar.desc'            => 'A manifestation of pure corruption has appeared. Only seasonal adventurers may challenge it. Deal damage to earn Corruption Orbs — powerful items that permanently alter your gear.',
+    'corruption.avatar.history'         => 'Your Avatar of Corruption History',
+    'corruption.avatar.players_queued'  => 'Seasonal Players in Queue: {count}',
+    'corruption.avatar.join_queue'      => 'Challenge the Avatar',
+    'corruption.avatar.li_seasonal'     => 'Only available during the Season of Corruption',
+    'corruption.avatar.li_orbs'         => 'Earn Corruption Orbs based on your party level (1 orb per 50 combined party levels)',
+    'corruption.avatar.alert.joined'    => 'You have joined the Avatar of Corruption queue!',
+
+    // Corruption Orb page
+    'nav.corruption_orb'                => 'Corruption Orbs',
+    'corruption.orb.title'              => 'Corruption Orbs',
+    'corruption.orb.desc'               => 'Corruption Orbs are powerful consumables earned by defeating the Avatar of Corruption. Apply one to a piece of gear to permanently corrupt it — for better or worse.',
+    'corruption.orb.owned'              => 'Orbs Owned',
+    'corruption.orb.apply_title'        => 'Apply a Corruption Orb',
+    'corruption.orb.apply_desc'         => 'Select a piece of gear to corrupt. The outcome is random: a +20% bonus or a -20% penalty to all stats on the item. Corruption cannot be reversed.',
+    'corruption.orb.select_gear'        => 'Select Gear',
+    'corruption.orb.select_placeholder' => '— choose a gear item —',
+    'corruption.orb.apply_btn'          => 'Corrupt Item',
+    'corruption.orb.inventory_title'    => 'Your Gear',
+    'corruption.orb.how_title'          => 'How it Works',
+    'corruption.orb.li_source'          => 'Earn Corruption Orbs from the Avatar of Corruption (seasonal only)',
+    'corruption.orb.li_chance'          => '50% chance of +20% to all gear stats, 50% chance of -20%',
+    'corruption.orb.li_one_use'         => 'Each item can only be corrupted once',
+    'corruption.orb.no_orbs_msg'        => 'You have no Corruption Orbs. Earn them by fighting the Avatar of Corruption.',
+    'corruption.orb.no_gear_msg'        => 'All your gear has already been corrupted.',
+    'corruption.orb.tag_bonus'          => '✦ +20% Corrupted',
+    'corruption.orb.tag_penalty'        => '✦ -20% Corrupted',
+    // Orb alerts
+    'corruption.orb.alert.invalid_gear'       => 'Invalid gear item selected.',
+    'corruption.orb.alert.no_orbs'            => 'You do not have any Corruption Orbs.',
+    'corruption.orb.alert.already_corrupted'  => 'This item has already been corrupted, or you do not own it.',
+    'corruption.orb.alert.bonus'              => 'The corruption blessed the item! All stats increased by 20%.',
+    'corruption.orb.alert.penalty'            => 'The corruption cursed the item. All stats reduced by 20%.',
+
+    // -------------------------------------------------------------------------
     // Leaderboard page
     // -------------------------------------------------------------------------
     'lb.title'              => 'Leaderboards',

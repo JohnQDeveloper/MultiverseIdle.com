@@ -19,6 +19,10 @@
     require_once('world-boss.php');
     echo "World Boss Cron Completed.\n";
 
+    echo "Starting Avatar of Corruption Cron...\n";
+    require_once('avatar-of-corruption.php');
+    echo "Avatar of Corruption Cron Completed.\n";
+
     echo "Starting Rifts Cron...\n";
     require_once('rifts.php');
     echo "Rifts Cron Completed.\n";

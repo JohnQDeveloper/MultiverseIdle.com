@@ -209,6 +209,42 @@ class Gear
     }
 
     /**
+     * Apply a Corruption Orb to a gear item.
+     *
+     * Randomly applies +20% or -20% to all gear stats via a corruption_modifier stored in details JSON.
+     * Returns 'bonus', 'penalty', or false if already corrupted or not owned.
+     *
+     * @return string|false 'bonus'|'penalty' on success, false on failure
+     */
+    public function ApplyCorruptionOrb(int $gear_id, int $owner_id): string|false
+    {
+        $gear_record = $this->DAL->r(
+            "SELECT id, details FROM gear WHERE id=:id AND owner_id=:owner_id",
+            [':id' => $gear_id, ':owner_id' => $owner_id]
+        );
+
+        if (empty($gear_record)) {
+            return false;
+        }
+
+        $details = json_decode($gear_record[0]['details'], true);
+
+        if (isset($details['corruption_modifier'])) {
+            return false; // already corrupted
+        }
+
+        $result = (random_int(0, 1) === 1) ? 'bonus' : 'penalty';
+        $details['corruption_modifier'] = ($result === 'bonus') ? CORRUPTION_ORB_BONUS : CORRUPTION_ORB_PENALTY;
+
+        $this->DAL->w(
+            "UPDATE gear SET details=:details WHERE id=:id AND owner_id=:owner_id",
+            [':details' => json_encode($details), ':id' => $gear_id, ':owner_id' => $owner_id]
+        );
+
+        return $this->DAL->rows_affected() > 0 ? $result : false;
+    }
+
+    /**
      * Get the party level required to equip a gear item
      *
      * @param int $gear_id Gear item ID
