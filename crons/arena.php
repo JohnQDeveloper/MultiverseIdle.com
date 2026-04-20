@@ -26,6 +26,12 @@
             # Load guild building bonuses
             $guild_building_bonuses = getGuildBuildingBonuses($r['user_id'], $Character->Data['season_id'] ?? null);
 
+            # VIP bonus: 10% to all gains, Perpetual only
+            $vip_bonus = 10;
+            $has_active_vip = ($Character->Data['season_id'] ?? null) === null
+                && !empty($Character->Data['vip_expires'])
+                && strtotime($Character->Data['vip_expires']) > time();
+
             echo "Loaded & running party for user_id: ".$r['user_id']."\n";
 
             $monster_strength = calculate_monster_attribute($arena_floor);
@@ -84,6 +90,9 @@
                 # Get arena stat gain bonus (percentage chance for +1 additional stat)
                 $arena_stat_bonus = isset($potion_bonuses['arena_stat_gains']) ? $potion_bonuses['arena_stat_gains'] : 0;
                 $arena_stat_bonus += $guild_building_bonuses['gym'];
+                if ($has_active_vip) {
+                    $arena_stat_bonus += $vip_bonus;
+                }
 
                 $frontline_stat = $stats[array_rand($stats)];
                 $frontline_stat_lucky = $stats[array_rand($stats)];
@@ -129,6 +138,9 @@
 
                 // Award gold equal to arena floor (with potion + guild market bonus)
                 $arena_resource_bonus = isset($potion_bonuses['arena_resource_drops']) ? $potion_bonuses['arena_resource_drops'] : 0;
+                if ($has_active_vip) {
+                    $arena_resource_bonus += $vip_bonus;
+                }
                 $base_gold = $arena_floor;
                 $gold_multiplier = 1 + (($arena_resource_bonus + $guild_building_bonuses['market']) / 100);
                 $gold_award = round($base_gold * $gold_multiplier);
@@ -166,6 +178,9 @@
 
                 // Award XP equal to arena floor * 10 (with potion + guild tavern bonus)
                 $arena_xp_bonus = isset($potion_bonuses['arena_xp']) ? $potion_bonuses['arena_xp'] : 0;
+                if ($has_active_vip) {
+                    $arena_xp_bonus += $vip_bonus;
+                }
                 $base_xp = $arena_floor * 10;
                 $xp_multiplier = 1 + (($arena_xp_bonus + $guild_building_bonuses['tavern']) / 100);
                 $xp_award = (int)round($base_xp * $xp_multiplier);

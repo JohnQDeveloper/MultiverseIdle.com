@@ -71,6 +71,12 @@ foreach ($row as $r) {
     // Load guild building bonuses
     $guild_building_bonuses = getGuildBuildingBonuses($r['user_id'], $Character->Data['season_id'] ?? null);
 
+    // VIP bonus: +10% to all rift gains, Perpetual only
+    $has_active_vip = ($Character->Data['season_id'] ?? null) === null
+        && !empty($Character->Data['vip_expires'])
+        && strtotime($Character->Data['vip_expires']) > time();
+    $vip_bonus = $has_active_vip ? 10 : 0;
+
     // Load rift stone definitions
     $rift_stone_implicit_definitions = RiftStone::getImplicitDefinitions();
     $rift_stone_affix_definitions = RiftStone::getAffixDefinitions();
@@ -230,9 +236,9 @@ foreach ($row as $r) {
         $implicit_multiplier = 1.6; // +60% = 1.6x
 
         // Apply potion bonuses (guild building bonuses stack additively)
-        $rift_xp_bonus = (isset($potion_bonuses['rift_xp']) ? $potion_bonuses['rift_xp'] : 0) + $guild_building_bonuses['tavern'];
-        $rift_resource_bonus = isset($potion_bonuses['rift_drops']) ? $potion_bonuses['rift_drops'] : 0;
-        $rift_stat_bonus = (isset($potion_bonuses['rift_stat_gains']) ? $potion_bonuses['rift_stat_gains'] : 0) + $guild_building_bonuses['gym'];
+        $rift_xp_bonus = (isset($potion_bonuses['rift_xp']) ? $potion_bonuses['rift_xp'] : 0) + $guild_building_bonuses['tavern'] + $vip_bonus;
+        $rift_resource_bonus = (isset($potion_bonuses['rift_drops']) ? $potion_bonuses['rift_drops'] : 0) + $vip_bonus;
+        $rift_stat_bonus = (isset($potion_bonuses['rift_stat_gains']) ? $potion_bonuses['rift_stat_gains'] : 0) + $guild_building_bonuses['gym'] + $vip_bonus;
 
         $stats = ['strength', 'dexterity', 'health', 'wisdom'];
 

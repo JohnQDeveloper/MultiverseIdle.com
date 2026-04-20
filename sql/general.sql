@@ -40,6 +40,9 @@ ALTER TABLE characters ADD COLUMN highest_rift_level INT DEFAULT 0;
 ALTER TABLE `characters`
 ADD COLUMN `inventory_json` JSON DEFAULT NULL AFTER `worker_json`;
 
+ALTER TABLE `characters` ADD COLUMN `vip_expires` DATETIME DEFAULT NULL;
+
+
 /* RIFT QUEUE TABLE */
 CREATE TABLE
   `rifts` (

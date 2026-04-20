@@ -7,6 +7,9 @@
         <?php
         $has_active_sub = !empty($Character->Data['subscription_expires'])
             && strtotime($Character->Data['subscription_expires']) > time();
+        $has_active_vip = !empty($Character->Data['vip_expires'])
+            && strtotime($Character->Data['vip_expires']) > time()
+            && !$is_seasonal;
         ?>
 
         <!-- Current Credits Balance -->
@@ -17,6 +20,11 @@
                 &nbsp;&nbsp;|&nbsp;&nbsp;
                 <span class="text--success"><?php echo t('store.sub_active'); ?></span>
                 <?php echo t('store.sub_expires', ['date' => date('Y-m-d', strtotime($Character->Data['subscription_expires']))]); ?>
+            <?php endif; ?>
+            <?php if ($has_active_vip): ?>
+                &nbsp;&nbsp;|&nbsp;&nbsp;
+                <span class="text--success"><?php echo t('store.vip_active'); ?></span>
+                <?php echo t('store.sub_expires', ['date' => date('Y-m-d', strtotime($Character->Data['vip_expires']))]); ?>
             <?php endif; ?>
         </div>
 
@@ -92,6 +100,48 @@
                 </div>
             <?php endforeach; ?>
         </div>
+
+        <!-- VIP Subscription -->
+        <h2><?php echo t('store.vip.title'); ?></h2>
+        <p><?php echo t('store.vip.desc'); ?></p>
+        <ul>
+            <li><?php echo t('store.vip.li_resources'); ?></li>
+            <li><?php echo t('store.vip.li_xp'); ?></li>
+            <li><?php echo t('store.vip.li_stats'); ?></li>
+        </ul>
+        <p><small class="text--warning"><?php echo t('store.vip.perpetual_only'); ?></small></p>
+
+        <?php if ($is_seasonal): ?>
+            <div class="info-box">
+                <span class="text--warning"><?php echo t('store.vip.seasonal_notice'); ?></span>
+            </div>
+        <?php else: ?>
+        <div class="store-plans">
+            <?php foreach ($vip_plans as $months => $plan): ?>
+                <div class="card">
+                    <div class="grid">
+                        <div>
+                            <h3 class="heading--no-top-margin"><?php echo htmlspecialchars($plan['label']); ?></h3>
+                            <p class="store-plan-price">
+                                <?php echo t('store.qol.credits', ['credits' => human_num($plan['credits'])]); ?>
+                            </p>
+                            <?php if ($months >= 3): ?>
+                                <p><small class="text--success"><?php echo t('store.qol.save', ['pct' => round((1 - ($plan['credits'] / $months) / 100) * 100)]); ?></small></p>
+                            <?php endif; ?>
+                        </div>
+                        <div>
+                            <form method="POST" action="/store">
+                                <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf-token']; ?>">
+                                <input type="hidden" name="vip_duration_months" value="<?php echo $months; ?>">
+                                <input type="submit" name="buy_vip" value="<?php echo t('store.vip.subscribe'); ?>"
+                                    <?php echo ((int)($Character->Data['credits'] ?? 0) < $plan['credits']) ? 'disabled' : ''; ?>>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+        <?php endif; ?>
 
     </article>
     </div>

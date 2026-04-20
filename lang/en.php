@@ -49,6 +49,7 @@ return [
     'res.lucky_wyrdstone' => 'Lucky Wyrdstone',
     'res.credits'    => 'Credits',
     'res.qol_sub'    => 'QoL Sub',
+    'res.vip_sub'    => 'VIP Sub',
     'res.active'     => 'Active',
     'res.none'       => 'None',
     'res.rift'       => 'Rift',
@@ -894,6 +895,7 @@ return [
     'store.title'               => 'Store',
     'store.your_credits'        => 'Your Credits:',
     'store.sub_active'          => 'QoL Subscription Active',
+    'store.vip_active'          => 'VIP Subscription Active',
     'store.sub_expires'         => 'expires {date}',
     'store.free_credits.title'  => 'Free Credits',
     'store.free_credits.desc'   => 'Claim <strong>100 free credits</strong> once every 24 hours.',
@@ -916,12 +918,22 @@ return [
     'store.plan.3_months'       => '3 Months',
     'store.plan.6_months'       => '6 Months',
     'store.plan.12_months'      => '12 Months',
+    'store.vip.title'           => 'VIP Subscription',
+    'store.vip.desc'            => 'Unlock powerful permanent bonuses for your Perpetual character.',
+    'store.vip.li_resources'    => '10% increased resource income from all sources',
+    'store.vip.li_xp'           => '10% increased experience gain from all sources',
+    'store.vip.li_stats'        => '10% increased stat gains from all sources',
+    'store.vip.perpetual_only'  => 'VIP subscription only applies to your Perpetual character. It cannot be used on a Seasonal character.',
+    'store.vip.seasonal_notice' => 'You are currently playing in Season mode. Switch to Perpetual to purchase or benefit from the VIP subscription.',
+    'store.vip.subscribe'       => 'Subscribe',
     // Alerts
     'store.alert.claimed'           => 'You claimed 100 free credits!',
     'store.alert.already_claimed'   => 'You already claimed your free credits today. Next claim available at {time}.',
     'store.alert.invalid_plan'      => 'Invalid subscription option.',
     'store.alert.no_credits'        => 'Not enough credits. You need {need} credits but only have {have}.',
     'store.alert.subscribed'        => 'QoL subscription activated for {label}! Expires: {date}',
+    'store.alert.vip_subscribed'    => 'VIP subscription activated for {label}! Expires: {date}',
+    'store.alert.vip_seasonal'      => 'VIP subscription is only available for Perpetual characters. Switch to Perpetual mode to purchase it.',
 
     // -------------------------------------------------------------------------
     // Season Select page

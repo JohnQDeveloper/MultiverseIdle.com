@@ -112,6 +112,7 @@ class Character
             'world_boss_log' => null,
             'credits' => 0,
             'subscription_expires' => null,
+            'vip_expires' => null,
             'last_seen' => date('Y-m-d H:i:s'),
             'last_save' => date('Y-m-d H:i:s'),
             'last_arena_time' => null,
@@ -202,10 +203,12 @@ class Character
         $columns[] = '`world_boss_queued`';
         $columns[] = '`credits`';
         $columns[] = '`subscription_expires`';
+        $columns[] = '`vip_expires`';
 
         $values[] = 'NULL';
         $values[] = 'NULL';
         $values[] = '0';
+        $values[] = 'NULL';
         $values[] = 'NULL';
 
         $query = "INSERT INTO `characters` (" . implode(', ', $columns) . ")
@@ -360,10 +363,12 @@ class Character
         $columns[] = '`world_boss_queued`';
         $columns[] = '`credits`';
         $columns[] = '`subscription_expires`';
+        $columns[] = '`vip_expires`';
 
         $values[] = 'NULL';
         $values[] = 'NULL';
         $values[] = '0';
+        $values[] = 'NULL';
         $values[] = 'NULL';
 
         $query = "INSERT INTO `characters` (" . implode(', ', $columns) . ")
@@ -494,6 +499,7 @@ class Character
             '`last_seen` = :last_seen',
             '`credits` = :credits',
             '`subscription_expires` = :subscription_expires',
+            '`vip_expires` = :vip_expires',
             '`last_free_credits_claim` = :last_free_credits_claim',
             '`last_pvp_time` = :last_pvp_time',
             '`last_pvp_log` = :last_pvp_log',
@@ -524,6 +530,7 @@ class Character
             'last_seen' => $this->Data['last_seen'],
             'credits' => $this->Data['credits'] ?? 0,
             'subscription_expires' => $this->Data['subscription_expires'] ?? null,
+            'vip_expires' => $this->Data['vip_expires'] ?? null,
             'last_free_credits_claim' => $this->Data['last_free_credits_claim'] ?? null,
             'last_pvp_time' => $this->Data['last_pvp_time'] ?? null,
             'last_pvp_log'  => $this->Data['last_pvp_log'] ?? null,

@@ -72,6 +72,14 @@
             $worker_building_map = ['gold' => 'market', 'iron' => 'iron_mine', 'herbs' => 'farm', 'gems' => 'gem_mine'];
             $potion_bonus += $guild_building_bonuses[$worker_building_map[$resource]] ?? 0;
 
+            # VIP bonus: +10% resource income, Perpetual only
+            $has_active_vip = ($Character->Data['season_id'] ?? null) === null
+                && !empty($Character->Data['vip_expires'])
+                && strtotime($Character->Data['vip_expires']) > time();
+            if ($has_active_vip) {
+                $potion_bonus += 10;
+            }
+
             $harvests = 10; // 10 harvests per 1 minute tick basically
             $harvests_without_potion = worker_yield($harvests, $speed_upgrades, $skill_level, $num_workers, 0);
             $harvests_with_potion = worker_yield($harvests, $speed_upgrades, $skill_level, $num_workers, $potion_bonus);
